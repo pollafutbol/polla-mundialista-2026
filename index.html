@@ -667,7 +667,7 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
       <div class="grid-3">
         <div class="field"><label>Nombre del Jugador</label><input type="text" id="adm-nombre" placeholder="Nombre completo"></div>
         <div class="field"><label>WhatsApp</label><input type="tel" id="adm-celular" placeholder="57300..."></div>
-        <div class="field"><label>Correo Electronico</label><input type="email" id="adm-email" placeholder="correo_en_gmail"></div>
+        <div class="field"><label>Correo Electronico</label><input type="email" id="adm-email" placeholder="correo_ejemplo"></div>
       </div>
       <div class="grid-3" style="margin-top:15px;">
         <div class="field"><label>Fecha Pago 1</label><input type="date" id="adm-fecha1"></div>
@@ -717,7 +717,7 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
 <div id="modalEnvio" class="modal-overlay">
   <div class="modal-box">
     <h2>ESTAS SEGURO?</h2>
-    <p>Una vez enviado no podras modificar tus pronosticos. Se enviara un resumen a <strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="9df0f4edf2f1f1fcfbe8e9fff2f1ddfaf0fcf4f1b3fef2f0">[email&#160;protected]</a></strong>.</p>
+    <p>Una vez enviado no podras modificar tus pronosticos. Se enviara un resumen a <strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="9cf1f5ecf3f0f0fdfae9e8fef3f0dcfbf1fdf5f0b2fff3f1">[email&#160;protected]</a></strong>.</p>
     <div class="modal-btns">
       <button style="background:var(--green-ok);color:#000;" onclick="procesarEnvio()">SI, ENVIAR</button>
       <button style="background:#c0392b;color:#fff;" onclick="cerrarModal('modalEnvio')">CANCELAR</button>
@@ -776,7 +776,7 @@ var ADMINS = {
 // DEMO siempre disponible en Firebase
 var DEMO_PLAYER = {
   nombre: 'Jugador Demo', pass: 'Demo1234', estado: 'activo', pago: 'pagado',
-  celular: '573000000000', email: 'demo_en_polla.com',
+  celular: '573000000000', email: 'demo_polla_com',
   nums: ['1234','5678','9012','3456'],
   fechas: ['','',''], bloqueado: false,
   pts: { exacto:0, ganador:0, empate:0, tarjetas:0, extra:0, penales:0, premundial:0 }
@@ -1824,7 +1824,7 @@ function procesarEnvio() {
   });
     var sep = '\n'; var cuerpoTexto = lineas.join(sep);  var asunto = encodeURIComponent('Pronosticos Polla Mundialista 2026 - ' + (usuarioActual?usuarioActual.codigo:''));
   var cuerpo = encodeURIComponent(cuerpoTexto);
-  window.location.href = 'mailto:mipollafutbol[arroba]gmail.com?subject=' + asunto + '&body=' + cuerpo;
+  window.location.href = '#?subject=' + asunto + '&body=' + cuerpo;
   alert('Pronosticos enviados correctamente.');
 }
 function startTimer(secs, el) {
