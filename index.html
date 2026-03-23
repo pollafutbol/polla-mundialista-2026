@@ -717,7 +717,7 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
 <div id="modalEnvio" class="modal-overlay">
   <div class="modal-box">
     <h2>ESTAS SEGURO?</h2>
-    <p>Una vez enviado no podras modificar tus pronosticos. Se enviara un resumen a <strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="9cf1f5ecf3f0f0fdfae9e8fef3f0dcfbf1fdf5f0b2fff3f1">[email&#160;protected]</a></strong>.</p>
+    <p>Una vez enviado no podras modificar tus pronosticos. Se enviara un resumen a <strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="abc6c2dbc4c7c7cacddedfc9c4c7ebccc6cac2c785c8c4c6">[email&#160;protected]</a></strong>.</p>
     <div class="modal-btns">
       <button style="background:var(--green-ok);color:#000;" onclick="procesarEnvio()">SI, ENVIAR</button>
       <button style="background:#c0392b;color:#fff;" onclick="cerrarModal('modalEnvio')">CANCELAR</button>
@@ -1824,7 +1824,7 @@ function procesarEnvio() {
   });
     var sep = '\n'; var cuerpoTexto = lineas.join(sep);  var asunto = encodeURIComponent('Pronosticos Polla Mundialista 2026 - ' + (usuarioActual?usuarioActual.codigo:''));
   var cuerpo = encodeURIComponent(cuerpoTexto);
-  window.location.href = '#?subject=' + asunto + '&body=' + cuerpo;
+  window.location.href = 'mail' + 'to:mipollafutbol' + '@' + 'gmail.com?subject=' + asunto + '&body=' + cuerpo;
   alert('Pronosticos enviados correctamente.');
 }
 function startTimer(secs, el) {
@@ -2180,3 +2180,49 @@ window.addEventListener('load', function(){
   actualizarHorariosPronostico();
   // Restaurar sesion
   var ss=sessionStorage.getItem('pollaUser');
+  if(ss){
+    try{
+      usuarioActual = JSON.parse(ss);
+      if(usuarioActual.esAdmin) mostrarInterfazAdmin(usuarioActual.codigo);
+      else cargarPerfil(usuarioActual.codigo, null);
+    }catch(e){}
+  }
+});
+
+// Exponer funciones globalmente
+window.login = login;
+window.cerrarSesion = cerrarSesion;
+window.irA = irA;
+window.cambiarGrupo = cambiarGrupo;
+window.limpiarGrupo = limpiarGrupo;
+window.resetSistema = resetSistema;
+window.recuperarClave = recuperarClave;
+window.toggleSi = toggleSi;
+window.abrirModalEnvio = abrirModalEnvio;
+window.cerrarModal = cerrarModal;
+window.procesarEnvio = procesarEnvio;
+window.cambiarZona = cambiarZona;
+window.guardarSim = guardarSim;
+window.guardarManual = guardarManual;
+window.irATerceros = irATerceros;
+window.mostrarElimSub = mostrarElimSub;
+window.validarElim = validarElim;
+window.cambiarClaveModal = cambiarClaveModal;
+window.guardarNuevaClave = guardarNuevaClave;
+window.activarCuenta = activarCuenta;
+window.confirmarGuardadoPM = confirmarGuardadoPM;
+window.cargarJugadores = cargarJugadores;
+window.generarCredenciales = generarCredenciales;
+window.registrarJugador = registrarJugador;
+window.enviarWhatsApp = enviarWhatsApp;
+window.buscarJugador = buscarJugador;
+window.guardarEdicionJugador = guardarEdicionJugador;
+window.filtrarJugadores = filtrarJugadores;
+window.togglePago = togglePago;
+window.toggleBloqueo = toggleBloqueo;
+window.eliminarJugador = eliminarJugador;
+window.sincronizarFIFA = sincronizarFIFA;
+window.limitarDigitos = limitarDigitos;
+</script>
+</body>
+</html>
