@@ -303,6 +303,9 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
     <option value="-1">&#127483;&#127466; Venezuela UTC-4 (+1h)</option>
     <option value="0">&#127482;&#127480; EE.UU. Este UTC-5 (=Colombia)</option>
     <option value="1">&#127482;&#127480; EE.UU. Centro UTC-6 (-1h)</option>
+    <option value="0">&#127464;&#127462; Canada Este UTC-5 (=Colombia)</option>
+    <option value="1">&#127464;&#127462; Canada Centro UTC-6 (-1h)</option>
+    <option value="2">&#127464;&#127462; Canada Pacifico UTC-7 (-2h)</option>
   </select>
 </div>
 
@@ -645,7 +648,15 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
       <p>Los pronosticos se cierran <strong>2 horas antes</strong> del primer partido de cada jornada.</p>
     </div>
     <div class="reg-section">
-      <h3>6. Rifa Chontico Noche</h3>
+      <h3>6. Simulador y Eliminatorias</h3>
+      <ul>
+        <li>Las pestanas de <strong>Simulador Grupos</strong> y <strong>Eliminatorias</strong> son simuladores — <strong>NO interfieren en los puntos para el Ranking</strong>. Son una herramienta para que puedas visualizar con mas detalle quien podria ser Campeon, Sub-campeon, Tercer y Cuarto puesto.</li>
+        <li>Para enviar pronosticos de cada jornada y el Pre-Mundial, el jugador debe tener <strong>datos moviles o WiFi</strong> activo.</li>
+        <li>Una vez enviados los pronosticos <strong>NO podran modificarse</strong>. Por tal motivo debes estar completamente seguro antes de enviar.</li>
+      </ul>
+    </div>
+    <div class="reg-section">
+      <h3>7. Rifa Chontico Noche</h3>
       <p>La rifa se realizara el <strong>Domingo 19 de Julio de 2026</strong> con la loteria <strong>Chontico Noche</strong> a las <strong>8:00 PM</strong>.</p>
       <p>Participan los <strong>4 numeros de 4 digitos</strong> inscritos por cada participante al momento de activar su cuenta.</p>
       <p>El premio es de <strong style="color:var(--gold)">$2.000.000 de pesos colombianos</strong>.</p>
@@ -854,6 +865,10 @@ function cambiarZona(val) {
   tzOffset = parseInt(val) || 0;
   localStorage.setItem('POLLA_TZ', tzOffset);
   actualizarHorariosPronostico();
+  // Si estamos en simulador, re-renderizar para actualizar horas
+  if (document.getElementById('sec-simulador').classList.contains('active')) {
+    renderizarGrupo();
+  }
 }
 
 function ajustarHora(horaBase) {
@@ -1547,6 +1562,8 @@ function cargarPerfil(cod, jData) {
     ['rifaNum1','rifaNum2','rifaNum3','rifaNum4'].forEach(function(id,i){ document.getElementById(id).innerText = nums[i] || '--'; });
     verificarChontico(nums);
     irA('perfil');
+    // Verificar si ya envio pronosticos hoy
+    verificarEnvioPronosticos();
   }
   if (jData) { mostrar(jData); return; }
   fbGetJugador(cod, function(j){ if (j) mostrar(j); });
@@ -1607,8 +1624,9 @@ function irA(seccion) {
   document.querySelectorAll('.seccion').forEach(function(s){ s.classList.remove('active'); });
   document.getElementById('sec-' + seccion).classList.add('active');
   if (seccion === 'eliminatorias') construirTablaEliminatoria();
+  if (seccion === 'pronosticos') verificarEnvioPronosticos();
   if (seccion === 'ranking') renderizarRanking();
-  if (seccion === 'premundial') { inicializarPaises(); iniciarCuentaRegresivaPM(); }
+  if (seccion === 'premundial') { inicializarPaises(); iniciarCuentaRegresivaPM(); verificarEnvioPM(); }
   if (seccion === 'simulador') cambiarGrupo(grupoActual);
 }
 
@@ -1715,7 +1733,10 @@ function guardarEdicionJugador(cod) {
   fbUpdateJugador(cod, updates, function() {
     hideLoading();
     alert('Datos de ' + cod + ' actualizados correctamente.');
-    buscarJugador(document.getElementById('buscadorInput').value);
+    // Limpiar busqueda
+    document.getElementById('buscadorInput').value = '';
+    document.getElementById('resultadoBusqueda').style.display = 'none';
+    document.getElementById('resultadoBusqueda').innerHTML = '';
   });
 }
 
@@ -1793,6 +1814,11 @@ function abrirModalEnvio() { document.getElementById('modalEnvio').classList.add
 function cerrarModal(id) { document.getElementById(id).classList.remove('open'); }
 function procesarEnvio() {
   cerrarModal('modalEnvio');
+  // Marcar en Firebase que este jugador ya envio
+  if (usuarioActual) {
+    var jornada = new Date().toISOString().split('T')[0]; // fecha actual YYYY-MM-DD
+    db.ref('envios/' + usuarioActual.codigo + '/' + jornada).set(true);
+  }
   // Recoger todos los pronosticos del DOM
   var lineas = [];
   lineas.push('POLLA MUNDIALISTA 2026 - PRONOSTICOS');
@@ -1869,9 +1895,56 @@ function cargarJugadores(selPais, targetId, soloPorteros) {
 }
 function confirmarGuardadoPM() {
   if (confirm('ATENCION: Una vez enviadas, las predicciones NO se pueden cambiar. Deseas guardar?')) {
-    alert('Predicciones Pre-Mundial guardadas. Buena suerte!');
+    if (!usuarioActual) return;
+    // Guardar predicciones en Firebase
+    var pm = {
+      campeon: document.getElementById('pm-campeon').value,
+      subcampeon: document.getElementById('pm-subcampeon').value,
+      tercero: document.getElementById('pm-tercero').value,
+      cuarto: document.getElementById('pm-cuarto').value,
+      enviado: true,
+      fecha: new Date().toISOString()
+    };
+    showLoading('Guardando predicciones...');
+    db.ref('premundial/' + usuarioActual.codigo).set(pm, function() {
+      hideLoading();
+      alert('Predicciones Pre-Mundial guardadas. Buena suerte!');
+      bloquearBotonPM();
+    });
   }
 }
+
+function bloquearBotonPM() {
+  var btn = document.querySelector('.btn-guardar-pm');
+  if (btn) {
+    btn.disabled = true;
+    btn.style.background = '#555';
+    btn.style.cursor = 'not-allowed';
+    btn.innerText = 'PREDICCIONES YA ENVIADAS';
+    btn.onclick = null;
+  }
+  // Bloquear todos los selects del pre-mundial
+  document.querySelectorAll('.pm-select, .pm-select-pais').forEach(function(sel) {
+    sel.disabled = true;
+  });
+}
+
+function verificarEnvioPM() {
+  if (!usuarioActual) return;
+  db.ref('premundial/' + usuarioActual.codigo).once('value', function(snap) {
+    var pm = snap.val();
+    if (pm && pm.enviado) {
+      bloquearBotonPM();
+      // Restaurar valores guardados
+      if (pm.campeon) document.getElementById('pm-campeon').value = pm.campeon;
+      if (pm.subcampeon) document.getElementById('pm-subcampeon').value = pm.subcampeon;
+      if (pm.tercero) document.getElementById('pm-tercero').value = pm.tercero;
+      if (pm.cuarto) document.getElementById('pm-cuarto').value = pm.cuarto;
+    }
+  });
+}
+window.bloquearBotonPM = bloquearBotonPM;
+window.verificarEnvioPM = verificarEnvioPM;
 
 // ============================================================
 // SIMULADOR GRUPOS — siempre arranca en 0
@@ -2190,6 +2263,25 @@ window.addEventListener('load', function(){
 });
 
 // Exponer funciones globalmente
+function verificarEnvioPronosticos() {
+  if (!usuarioActual) return;
+  var jornada = new Date().toISOString().split('T')[0];
+  db.ref('envios/' + usuarioActual.codigo + '/' + jornada).once('value', function(snap) {
+    if (snap.val()) {
+      // Ya envio hoy - bloquear boton
+      var btn = document.querySelector('.btn-enviar');
+      if (btn) {
+        btn.disabled = true;
+        btn.style.background = '#555';
+        btn.style.cursor = 'not-allowed';
+        btn.innerText = 'PRONOSTICOS YA ENVIADOS';
+        btn.onclick = null;
+      }
+    }
+  });
+}
+window.verificarEnvioPronosticos = verificarEnvioPronosticos;
+
 window.login = login;
 window.cerrarSesion = cerrarSesion;
 window.irA = irA;
