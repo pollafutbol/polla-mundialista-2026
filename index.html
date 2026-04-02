@@ -397,6 +397,32 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
       <h2 id="perfilNombre">Bienvenido</h2>
       <div class="codigo">CODIGO: <span id="perfilCodigo">&mdash;</span></div>
     </div>
+
+    <!-- PREMIOS -->
+    <div style="margin-bottom:24px;">
+      <p class="rifa-title">🏆 PREMIOS DE LA POLLA</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;max-width:600px;margin:0 auto;">
+        <div style="background:linear-gradient(135deg,#1a1400,#2a2000);border:2px solid #FFD700;border-radius:10px;padding:16px;text-align:center;">
+          <div style="font-size:1.8rem;">🥇</div>
+          <div style="font-family:'Bebas Neue';font-size:1rem;color:#FFD700;letter-spacing:2px;margin:4px 0;">PRIMER PUESTO</div>
+          <div style="font-family:'Bebas Neue';font-size:1.5rem;color:#fff;letter-spacing:1px;">$1.000.000</div>
+          <div style="font-size:0.7rem;color:#aaa;margin-top:2px;">UN MILLÓN DE PESOS</div>
+        </div>
+        <div style="background:linear-gradient(135deg,#0f1a0f,#162616);border:2px solid #C0C0C0;border-radius:10px;padding:16px;text-align:center;">
+          <div style="font-size:1.8rem;">🥈</div>
+          <div style="font-family:'Bebas Neue';font-size:1rem;color:#C0C0C0;letter-spacing:2px;margin:4px 0;">SEGUNDO PUESTO</div>
+          <div style="font-family:'Bebas Neue';font-size:1.5rem;color:#fff;letter-spacing:1px;">$600.000</div>
+          <div style="font-size:0.7rem;color:#aaa;margin-top:2px;">SEISCIENTOS MIL PESOS</div>
+        </div>
+        <div style="background:linear-gradient(135deg,#1a0d00,#261500);border:2px solid #CD7F32;border-radius:10px;padding:16px;text-align:center;">
+          <div style="font-size:1.8rem;">🥉</div>
+          <div style="font-family:'Bebas Neue';font-size:1rem;color:#CD7F32;letter-spacing:2px;margin:4px 0;">TERCER PUESTO</div>
+          <div style="font-family:'Bebas Neue';font-size:1.1rem;color:#fff;letter-spacing:1px;line-height:1.2;">CUADRO CON RESINA</div>
+          <div style="font-size:0.7rem;color:#aaa;margin-top:2px;">CAMPEÓN MUNDIAL 2026</div>
+        </div>
+      </div>
+    </div>
+
     <div class="rifa-aviso">
       <p style="font-family:'Barlow Condensed';font-weight:700;font-size:1rem;color:#fff;letter-spacing:1px;">GRAN RIFA &mdash; CHONTICO NOCHE</p>
       <div class="monto">$2.000.000</div>
@@ -1615,16 +1641,49 @@ function cerrarSesion() {
 function recuperarClave() {
   var cod = prompt('Ingresa tu codigo de usuario:');
   if (!cod) return;
-  var u = cod.toUpperCase();
+  var u = cod.toUpperCase().trim();
   showLoading('Buscando...');
   db.ref('jugadores/' + u).once('value', function(s) {
     hideLoading();
-    if (s.val()) {
-      db.ref('jugadores/' + u).update({ pass: 'TEMP1234', estado: 'recuperacion' });
-      alert('Clave temporal: TEMP1234. Informa al administrador para confirmacion.');
-    } else {
-      alert('Codigo no encontrado. Contacta al administrador.');
+    var jugador = s.val();
+    if (!jugador) {
+      alert('Código "' + u + '" no encontrado.\n\nVerifica tu código o contacta al administrador.');
+      return;
     }
+    // Verificar que el jugador tenga número de celular registrado
+    var cel = jugador.celular || '';
+    if (!cel || cel.length < 10) {
+      alert('Tu cuenta no tiene un número de WhatsApp registrado.\n\nContacta al administrador para recuperar tu clave.');
+      return;
+    }
+    // Generar clave temporal aleatoria segura (6 caracteres: letras + números)
+    // Clave temporal de 8 caracteres: al menos 1 minúscula, 1 mayúscula, 1 número
+    var lower = 'abcdefghjkmnpqrstuvwxyz';
+    var upper = 'ABCDEFGHJKMNPQRSTUVWXYZ';
+    var digits = '23456789';
+    var all = lower + upper + digits;
+    var claveTemp = '';
+    // Garantizar al menos 1 de cada tipo
+    claveTemp += lower.charAt(Math.floor(Math.random() * lower.length));
+    claveTemp += upper.charAt(Math.floor(Math.random() * upper.length));
+    claveTemp += digits.charAt(Math.floor(Math.random() * digits.length));
+    // Completar hasta 8 caracteres
+    for (var i = 3; i < 8; i++) {
+      claveTemp += all.charAt(Math.floor(Math.random() * all.length));
+    }
+    // Mezclar aleatoriamente
+    claveTemp = claveTemp.split('').sort(function(){ return Math.random()-0.5; }).join('');
+    // Guardar clave temporal en Firebase
+    db.ref('jugadores/' + u).update({ pass: claveTemp, estado: 'recuperacion' }, function(err) {
+      if (err) {
+        alert('Error al procesar la solicitud. Intenta de nuevo.');
+        return;
+      }
+      // Enviar clave temporal por WhatsApp AL NÚMERO DEL JUGADOR
+      var msg = '🔐 POLLA MUNDIALISTA 2026\n\nHola ' + (jugador.nombre || u) + '! Tu clave temporal es:\n\n*' + claveTemp + '*\n\nIngresa con esta clave y cámbiala inmediatamente por una nueva.\n\nCódigo de usuario: ' + u;
+      window.open('https://wa.me/' + cel + '?text=' + encodeURIComponent(msg), '_blank');
+      alert('✅ Se abrirá WhatsApp para enviarte tu clave temporal al número registrado.\n\nUna vez que ingreses, ve a tu perfil y cambia la clave.');
+    });
   });
 }
 
