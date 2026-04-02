@@ -1744,7 +1744,7 @@ function enviarWhatsApp() {
   var nombre = document.getElementById('adm-nombre').value;
   var cel    = document.getElementById('adm-celular').value;
   if (!cel) { alert('Ingresa el numero de WhatsApp.'); return; }
-  var msg = 'Bienvenido a POLLA MUNDIALISTA 2026! Tu codigo: ' + cod + ' Tu clave provisional: ' + clave + ' Ingresa al portal desde cualquier dispositivo y cambia tu clave. Fecha limite: 2 junio 2026.';
+  var msg = 'Bienvenido a POLLA MUNDIALISTA 2026! Tu codigo: ' + cod + ' Tu clave provisional: ' + clave + ' Ingresa al portal desde cualquier dispositivo y cambia tu clave. Fecha limite para estar AL DIA: 2 de Junio 2026.';
   window.open('https://wa.me/' + cel + '?text=' + encodeURIComponent(msg), '_blank');
 }
 
