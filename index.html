@@ -673,7 +673,7 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
         <li>Mayor cantidad de aciertos Al Ganador</li>
         <li>Mayor cantidad de aciertos Al Empate</li>
         <li>Puntaje Pre-Mundial</li>
-        <li><strong style="color:var(--gold)">Pronto Pago</strong> — Se da prioridad al jugador que haya realizado la cancelación <strong>total</strong> de su inscripción en la fecha más temprana. No aplica pagos parciales.</li>
+        <li><strong style="color:var(--gold)">Pronto Pago</strong> — Se da prioridad al jugador cuyo <strong>último pago</strong> (que complete el total de su inscripción) haya sido registrado en la fecha más temprana. Aplica también para pagos realizados en cuotas: lo que cuenta es la fecha del pago final que salde el valor completo. Ejemplo: si un jugador completó su pago el 10 de mayo y otro el 15 de mayo, gana el desempate quien pagó el 10 de mayo.</li>
       </ol>
     </div>
     <div class="reg-section">
@@ -750,7 +750,7 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
       </div>
       <div style="overflow-x:auto;">
         <table class="jugadores-table" id="tablaJugadores">
-          <thead><tr><th>Codigo</th><th>Nombre</th><th>WhatsApp</th><th>Pagos</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <thead><tr><th>Codigo</th><th>Nombre</th><th>WhatsApp</th><th>Pagos</th><th>Estado</th><th>Creado Por</th><th>Acciones</th></tr></thead>
           <tbody id="jugadoresBody"></tbody>
         </table>
       </div>
@@ -813,9 +813,10 @@ function hideLoading() {
 // ADMINS (escritos en codigo, no dependen de Firebase)
 // ============================================================
 var ADMINS = {
-  'B312': { pass: 'Icaros23', nombre: 'Hector',  ciudad: 'Cali' },
-  'K075': { pass: 'Kairos28', nombre: 'Admin 2',  ciudad: 'Cali' },
-  'J369': { pass: 'Perla963', nombre: 'Admin 3',  ciudad: 'Cali' }
+  'H175': { pass: 'Campo159', nombre: 'Admin H175', ciudad: 'Cali' },
+  'A228': { pass: 'Kairos75', nombre: 'Admin A228', ciudad: 'Cali' },
+  'S357': { pass: 'Carpas95', nombre: 'Admin S357', ciudad: 'Cali' },
+  'J802': { pass: 'Viajes79', nombre: 'Admin J802', ciudad: 'Cali' }
 };
 
 // DEMO siempre disponible en Firebase
@@ -1737,7 +1738,8 @@ function registrarJugador() {
   var f3     = document.getElementById('adm-fecha3').value;
   if (!cod || !clave || !nombre) { alert('Genera credenciales y completa el nombre.'); return; }
   var jugador = { pass:clave, nombre:nombre, celular:cel, email:email, pago:pago, estado:'nuevo', nums:[], bloqueado:false,
-    fechas:[f1,f2,f3], pts:{exacto:0,ganador:0,empate:0,tarjetas:0,extra:0,penales:0,premundial:0} };
+    fechas:[f1,f2,f3], creadoPor: usuarioActual ? usuarioActual.codigo : '?',
+    pts:{exacto:0,ganador:0,empate:0,tarjetas:0,extra:0,penales:0,premundial:0} };
   showLoading('Registrando jugador...');
   fbSetJugador(cod, jugador, function() {
     hideLoading();
@@ -1831,18 +1833,20 @@ function renderizarTablaJugadores() {
     if (filtroActualJugadores === 'bloqueado') return j.bloqueado;
     return true;
   });
-  if (jugadores.length === 0) { tbody.innerHTML = '<tr><td colspan="6" style="color:#555;padding:20px;">No hay jugadores en esta categoria.</td></tr>'; return; }
+  if (jugadores.length === 0) { tbody.innerHTML = '<tr><td colspan="7" style="color:#555;padding:20px;">No hay jugadores en esta categoria.</td></tr>'; return; }
   tbody.innerHTML = jugadores.map(function(e){
     var cod=e[0], j=e[1];
     var tagCls  = j.bloqueado ? 'tag-bloqueado' : (j.pago==='pagado' ? 'tag-pagado' : (j.estado==='nuevo' ? 'tag-nuevo' : 'tag-pendiente'));
     var tagTxt  = j.bloqueado ? 'Bloqueado' : (j.pago==='pagado' ? 'Pagado' : (j.estado==='nuevo' ? 'Nuevo' : 'Pendiente'));
     var pagos   = (j.fechas||[]).filter(function(f){ return f; }).join(' / ') || '-';
+    var creadoPor = j.creadoPor || '-';
     return '<tr>' +
       '<td style="color:var(--accent);font-weight:900;">' + cod + '</td>' +
       '<td>' + (j.nombre||'-') + '</td>' +
       '<td>' + (j.celular||'-') + '</td>' +
       '<td style="font-size:0.75rem;color:#aaa;">' + pagos + '</td>' +
       '<td><span class="' + tagCls + '">' + tagTxt + '</span></td>' +
+      '<td style="font-size:0.75rem;color:var(--gold);font-weight:700;text-align:center;">' + creadoPor + '</td>' +
       '<td style="display:flex;gap:4px;flex-wrap:wrap;">' +
       '<button onclick="togglePago(\'' + cod + '\')" style="background:' + (j.pago==='pagado'?'#555':'var(--mexico)') + ';color:#fff;border:none;padding:3px 8px;cursor:pointer;border-radius:3px;font-size:0.7rem;">' + (j.pago==='pagado'?'Quitar':'Pago') + '</button>' +
       '<button onclick="toggleBloqueo(\'' + cod + '\')" style="background:' + (j.bloqueado?'#006847':'#7f1a1a') + ';color:#fff;border:none;padding:3px 8px;cursor:pointer;border-radius:3px;font-size:0.7rem;">' + (j.bloqueado?'Desbloquear':'Bloquear') + '</button>' +
