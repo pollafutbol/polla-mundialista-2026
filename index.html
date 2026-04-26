@@ -468,6 +468,7 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
   <div class="premundial-wrap">
     <h2 class="section-title">Pre-Mundial</h2>
     <p class="section-sub">Predicciones especiales antes del torneo</p>
+    <div id="avisoPMFecha" style="display:none;max-width:520px;margin:0 auto 12px;background:rgba(255,153,0,0.1);border:1px solid #ff9900;border-radius:8px;padding:10px 16px;text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:0.9rem;color:#ff9900;line-height:1.5;"></div>
     <div class="countdown-pm"><span class="cdlabel">Tiempo restante para enviar tus predicciones</span><span class="cdtime" id="timerPM">--:--:--</span></div>
     <div class="aviso-pm">Una vez enviadas las predicciones NO podran modificarse. Revisa bien antes de confirmar.</div>
     <div class="premundial-grid">
@@ -694,7 +695,7 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
     <div class="reg-section">
       <h3>5. Cierre de la Polla</h3>
       <p>El ganador absoluto es quien lidere el Ranking tras la ceremonia de premiacion el <strong>19 de julio de 2026</strong>.</p>
-      <p>Los pronosticos se cierran <strong>2 horas antes</strong> del primer partido de cada jornada.</p>
+      <p>Los pronósticos se habilitan <strong>2 días antes de la inauguración</strong> (9 de Junio de 2026). Se cierran <strong>2 horas antes</strong> del primer partido de cada jornada.</p>
     </div>
     <div class="reg-section">
       <h3>6. Simulador y Eliminatorias</h3>
@@ -1977,7 +1978,15 @@ function toggleSi(el) {
   el.innerText = el.innerText === 'SI' ? '-' : 'SI';
   el.classList.toggle('active');
 }
-function abrirModalEnvio() { document.getElementById('modalEnvio').classList.add('open'); }
+function abrirModalEnvio() {
+  var APERTURA_PRONOSTICOS = new Date('2026-06-09T00:00:00-05:00');
+  var ahora = new Date();
+  if (ahora < APERTURA_PRONOSTICOS) {
+    alert('⏳ Los pronósticos se habilitan el 9 de Junio de 2026.\nFaltan ' + Math.ceil((APERTURA_PRONOSTICOS - ahora) / 86400000) + ' días para la inauguración.');
+    return;
+  }
+  document.getElementById('modalEnvio').classList.add('open');
+}
 function cerrarModal(id) { document.getElementById(id).classList.remove('open'); }
 function procesarEnvio() {
   cerrarModal('modalEnvio');
@@ -2107,15 +2116,57 @@ function bloquearBotonPM() {
 
 function verificarEnvioPM() {
   if (!usuarioActual) return;
+  // Bloqueo por fecha: habilitado solo 2 días antes de la inauguración (9 Jun 2026 en adelante)
+  var APERTURA_PM  = new Date('2026-06-09T00:00:00-05:00'); // 2 días antes del 11 Jun
+  var CIERRE_PM    = new Date('2026-06-11T11:00:00-05:00'); // 2h antes del primer partido
+  var ahora = new Date();
+  var avisoPMEl = document.getElementById('avisoPMFecha');
+  var btn = document.querySelector('.btn-guardar-pm');
+  if (ahora < APERTURA_PM) {
+    // Todavía no se puede votar — bloquear y mostrar aviso
+    if (btn) {
+      btn.disabled = true;
+      btn.style.background = '#333';
+      btn.style.cursor = 'not-allowed';
+      btn.innerText = '🔒 VOTACIÓN CERRADA — ABRE EL 9 JUN';
+      btn.onclick = null;
+    }
+    document.querySelectorAll('.pm-select, .pm-select-pais').forEach(function(sel){ sel.disabled = true; });
+    if (avisoPMEl) {
+      avisoPMEl.style.display = 'block';
+      avisoPMEl.innerHTML = '📅 Las votaciones del Pre-Mundial se abren el <strong>9 de Junio de 2026</strong>.<br><span style="font-size:0.8rem;color:#aaa;">Puedes revisar las opciones pero no podrás enviar hasta esa fecha.</span>';
+    }
+    return; // No consultar Firebase todavía
+  }
+  if (ahora >= CIERRE_PM) {
+    // Ya pasó el cierre
+    if (btn) {
+      btn.disabled = true;
+      btn.style.background = '#555';
+      btn.style.cursor = 'not-allowed';
+      btn.innerText = '🔒 PRE-MUNDIAL CERRADO';
+      btn.onclick = null;
+    }
+    document.querySelectorAll('.pm-select, .pm-select-pais').forEach(function(sel){ sel.disabled = true; });
+    if (avisoPMEl) { avisoPMEl.style.display = 'none'; }
+    return;
+  }
+  // Ventana abierta: 9 Jun → 11 Jun 11AM
+  if (avisoPMEl) {
+    avisoPMEl.style.display = 'block';
+    avisoPMEl.innerHTML = '✅ <strong style="color:#00ff99;">¡Las votaciones del Pre-Mundial están ABIERTAS!</strong><br><span style="font-size:0.8rem;color:#aaa;">Cierre: 11 de Junio 2026 a las 11:00 AM (hora Colombia).</span>';
+    avisoPMEl.style.background = 'rgba(0,150,80,0.12)';
+    avisoPMEl.style.borderColor = '#00c870';
+    avisoPMEl.style.color = '#00ff99';
+  }
   db.ref('premundial/' + usuarioActual.codigo).once('value', function(snap) {
     var pm = snap.val();
     if (pm && pm.enviado) {
       bloquearBotonPM();
-      // Restaurar valores guardados
-      if (pm.campeon) document.getElementById('pm-campeon').value = pm.campeon;
+      if (pm.campeon)    document.getElementById('pm-campeon').value    = pm.campeon;
       if (pm.subcampeon) document.getElementById('pm-subcampeon').value = pm.subcampeon;
-      if (pm.tercero) document.getElementById('pm-tercero').value = pm.tercero;
-      if (pm.cuarto) document.getElementById('pm-cuarto').value = pm.cuarto;
+      if (pm.tercero)    document.getElementById('pm-tercero').value    = pm.tercero;
+      if (pm.cuarto)     document.getElementById('pm-cuarto').value     = pm.cuarto;
     }
   });
 }
