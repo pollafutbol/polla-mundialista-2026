@@ -1625,8 +1625,8 @@ function login() {
     if (j.pass !== pass) { alert('Codigo o contrasena incorrectos.'); return; }
     usuarioActual = { codigo: cod, esAdmin: false, nombre: j.nombre };
     sessionStorage.setItem('pollaUser', JSON.stringify(usuarioActual));
-    if (j.estado === 'nuevo' || j.estado === 'recuperacion') {
-      document.getElementById('tituloActivacion').innerText = j.estado === 'recuperacion' ? 'Restablecer Clave' : 'Activacion de Cuenta';
+    if (j.estado === 'recuperacion') {
+      document.getElementById('tituloActivacion').innerText = 'Restablecer Clave';
       document.getElementById('bloqueRifa').style.display = (j.nums && j.nums.length > 0) ? 'none' : 'block';
       irA('activacion');
     } else {
