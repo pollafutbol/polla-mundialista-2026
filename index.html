@@ -258,6 +258,12 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
   .podio-1{width:120px;height:160px;}.podio-2{width:100px;height:120px;}.podio-3{width:90px;height:90px;}
 }
 </style>
+
+<style>
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; margin:0; }
+input[type=number] { -moz-appearance:textfield; appearance:textfield; }
+</style>
 </head>
 <body>
 
@@ -818,7 +824,7 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
       </div>
       <div style="overflow-x:auto;">
         <table class="jugadores-table" id="tablaJugadores">
-          <thead><tr><th>Codigo</th><th>Nombre</th><th>WhatsApp</th><th>Pagos</th><th>Estado</th><th>Creado Por</th><th>Acciones</th></tr></thead>
+          <thead><tr><th>Codigo</th><th>Nombre</th><th>WhatsApp</th><th>Pagos</th><th>Estado</th><th style="color:var(--gold);">Valor Pagado</th><th>Creado Por</th><th>Acciones</th></tr></thead>
           <tbody id="jugadoresBody"></tbody>
         </table>
       </div>
@@ -1973,12 +1979,12 @@ function buscarJugador(q) {
       '</div>' +
       '<div class="grid-3" style="margin-top:10px;">' +
       "<div style='display:grid;grid-template-columns:1fr 1fr;gap:8px;'>" +
-      "<div class='field'><label>Fecha Pago 1</label><input type='date' id='edit_f1_" + cod + "' value='" + ((j.fechas&&j.fechas[0])||'') + "' " + (usuarioActual&&usuarioActual.codigo==='H175'?'':"min='" + new Date().toISOString().split('T')[0] + "'") + " style='background:#0d1b2a;border:1px solid #233554;border-radius:5px;color:#fff;padding:8px;width:100%;'></div>" +
-      "<div class='field'><label>Valor 1 ($)</label><input type='number' id='edit_v1_" + cod + "' value='" + ((j.valores&&j.valores[0])||'') + "' min='0' max='50000' placeholder='Ej: 25000' style='background:#0d1b2a;border:1px solid #233554;border-radius:5px;color:#fff;padding:8px;width:100%;'></div>" +
-      "<div class='field'><label>Fecha Pago 2</label><input type='date' id='edit_f2_" + cod + "' value='" + ((j.fechas&&j.fechas[1])||'') + "' " + (usuarioActual&&usuarioActual.codigo==='H175'?'':"min='" + new Date().toISOString().split('T')[0] + "'") + " style='background:#0d1b2a;border:1px solid #233554;border-radius:5px;color:#fff;padding:8px;width:100%;'></div>" +
-      "<div class='field'><label>Valor 2 ($)</label><input type='number' id='edit_v2_" + cod + "' value='" + ((j.valores&&j.valores[1])||'') + "' min='0' max='50000' placeholder='Ej: 25000' style='background:#0d1b2a;border:1px solid #233554;border-radius:5px;color:#fff;padding:8px;width:100%;'></div>" +
-      "<div class='field'><label>Fecha Pago 3</label><input type='date' id='edit_f3_" + cod + "' value='" + ((j.fechas&&j.fechas[2])||'') + "' " + (usuarioActual&&usuarioActual.codigo==='H175'?'':"min='" + new Date().toISOString().split('T')[0] + "'") + " style='background:#0d1b2a;border:1px solid #233554;border-radius:5px;color:#fff;padding:8px;width:100%;'></div>" +
-      "<div class='field'><label>Valor 3 ($)</label><input type='number' id='edit_v3_" + cod + "' value='" + ((j.valores&&j.valores[2])||'') + "' min='0' max='50000' placeholder='Ej: 25000' style='background:#0d1b2a;border:1px solid #233554;border-radius:5px;color:#fff;padding:8px;width:100%;'></div>" +
+      "<div class='field'><label style='font-size:0.7rem;'>Fecha Pago 1</label><input type='date' id='edit_f1_" + cod + "' value='" + ((j.fechas&&j.fechas[0])||'') + "' " + (usuarioActual&&usuarioActual.codigo==='H175'?'':"min='" + new Date().toISOString().split('T')[0] + "' readonly") + " style='background:" + (usuarioActual&&usuarioActual.codigo==='H175'?'#0d1b2a':'#070d14') + ";border:1px solid #233554;border-radius:5px;color:" + (usuarioActual&&usuarioActual.codigo==='H175'?'#fff':'#555') + ";padding:8px;width:100%;'></div>" +
+      "<div class='field' style='grid-column:span 1;'><label style='font-size:0.7rem;'>Valor 1 — " + (usuarioActual&&usuarioActual.codigo==='H175'?'<span style=color:#ff9900;>solo H175</span>':'bloqueado') + "</label><input type='number' id='edit_v1_" + cod + "' value='" + ((j.valores&&j.valores[0])||'') + "' placeholder='Ej: 25.000' " + (usuarioActual&&usuarioActual.codigo==='H175'?'':'readonly') + " style='background:" + (usuarioActual&&usuarioActual.codigo==='H175'?'#0d1b2a':'#070d14') + ";border:1px solid #233554;border-radius:5px;color:" + (usuarioActual&&usuarioActual.codigo==='H175'?'#fff':'#555') + ";padding:8px;width:100%;-moz-appearance:textfield;appearance:textfield;'></div>" +
+      "<div class='field'><label style='font-size:0.7rem;'>Fecha Pago 2</label><input type='date' id='edit_f2_" + cod + "' value='" + ((j.fechas&&j.fechas[1])||'') + "' " + (usuarioActual&&usuarioActual.codigo==='H175'?'':"min='" + new Date().toISOString().split('T')[0] + "' readonly") + " style='background:" + (usuarioActual&&usuarioActual.codigo==='H175'?'#0d1b2a':'#070d14') + ";border:1px solid #233554;border-radius:5px;color:" + (usuarioActual&&usuarioActual.codigo==='H175'?'#fff':'#555') + ";padding:8px;width:100%;'></div>" +
+      "<div class='field'><label style='font-size:0.7rem;'>Valor 2</label><input type='number' id='edit_v2_" + cod + "' value='" + ((j.valores&&j.valores[1])||'') + "' placeholder='Ej: 25.000' " + (usuarioActual&&usuarioActual.codigo==='H175'?'':'readonly') + " style='background:" + (usuarioActual&&usuarioActual.codigo==='H175'?'#0d1b2a':'#070d14') + ";border:1px solid #233554;border-radius:5px;color:" + (usuarioActual&&usuarioActual.codigo==='H175'?'#fff':'#555') + ";padding:8px;width:100%;-moz-appearance:textfield;appearance:textfield;'></div>" +
+      "<div class='field'><label style='font-size:0.7rem;'>Fecha Pago 3</label><input type='date' id='edit_f3_" + cod + "' value='" + ((j.fechas&&j.fechas[2])||'') + "' " + (usuarioActual&&usuarioActual.codigo==='H175'?'':"min='" + new Date().toISOString().split('T')[0] + "' readonly") + " style='background:" + (usuarioActual&&usuarioActual.codigo==='H175'?'#0d1b2a':'#070d14') + ";border:1px solid #233554;border-radius:5px;color:" + (usuarioActual&&usuarioActual.codigo==='H175'?'#fff':'#555') + ";padding:8px;width:100%;'></div>" +
+      "<div class='field'><label style='font-size:0.7rem;'>Valor 3</label><input type='number' id='edit_v3_" + cod + "' value='" + ((j.valores&&j.valores[2])||'') + "' placeholder='Ej: 25.000' " + (usuarioActual&&usuarioActual.codigo==='H175'?'':'readonly') + " style='background:" + (usuarioActual&&usuarioActual.codigo==='H175'?'#0d1b2a':'#070d14') + ";border:1px solid #233554;border-radius:5px;color:" + (usuarioActual&&usuarioActual.codigo==='H175'?'#fff':'#555') + ";padding:8px;width:100%;-moz-appearance:textfield;appearance:textfield;'></div>" +
       '</div>' +
       '<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">' +
       '<button onclick="guardarEdicionJugador(\'' + cod + '\')" style="background:var(--mexico);color:#fff;border:none;padding:8px 16px;cursor:pointer;border-radius:5px;font-family:\'Barlow Condensed\';font-weight:700;font-size:0.85rem;">GUARDAR CAMBIOS</button>' +
@@ -2024,19 +2030,29 @@ function renderizarTablaJugadores() {
     if (filtroActualJugadores === 'bloqueado') return j.bloqueado;
     return true;
   });
-  if (jugadores.length === 0) { tbody.innerHTML = '<tr><td colspan="7" style="color:#555;padding:20px;">No hay jugadores en esta categoria.</td></tr>'; return; }
+  if (jugadores.length === 0) { tbody.innerHTML = '<tr><td colspan="8" style="color:#555;padding:20px;">No hay jugadores en esta categoria.</td></tr>'; return; }
   tbody.innerHTML = jugadores.map(function(e){
     var cod=e[0], j=e[1];
     var tagCls  = j.bloqueado ? 'tag-bloqueado' : (j.pago==='pagado' ? 'tag-pagado' : 'tag-pendiente');
     var tagTxt  = j.bloqueado ? 'Bloqueado' : (j.pago==='pagado' ? 'Pagado' : 'Pendiente');
-    var pagos   = (j.fechas||[]).filter(function(f){ return f; }).join(' / ') || '-';
+    var pagosFmt = [];
+    (j.fechas||[]).forEach(function(f,i){
+      if(!f) return;
+      var v = (j.valores&&j.valores[i]) ? '$'+(parseFloat(j.valores[i])||0).toLocaleString('es-CO') : '';
+      pagosFmt.push(f + (v?' ('+v+')':''));
+    });
+    var pagos = pagosFmt.join('<br>') || '-';
     var creadoPor = j.creadoPor || '-';
+    var vals = j.valores || [];
+    var totalVal = (parseFloat(vals[0])||0) + (parseFloat(vals[1])||0) + (parseFloat(vals[2])||0);
+    var valorPagadoStr = '$' + totalVal.toLocaleString('es-CO');
     return '<tr>' +
       '<td style="color:var(--accent);font-weight:900;">' + cod + '</td>' +
       '<td>' + (j.nombre||'-') + '</td>' +
       '<td>' + (j.celular||'-') + '</td>' +
-      '<td style="font-size:0.75rem;color:#aaa;">' + pagos + '</td>' +
+      '<td style="font-size:0.72rem;color:#aaa;line-height:1.5;">' + pagos + '</td>' +
       '<td><span class="' + tagCls + '">' + tagTxt + '</span></td>' +
+      '<td style="font-size:0.82rem;color:#00ff99;font-weight:700;text-align:center;">' + valorPagadoStr + '</td>' +
       '<td style="font-size:0.75rem;color:var(--gold);font-weight:700;text-align:center;">' + creadoPor + '</td>' +
       '<td style="display:flex;gap:4px;flex-wrap:wrap;">' +
       '<button onclick="togglePago(\'' + cod + '\')" style="background:' + (j.pago==='pagado'?'#555':'var(--mexico)') + ';color:#fff;border:none;padding:3px 8px;cursor:pointer;border-radius:3px;font-size:0.7rem;">' + (j.pago==='pagado'?'Quitar':'Pago') + '</button>' +
