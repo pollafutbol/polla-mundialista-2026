@@ -1915,45 +1915,78 @@ function enviarWhatsApp() {
   var cod    = document.getElementById('adm-codigo').value.trim();
   var clave  = document.getElementById('adm-clave').value.trim();
   var nombre = document.getElementById('adm-nombre').value.trim();
-  var _indEl  = document.getElementById('adm-indicativo');
-  var _ind    = _indEl ? _indEl.value : '57';
-  var _num    = document.getElementById('adm-celular').value.trim().replace(/[^0-9]/g,'');
-  var cel     = _num ? _ind + _num : '';
+  var _indEl = document.getElementById('adm-indicativo');
+  var _ind   = _indEl ? _indEl.value : '57';
+  var _numEl = document.getElementById('adm-celular-num') || document.getElementById('adm-celular');
+  var _num   = (_numEl ? _numEl.value : '').replace(/[^0-9]/g,'');
+  var cel    = _num ? _ind + _num : '';
   var email  = document.getElementById('adm-email').value.trim();
   var pago   = document.getElementById('adm-pago').value;
   var f1     = document.getElementById('adm-fecha1').value;
   var f2     = document.getElementById('adm-fecha2').value;
   var f3     = document.getElementById('adm-fecha3').value;
-  var v1     = parseFloat(document.getElementById('adm-valor1')&&document.getElementById('adm-valor1').value||0)||0;
-  var v2     = parseFloat(document.getElementById('adm-valor2')&&document.getElementById('adm-valor2').value||0)||0;
-  var v3     = parseFloat(document.getElementById('adm-valor3')&&document.getElementById('adm-valor3').value||0)||0;
-  var ciudad = (document.getElementById('adm-ciudad')&&document.getElementById('adm-ciudad').value)||'';
-  if (!cel) { alert('Ingresa el numero de WhatsApp.'); return; }
-  if (!cod || !clave || !nombre) { alert('Genera credenciales y completa el nombre antes de enviar WhatsApp.'); return; }
-  // Calcular pago automático
+  var v1     = parseFloat((document.getElementById('adm-valor1')||{value:0}).value||0)||0;
+  var v2     = parseFloat((document.getElementById('adm-valor2')||{value:0}).value||0)||0;
+  var v3     = parseFloat((document.getElementById('adm-valor3')||{value:0}).value||0)||0;
+  var ciudad = (document.getElementById('adm-ciudad')||{value:''}).value||'';
+  if (!_num) { alert('Ingresa el numero de WhatsApp.'); return; }
+  if (!cod || !clave || !nombre) { alert('Genera credenciales y completa el nombre.'); return; }
   var totalPagado = v1+v2+v3;
   if (totalPagado >= 50000) pago = 'pagado';
-  // REGISTRAR JUGADOR AUTOMÁTICAMENTE
-  var jugador = { pass:clave, nombre:nombre, celular:cel, email:email, pago:pago, ciudad:ciudad, estado:'pendiente', nums:[], bloqueado:false,
-    fechas:[f1,f2,f3], valores:[v1,v2,v3], creadoPor: usuarioActual ? usuarioActual.codigo : '?',
-    pts:{exacto:0,ganador:0,empate:0,tarjetas:0,extra:0,penales:0,premundial:0} };
-  showLoading('Registrando y abriendo WhatsApp...');
+
+  // Construir mensaje
+  var msg = '\u00a1Bienvenido a POLLA MUNDIALISTA 2026! \ud83c\udfc6'
+    + '\n\ud83d\udd11 Tu c\u00f3digo: ' + cod
+    + '\n\ud83d\udd12 Clave provisional: ' + clave
+    + '\n\ud83c\udf10 Ingresa al portal: https://pollafutbol.github.io/polla-mundialista-2026'
+    + '\n\u23f3 Fecha l\u00edmite AL D\u00cdA: 2 de Junio 2026.'
+    + '\n\ud83d\udccb Revisa las reglas en la hoja REGLAMENTO.'
+    + '\n\ud83d\udd25 RECOMPENSA PRONTO PAGO: Si te pones al d\u00eda antes del 25 de mayo, \u00a1entras al sorteo del Reloj Conmemorativo del Mundial!';
+
+  // *** CLAVE PARA iPHONE ***
+  // Safari bloquea window.open() dentro de callbacks async (Firebase)
+  // SOLUCIÓN: abrir WhatsApp PRIMERO (hilo directo del clic) y registrar DESPUÉS
+  var waUrl = 'https://api.whatsapp.com/send?phone=' + cel + '&text=' + encodeURIComponent(msg);
+  var waWindow = window.open(waUrl, '_blank');
+
+  // Si Safari bloqueó el popup, ofrecer alternativas
+  if (!waWindow || waWindow.closed || typeof waWindow.closed === 'undefined') {
+    // Intentar con location.href como fallback
+    var fallback = confirm(
+      'Safari bloqueó la apertura de WhatsApp.\n\n' +
+      'Opciones:\n• ACEPTAR = Intentar abrir WhatsApp de otra forma\n• CANCELAR = Copiar mensaje al portapapeles'
+    );
+    if (fallback) {
+      window.location.href = waUrl;
+    } else {
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(msg).then(function(){
+          alert('Mensaje copiado. Abre WhatsApp y pegalo al jugador ' + nombre + '.');
+        });
+      } else {
+        prompt('Copia este mensaje:', msg);
+      }
+    }
+  }
+
+  // Registrar jugador en Firebase en background (ya no bloquea el popup)
+  var jugador = {
+    pass:clave, nombre:nombre, celular:cel, email:email, pago:pago, ciudad:ciudad,
+    estado:'pendiente', nums:[], bloqueado:false,
+    fechas:[f1,f2,f3], valores:[v1,v2,v3],
+    creadoPor: usuarioActual ? usuarioActual.codigo : '?',
+    pts:{exacto:0,ganador:0,empate:0,tarjetas:0,extra:0,penales:0,premundial:0}
+  };
   fbSetJugador(cod, jugador, function() {
-    hideLoading();
-    // Limpiar campos
-    ['adm-codigo','adm-clave','adm-nombre','adm-celular','adm-email','adm-fecha1','adm-fecha2','adm-fecha3','adm-valor1','adm-valor2','adm-valor3','adm-ciudad'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
-    var si=document.getElementById('adm-saldo-info'); if(si) si.innerHTML='';
-    aplicarRestriccionFechas();
-    // Abrir WhatsApp
-    var msg = '\u00a1Bienvenido a POLLA MUNDIALISTA 2026! \ud83c\udfc6\n\ud83d\udd11 Tu c\u00f3digo: ' + cod + '\n\ud83d\udd12 Clave provisional: ' + clave + '\n\ud83c\udf10 Ingresa al portal: https://pollafutbol.github.io/polla-mundialista-2026\n\u23f3 Fecha l\u00edmite para estar AL D\u00cdA: 2 de Junio 2026.\n\ud83d\udccb Por favor revisa las reglas en la hoja REGLAMENTO.\n\ud83d\udd25 RECOMPENSA POR PAGO ANTICIPADO: Si te pones al d\u00eda antes del 25 de mayo, \u00a1entras al sorteo de un espect\u00e1culo Reloj de pared Conmemorativo del Mundial! \u00a1Asegura tu cupo y gana desde ya!';
-    // WhatsApp con compatibilidad iPhone (api.whatsapp.com funciona mejor en iOS)
-    var waUrl = 'https://api.whatsapp.com/send?phone=' + cel.replace(/[^0-9]/g,'') + '&text=' + encodeURIComponent(msg);
-    window.open(waUrl, '_blank');
-    // Botón de copia como respaldo si WA no abre en iPhone
-    setTimeout(function(){
-      var copied = confirm('¿Se abrió WhatsApp correctamente?\n\nSi NO se abrió (iPhone/Safari), haz clic en CANCELAR para copiar el mensaje al portapapeles.');
-      if(!copied){ try{ navigator.clipboard.writeText(msg).then(function(){ alert('✅ Mensaje copiado. Ábrelo en WhatsApp y pégalo al jugador.'); }); }catch(e){ prompt('Copia este mensaje:', msg); } }
-    }, 1500);
+    // Limpiar formulario silenciosamente
+    ['adm-codigo','adm-clave','adm-nombre','adm-celular','adm-celular-num',
+     'adm-email','adm-fecha1','adm-fecha2','adm-fecha3',
+     'adm-valor1','adm-valor2','adm-valor3','adm-ciudad'].forEach(function(id){
+      var el = document.getElementById(id); if(el) el.value='';
+    });
+    var si = document.getElementById('adm-saldo-info'); if(si) si.innerHTML='';
+    if(typeof inicializarFormAdmin==='function') inicializarFormAdmin();
+    renderizarTablaJugadores();
   });
 }
 
