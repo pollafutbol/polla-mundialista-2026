@@ -258,12 +258,6 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
   .podio-1{width:120px;height:160px;}.podio-2{width:100px;height:120px;}.podio-3{width:90px;height:90px;}
 }
 </style>
-
-<style>
-input[type=number]::-webkit-inner-spin-button,
-input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; margin:0; }
-input[type=number] { -moz-appearance:textfield; appearance:textfield; }
-</style>
 </head>
 <body>
 
@@ -380,41 +374,27 @@ input[type=number] { -moz-appearance:textfield; appearance:textfield; }
   <div class="activation-wrap">
     <div class="login-card">
       <h2 id="tituloActivacion" style="font-family:'Bebas Neue';color:var(--accent);font-size:1.8rem;letter-spacing:3px;text-align:center;margin-bottom:8px;">Activacion de Cuenta</h2>
-
-      <!-- PASO 1: Solo cambio de clave -->
-      <div id="paso1Activacion">
-        <p class="sub" style="text-align:center;">Paso 1 de 2 &mdash; Crea tu contrasena personal</p>
-        <div class="nota-req">8 caracteres &middot; Mayusculas &middot; Minusculas &middot; Numeros &middot; Sin especiales</div>
-        <div class="field"><label>Nueva Contrasena</label>
-          <div style="position:relative;display:flex;align-items:center;">
-            <input type="password" id="newPass1" maxlength="8" placeholder="8 caracteres" style="width:100%;padding-right:40px;">
-            <button type="button" onclick="toggleOjo('newPass1',this)" style="position:absolute;right:8px;background:none;border:none;cursor:pointer;color:#aaa;font-size:1.1rem;padding:4px;">👁️</button>
-          </div>
+      <p class="sub">Crea tu contrasena personal para ingresar al sistema</p>
+      <div class="nota-req">8 caracteres &middot; Mayusculas &middot; Minusculas &middot; Numeros &middot; Sin caracteres especiales</div>
+      <div class="field"><label>Nueva Contrasena</label><div style="position:relative;display:flex;align-items:center;">
+          <input type="password" id="newPass1" maxlength="8" placeholder="8 caracteres" style="width:100%;padding-right:40px;">
+          <button type="button" onclick="toggleOjo('newPass1',this)" style="position:absolute;right:8px;background:none;border:none;cursor:pointer;color:#aaa;font-size:1.1rem;padding:4px;">👁️</button>
+        </div></div>
+      <div class="field"><label>Confirmar Contrasena</label><div style="position:relative;display:flex;align-items:center;">
+          <input type="password" id="newPass2" maxlength="8" placeholder="Repite la clave" style="width:100%;padding-right:40px;">
+          <button type="button" onclick="toggleOjo('newPass2',this)" style="position:absolute;right:8px;background:none;border:none;cursor:pointer;color:#aaa;font-size:1.1rem;padding:4px;">👁️</button>
+        </div></div>
+      <div id="bloqueRifa">
+        <div class="aviso-rifa-warn">ATENCION: Una vez registres tus numeros de rifa NO podras cambiarlos.</div>
+        <p style="color:var(--muted);font-size:0.8rem;text-align:center;margin-bottom:12px;">4 numeros de 4 digitos cada uno (solo numeros)</p>
+        <div class="nums-grid">
+          <div class="field"><label>Numero 1</label><input type="number" id="n1" min="0" max="9999" placeholder="####" oninput="limitarDigitos(this)"></div>
+          <div class="field"><label>Numero 2</label><input type="number" id="n2" min="0" max="9999" placeholder="####" oninput="limitarDigitos(this)"></div>
+          <div class="field"><label>Numero 3</label><input type="number" id="n3" min="0" max="9999" placeholder="####" oninput="limitarDigitos(this)"></div>
+          <div class="field"><label>Numero 4</label><input type="number" id="n4" min="0" max="9999" placeholder="####" oninput="limitarDigitos(this)"></div>
         </div>
-        <div class="field"><label>Confirmar Contrasena</label>
-          <div style="position:relative;display:flex;align-items:center;">
-            <input type="password" id="newPass2" maxlength="8" placeholder="Repite la clave" style="width:100%;padding-right:40px;">
-            <button type="button" onclick="toggleOjo('newPass2',this)" style="position:absolute;right:8px;background:none;border:none;cursor:pointer;color:#aaa;font-size:1.1rem;padding:4px;">👁️</button>
-          </div>
-        </div>
-        <button class="btn-entrar" onclick="guardarClavePaso1()">Continuar &rarr; Paso 2</button>
       </div>
-
-      <!-- PASO 2: Numeros de rifa (aparece despues de guardar clave) -->
-      <div id="paso2Activacion" style="display:none;">
-        <p class="sub" style="text-align:center;">Paso 2 de 2 &mdash; Registra tus numeros de rifa</p>
-        <div id="bloqueRifa">
-          <div class="aviso-rifa-warn">ATENCION: Una vez registres tus numeros de rifa NO podras cambiarlos.</div>
-          <p style="color:var(--muted);font-size:0.8rem;text-align:center;margin-bottom:12px;">4 numeros de 4 digitos cada uno (solo numeros)</p>
-          <div class="nums-grid">
-            <div class="field"><label>Numero 1</label><input type="number" id="n1" min="0" max="9999" placeholder="####" oninput="limitarDigitos(this)"></div>
-            <div class="field"><label>Numero 2</label><input type="number" id="n2" min="0" max="9999" placeholder="####" oninput="limitarDigitos(this)"></div>
-            <div class="field"><label>Numero 3</label><input type="number" id="n3" min="0" max="9999" placeholder="####" oninput="limitarDigitos(this)"></div>
-            <div class="field"><label>Numero 4</label><input type="number" id="n4" min="0" max="9999" placeholder="####" oninput="limitarDigitos(this)"></div>
-          </div>
-        </div>
-        <button class="btn-entrar" onclick="activarCuenta()">Finalizar Registro</button>
-      </div>
+      <button class="btn-entrar" onclick="activarCuenta()">Finalizar Registro</button>
     </div>
   </div>
 </div>
@@ -787,16 +767,16 @@ input[type=number] { -moz-appearance:textfield; appearance:textfield; }
         <label style="font-size:0.8rem;color:#aaa;letter-spacing:1px;display:block;margin-bottom:8px;">PAGOS (Fecha + Valor · máx. 3 abonos · Inscripción total: $50.000)</label>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px;">
           <div class="field"><label>Fecha Pago 1</label><input type="date" id="adm-fecha1"></div>
-          <div class="field"><label>Valor Pago 1 ($)</label><input type="number" id="adm-valor1" min="0" placeholder="Ej: 25000" style="background:#0d1b2a;border:1px solid #233554;border-radius:5px;color:#fff;padding:8px;width:100%;"></div>
+          <div class="field"><label>Valor Pago 1 ($)</label><input type="number" id="adm-valor1" min="0" max="50000" placeholder="Ej: 25000" style="background:#0d1b2a;border:1px solid #233554;border-radius:5px;color:#fff;padding:8px;width:100%;"></div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px;">
           <div class="field"><label>Fecha Pago 2</label><input type="date" id="adm-fecha2" disabled></div>
-          <div class="field"><label>Valor Pago 2 ($)</label><input type="number" id="adm-valor2" min="0" placeholder="Ej: 25000" disabled style="background:#0d1b2a;border:1px solid #233554;border-radius:5px;color:#fff;padding:8px;width:100%;"></div>
+          <div class="field"><label>Valor Pago 2 ($)</label><input type="number" id="adm-valor2" min="0" max="50000" placeholder="Ej: 25000" disabled style="background:#0d1b2a;border:1px solid #233554;border-radius:5px;color:#fff;padding:8px;width:100%;"></div>
         </div>
         <div style="margin-bottom:8px;"><button type="button" class="btn-action" style="background:#1a3a5a;color:var(--accent);border:1px dashed var(--accent);font-size:0.75rem;padding:7px 14px;" onclick="habilitarAbono(2)">➕ Agregar Abono 2</button></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px;">
           <div class="field"><label>Fecha Pago 3</label><input type="date" id="adm-fecha3" disabled></div>
-          <div class="field"><label>Valor Pago 3 ($)</label><input type="number" id="adm-valor3" min="0" placeholder="Ej: 25000" disabled style="background:#0d1b2a;border:1px solid #233554;border-radius:5px;color:#fff;padding:8px;width:100%;"></div>
+          <div class="field"><label>Valor Pago 3 ($)</label><input type="number" id="adm-valor3" min="0" max="50000" placeholder="Ej: 25000" disabled style="background:#0d1b2a;border:1px solid #233554;border-radius:5px;color:#fff;padding:8px;width:100%;"></div>
         </div>
         <div style="margin-bottom:6px;"><button type="button" class="btn-action" style="background:#1a3a5a;color:var(--accent);border:1px dashed var(--accent);font-size:0.75rem;padding:7px 14px;" onclick="habilitarAbono(3)">➕ Agregar Abono 3</button></div>
         <div id="adm-saldo-info" style="font-family:'Barlow Condensed';font-size:0.85rem;color:#aaa;margin-top:4px;"></div>
@@ -835,6 +815,17 @@ input[type=number] { -moz-appearance:textfield; appearance:textfield; }
         <button class="btn-action btn-green" onclick="filtrarJugadores('pagado')">Pagados</button>
         <button class="btn-action" style="background:#7f4a00;color:#ffbb00;" onclick="filtrarJugadores('pendiente')">Pendientes</button>
         <button class="btn-action" style="background:#333;color:#ff4444;" onclick="filtrarJugadores('bloqueado')">Bloqueados</button>
+        <div style="position:relative;display:inline-block;">
+          <button class="btn-action" style="background:#1a1a4a;color:#aabbff;border:1px solid #333;" onclick="document.getElementById('dropAdmins').style.display=document.getElementById('dropAdmins').style.display==='none'?'block':'none'">👤 Por Admin ▾</button>
+          <div id="dropAdmins" style="display:none;position:absolute;top:110%;left:0;background:#0d1b2a;border:1px solid #233554;border-radius:6px;z-index:100;min-width:140px;box-shadow:0 4px 16px rgba(0,0,0,0.5);">
+            <div onclick="filtrarPorAdmin('todos');document.getElementById('dropAdmins').style.display='none'" style="padding:8px 14px;cursor:pointer;color:#aaa;font-family:'Barlow Condensed';font-size:0.85rem;border-bottom:1px solid #1a2a3a;">Todos los admins</div>
+            <div onclick="filtrarPorAdmin('H175');document.getElementById('dropAdmins').style.display='none'" style="padding:8px 14px;cursor:pointer;color:#FFD700;font-family:'Barlow Condensed';font-size:0.85rem;font-weight:700;border-bottom:1px solid #1a2a3a;">H175 — Hector</div>
+            <div onclick="filtrarPorAdmin('A228');document.getElementById('dropAdmins').style.display='none'" style="padding:8px 14px;cursor:pointer;color:#fff;font-family:'Barlow Condensed';font-size:0.85rem;border-bottom:1px solid #1a2a3a;">A228</div>
+            <div onclick="filtrarPorAdmin('S357');document.getElementById('dropAdmins').style.display='none'" style="padding:8px 14px;cursor:pointer;color:#fff;font-family:'Barlow Condensed';font-size:0.85rem;border-bottom:1px solid #1a2a3a;">S357</div>
+            <div onclick="filtrarPorAdmin('J802');document.getElementById('dropAdmins').style.display='none'" style="padding:8px 14px;cursor:pointer;color:#fff;font-family:'Barlow Condensed';font-size:0.85rem;">J802</div>
+          </div>
+        </div>
+        <span id="contadorJugadores" style="font-family:'Barlow Condensed';font-size:0.85rem;color:#555;margin-left:6px;align-self:center;"></span>
       </div>
       <div style="overflow-x:auto;">
         <table class="jugadores-table" id="tablaJugadores">
@@ -1645,13 +1636,9 @@ function login() {
     if (j.pass !== pass) { alert('Codigo o contrasena incorrectos.'); return; }
     usuarioActual = { codigo: cod, esAdmin: false, nombre: j.nombre };
     sessionStorage.setItem('pollaUser', JSON.stringify(usuarioActual));
-    if (j.estado === 'nuevo' || j.estado === 'pendiente' || j.estado === 'recuperacion') {
-      document.getElementById('tituloActivacion').innerText = j.estado === 'recuperacion' ? 'Restablecer Clave' : (j.nums && j.nums.length > 0 && j.nums[0] && j.nums[0] !== '--') ? 'Cambiar Clave' : 'Activacion de Cuenta';
-      document.getElementById('bloqueRifa').style.display = (j.nums && j.nums.length > 0 && j.nums[0] && j.nums[0] !== '--') ? 'none' : 'block';
-      document.getElementById('paso1Activacion').style.display = 'block';
-      document.getElementById('paso2Activacion').style.display = 'none';
-      document.getElementById('newPass1').value = '';
-      document.getElementById('newPass2').value = '';
+    if (j.estado === 'nuevo' || j.estado === 'recuperacion') {
+      document.getElementById('tituloActivacion').innerText = j.estado === 'recuperacion' ? 'Restablecer Clave' : 'Activacion de Cuenta';
+      document.getElementById('bloqueRifa').style.display = (j.nums && j.nums.length > 0) ? 'none' : 'block';
       irA('activacion');
     } else {
       cargarPerfil(cod, j);
@@ -1671,43 +1658,23 @@ function mostrarInterfazAdmin(cod) {
   setTimeout(aplicarRestriccionFechas, 300);
 }
 
-function guardarClavePaso1() {
+function activarCuenta() {
+  var u  = usuarioActual.codigo;
   var p1 = document.getElementById('newPass1').value;
   var p2 = document.getElementById('newPass2').value;
   if (!validarClave(p1)) { alert('La clave debe tener 8 caracteres con mayusculas, minusculas y numeros. Sin caracteres especiales.'); return; }
   if (p1 !== p2) { alert('Las claves no coinciden.'); return; }
-  var u = usuarioActual.codigo;
-  showLoading('Guardando clave...');
   fbGetJugador(u, function(j) {
-    if (!j) { hideLoading(); alert('Error: jugador no encontrado.'); return; }
-    j.pass = p1;
-    // Si ya tiene nums registrados ir directo al perfil
-    if (j.nums && j.nums.length > 0 && j.nums[0] && j.nums[0] !== '--') {
-      j.estado = 'activo';
-      fbSetJugador(u, j, function() { hideLoading(); cargarPerfil(u, j); });
-      return;
+    if (!j) { alert('Error: jugador no encontrado.'); return; }
+    if (!j.nums || j.nums.length === 0) {
+      if (!confirm('ATENCION: Una vez registres tus numeros de rifa NO podras cambiarlos. Deseas continuar?')) return;
+      var v = [document.getElementById('n1').value, document.getElementById('n2').value,
+               document.getElementById('n3').value, document.getElementById('n4').value];
+      if (v.some(function(n){ return !/^\d{4}$/.test(n); })) { alert('Cada numero debe tener exactamente 4 digitos.'); return; }
+      j.nums = v;
     }
-    // Guardar clave y mostrar paso 2 (numeros de rifa)
-    fbSetJugador(u, j, function() {
-      hideLoading();
-      document.getElementById('paso1Activacion').style.display = 'none';
-      document.getElementById('paso2Activacion').style.display = 'block';
-    });
-  });
-}
-window.guardarClavePaso1 = guardarClavePaso1;
-
-function activarCuenta() {
-  var u = usuarioActual.codigo;
-  if (!confirm('ATENCION: Una vez registres tus numeros de rifa NO podras cambiarlos. Deseas continuar?')) return;
-  var v = [document.getElementById('n1').value, document.getElementById('n2').value,
-           document.getElementById('n3').value, document.getElementById('n4').value];
-  if (v.some(function(n){ return !/^\d{4}$/.test(n); })) { alert('Cada numero debe tener exactamente 4 digitos.'); return; }
-  showLoading('Guardando...');
-  fbGetJugador(u, function(j) {
-    if (!j) { hideLoading(); alert('Error: jugador no encontrado.'); return; }
-    j.nums = v;
-    j.estado = 'activo';
+    j.pass = p1; j.estado = 'activo';
+    showLoading('Guardando...');
     fbSetJugador(u, j, function() {
       hideLoading();
       cargarPerfil(u, j);
@@ -1926,7 +1893,7 @@ function registrarJugador() {
   if (!cod || !clave || !nombre) { alert('Genera credenciales y completa el nombre.'); return; }
   // Validar valor1 obligatorio (0-50000)
   if (v1 === 0 && !document.getElementById('adm-valor1').value) { alert('⚠️ El Valor de Pago 1 es obligatorio. Ingresa un valor entre $0 y $50.000.'); document.getElementById('adm-valor1').focus(); return; }
-  if (v1 < 0) { alert('El Valor de Pago 1 no puede ser negativo.'); return; }
+  if (v1 < 0 || v1 > 50000) { alert('⚠️ El Valor de Pago 1 debe estar entre $0 y $50.000.'); return; }
   // Validar: si hay fecha, debe tener valor
   if ((f2 && !v2)||(f3 && !v3)) { alert('⚠️ Cada fecha de abono debe tener su valor correspondiente.'); return; }
   // Calcular pago automático según suma de valores
@@ -2017,12 +1984,12 @@ function buscarJugador(q) {
       '</div>' +
       '<div class="grid-3" style="margin-top:10px;">' +
       "<div style='display:grid;grid-template-columns:1fr 1fr;gap:8px;'>" +
-      "<div class='field'><label style='font-size:0.7rem;'>Fecha Pago 1</label><input type='date' id='edit_f1_" + cod + "' value='" + ((j.fechas&&j.fechas[0])||'') + "' " + (usuarioActual&&usuarioActual.codigo==='H175'?'':"min='" + new Date().toISOString().split('T')[0] + "' readonly") + " style='background:" + (usuarioActual&&usuarioActual.codigo==='H175'?'#0d1b2a':'#070d14') + ";border:1px solid #233554;border-radius:5px;color:" + (usuarioActual&&usuarioActual.codigo==='H175'?'#fff':'#555') + ";padding:8px;width:100%;'></div>" +
-      "<div class='field' style='grid-column:span 1;'><label style='font-size:0.7rem;'>Valor 1 — " + (usuarioActual&&usuarioActual.codigo==='H175'?'<span style=color:#ff9900;>solo H175</span>':'bloqueado') + "</label><input type='number' id='edit_v1_" + cod + "' value='" + ((j.valores&&j.valores[0])||'') + "' placeholder='Ej: 50.000' " + (usuarioActual&&usuarioActual.codigo==='H175'?'':'readonly') + " style='background:" + (usuarioActual&&usuarioActual.codigo==='H175'?'#0d1b2a':'#070d14') + ";border:1px solid #233554;border-radius:5px;color:" + (usuarioActual&&usuarioActual.codigo==='H175'?'#fff':'#555') + ";padding:8px;width:100%;-moz-appearance:textfield;appearance:textfield;'></div>" +
-      "<div class='field'><label style='font-size:0.7rem;'>Fecha Pago 2</label><input type='date' id='edit_f2_" + cod + "' value='" + ((j.fechas&&j.fechas[1])||'') + "' " + (usuarioActual&&usuarioActual.codigo==='H175'?'':"min='" + new Date().toISOString().split('T')[0] + "' readonly") + " style='background:" + (usuarioActual&&usuarioActual.codigo==='H175'?'#0d1b2a':'#070d14') + ";border:1px solid #233554;border-radius:5px;color:" + (usuarioActual&&usuarioActual.codigo==='H175'?'#fff':'#555') + ";padding:8px;width:100%;'></div>" +
-      "<div class='field'><label style='font-size:0.7rem;'>Valor 2</label><input type='number' id='edit_v2_" + cod + "' value='" + ((j.valores&&j.valores[1])||'') + "' placeholder='Ej: 50.000' " + (usuarioActual&&usuarioActual.codigo==='H175'?'':'readonly') + " style='background:" + (usuarioActual&&usuarioActual.codigo==='H175'?'#0d1b2a':'#070d14') + ";border:1px solid #233554;border-radius:5px;color:" + (usuarioActual&&usuarioActual.codigo==='H175'?'#fff':'#555') + ";padding:8px;width:100%;-moz-appearance:textfield;appearance:textfield;'></div>" +
-      "<div class='field'><label style='font-size:0.7rem;'>Fecha Pago 3</label><input type='date' id='edit_f3_" + cod + "' value='" + ((j.fechas&&j.fechas[2])||'') + "' " + (usuarioActual&&usuarioActual.codigo==='H175'?'':"min='" + new Date().toISOString().split('T')[0] + "' readonly") + " style='background:" + (usuarioActual&&usuarioActual.codigo==='H175'?'#0d1b2a':'#070d14') + ";border:1px solid #233554;border-radius:5px;color:" + (usuarioActual&&usuarioActual.codigo==='H175'?'#fff':'#555') + ";padding:8px;width:100%;'></div>" +
-      "<div class='field'><label style='font-size:0.7rem;'>Valor 3</label><input type='number' id='edit_v3_" + cod + "' value='" + ((j.valores&&j.valores[2])||'') + "' placeholder='Ej: 50.000' " + (usuarioActual&&usuarioActual.codigo==='H175'?'':'readonly') + " style='background:" + (usuarioActual&&usuarioActual.codigo==='H175'?'#0d1b2a':'#070d14') + ";border:1px solid #233554;border-radius:5px;color:" + (usuarioActual&&usuarioActual.codigo==='H175'?'#fff':'#555') + ";padding:8px;width:100%;-moz-appearance:textfield;appearance:textfield;'></div>" +
+      "<div class='field'><label>Fecha Pago 1</label><input type='date' id='edit_f1_" + cod + "' value='" + ((j.fechas&&j.fechas[0])||'') + "' " + (usuarioActual&&usuarioActual.codigo==='H175'?'':"min='" + new Date().toISOString().split('T')[0] + "'") + " style='background:#0d1b2a;border:1px solid #233554;border-radius:5px;color:#fff;padding:8px;width:100%;'></div>" +
+      "<div class='field'><label>Valor 1 ($)</label><input type='number' id='edit_v1_" + cod + "' value='" + ((j.valores&&j.valores[0])||'') + "' min='0' max='50000' placeholder='Ej: 25000' style='background:#0d1b2a;border:1px solid #233554;border-radius:5px;color:#fff;padding:8px;width:100%;'></div>" +
+      "<div class='field'><label>Fecha Pago 2</label><input type='date' id='edit_f2_" + cod + "' value='" + ((j.fechas&&j.fechas[1])||'') + "' " + (usuarioActual&&usuarioActual.codigo==='H175'?'':"min='" + new Date().toISOString().split('T')[0] + "'") + " style='background:#0d1b2a;border:1px solid #233554;border-radius:5px;color:#fff;padding:8px;width:100%;'></div>" +
+      "<div class='field'><label>Valor 2 ($)</label><input type='number' id='edit_v2_" + cod + "' value='" + ((j.valores&&j.valores[1])||'') + "' min='0' max='50000' placeholder='Ej: 25000' style='background:#0d1b2a;border:1px solid #233554;border-radius:5px;color:#fff;padding:8px;width:100%;'></div>" +
+      "<div class='field'><label>Fecha Pago 3</label><input type='date' id='edit_f3_" + cod + "' value='" + ((j.fechas&&j.fechas[2])||'') + "' " + (usuarioActual&&usuarioActual.codigo==='H175'?'':"min='" + new Date().toISOString().split('T')[0] + "'") + " style='background:#0d1b2a;border:1px solid #233554;border-radius:5px;color:#fff;padding:8px;width:100%;'></div>" +
+      "<div class='field'><label>Valor 3 ($)</label><input type='number' id='edit_v3_" + cod + "' value='" + ((j.valores&&j.valores[2])||'') + "' min='0' max='50000' placeholder='Ej: 25000' style='background:#0d1b2a;border:1px solid #233554;border-radius:5px;color:#fff;padding:8px;width:100%;'></div>" +
       '</div>' +
       '<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">' +
       '<button onclick="guardarEdicionJugador(\'' + cod + '\')" style="background:var(--mexico);color:#fff;border:none;padding:8px 16px;cursor:pointer;border-radius:5px;font-family:\'Barlow Condensed\';font-weight:700;font-size:0.85rem;">GUARDAR CAMBIOS</button>' +
@@ -2033,78 +2000,111 @@ function buscarJugador(q) {
 }
 
 function guardarEdicionJugador(cod) {
+  var esH175 = usuarioActual && usuarioActual.codigo === 'H175';
+  // Leer valores — solo H175 puede modificarlos
+  var v1El = document.getElementById('edit_v1_' + cod);
+  var v2El = document.getElementById('edit_v2_' + cod);
+  var v3El = document.getElementById('edit_v3_' + cod);
+  var v1 = v1El ? (parseFloat(v1El.value) || 0) : 0;
+  var v2 = v2El ? (parseFloat(v2El.value) || 0) : 0;
+  var v3 = v3El ? (parseFloat(v3El.value) || 0) : 0;
+  var totalPagado = v1 + v2 + v3;
+  // Determinar estado de pago automaticamente segun total
+  var pagoSelect = document.getElementById('edit_pago_' + cod);
+  var pagoVal = pagoSelect ? pagoSelect.value : 'pendiente';
+  if (esH175 && totalPagado >= 50000) pagoVal = 'pagado';
   var updates = {
     nombre:  document.getElementById('edit_nom_'  + cod).value,
     celular: document.getElementById('edit_cel_'  + cod).value,
     email:   document.getElementById('edit_email_'+ cod).value,
-    pago:    document.getElementById('edit_pago_' + cod).value,
+    pago:    pagoVal,
     fechas:  [
       document.getElementById('edit_f1_' + cod).value,
       document.getElementById('edit_f2_' + cod).value,
       document.getElementById('edit_f3_' + cod).value
     ]
   };
+  // Solo H175 guarda los valores de pago
+  if (esH175) {
+    updates.valores = [v1, v2, v3];
+  }
   showLoading('Guardando cambios...');
   fbUpdateJugador(cod, updates, function() {
     hideLoading();
-    alert('Datos de ' + cod + ' actualizados correctamente.');
-    // Limpiar busqueda
+    alert('Datos de ' + cod + ' actualizados. Total pagado: $' + totalPagado.toLocaleString('es-CO'));
     document.getElementById('buscadorInput').value = '';
     document.getElementById('resultadoBusqueda').style.display = 'none';
     document.getElementById('resultadoBusqueda').innerHTML = '';
+    renderizarTablaJugadores();
   });
 }
 
 var filtroActualJugadores = 'todos';
-function filtrarJugadores(tipo) { filtroActualJugadores = tipo; renderizarTablaJugadores(); }
+var filtroAdminJugadores  = 'todos';
+
+function filtrarJugadores(tipo) { filtroActualJugadores = tipo; filtroAdminJugadores = 'todos'; renderizarTablaJugadores(); }
+function filtrarPorAdmin(admin) { filtroAdminJugadores = admin; filtroActualJugadores = 'todos'; renderizarTablaJugadores(); }
+window.filtrarPorAdmin = filtrarPorAdmin;
 
 function renderizarTablaJugadores() {
   var tbody = document.getElementById('jugadoresBody');
   if (!tbody) return;
   var jugadores = Object.entries(jugadoresCache).filter(function(e){
     var j = e[1];
+    // Filtro por estado
     if (filtroActualJugadores === 'pagado')    return j.pago === 'pagado' && !j.bloqueado;
     if (filtroActualJugadores === 'pendiente') return j.pago !== 'pagado' && !j.bloqueado;
     if (filtroActualJugadores === 'bloqueado') return j.bloqueado;
+    // Filtro por admin
+    if (filtroAdminJugadores !== 'todos') return (j.creadoPor || '?') === filtroAdminJugadores;
     return true;
   });
-  if (jugadores.length === 0) { tbody.innerHTML = '<tr><td colspan="9" style="color:#555;padding:20px;">No hay jugadores en esta categoria.</td></tr>'; return; }
   // Ordenar alfabeticamente por nombre
   jugadores.sort(function(a,b){
     var na=(a[1].nombre||'').toLowerCase(), nb=(b[1].nombre||'').toLowerCase();
-    return na < nb ? -1 : na > nb ? 1 : 0;
+    return na<nb?-1:na>nb?1:0;
   });
+  if (jugadores.length === 0) { tbody.innerHTML = '<tr><td colspan="9" style="color:#555;padding:20px;">No hay jugadores en esta categoria.</td></tr>'; return; }
   tbody.innerHTML = jugadores.map(function(e, idx){
     var cod=e[0], j=e[1];
-    var tagCls  = j.bloqueado ? 'tag-bloqueado' : (j.pago==='pagado' ? 'tag-pagado' : 'tag-pendiente');
-    var tagTxt  = j.bloqueado ? 'Bloqueado' : (j.pago==='pagado' ? 'Pagado' : 'Pendiente');
+    var tagCls = j.bloqueado ? 'tag-bloqueado' : (j.pago==='pagado' ? 'tag-pagado' : 'tag-pendiente');
+    var tagTxt = j.bloqueado ? 'Bloqueado' : (j.pago==='pagado' ? 'Pagado' : 'Pendiente');
+    // Pagos con formato
     var pagosFmt = [];
     (j.fechas||[]).forEach(function(f,i){
       if(!f) return;
-      var v = (j.valores&&j.valores[i]) ? '$'+(parseFloat(j.valores[i])||0).toLocaleString('es-CO') : '';
-      pagosFmt.push(f + (v?' ('+v+')':''));
+      var v = (j.valores&&j.valores[i]) ? ' ($'+(parseFloat(j.valores[i])||0).toLocaleString('es-CO')+')' : '';
+      pagosFmt.push(f + v);
     });
     var pagos = pagosFmt.join('<br>') || '-';
     var creadoPor = j.creadoPor || '-';
+    // Valor pagado con colores
     var vals = j.valores || [];
-    var totalVal = (parseFloat(vals[0])||0) + (parseFloat(vals[1])||0) + (parseFloat(vals[2])||0);
-    var valorPagadoStr = '$' + totalVal.toLocaleString('es-CO');
+    var totalVal = (parseFloat(vals[0])||0)+(parseFloat(vals[1])||0)+(parseFloat(vals[2])||0);
+    var colorVal, bgVal;
+    if (totalVal === 0)       { colorVal='#ff4444'; bgVal='rgba(255,68,68,0.1)'; }
+    else if (totalVal >= 50000) { colorVal='#00ff99'; bgVal='rgba(0,255,153,0.1)'; }
+    else                       { colorVal='#ffdd00'; bgVal='rgba(255,221,0,0.1)'; }
+    var valorPagadoStr = '<span style="color:'+colorVal+';background:'+bgVal+';padding:2px 8px;border-radius:10px;font-weight:700;font-size:0.82rem;">$'+totalVal.toLocaleString('es-CO')+'</span>';
     return '<tr>' +
       '<td style="color:#666;font-size:0.75rem;text-align:center;">' + (idx+1) + '</td>' +
       '<td style="font-weight:700;">' + (j.nombre||'-') + '</td>' +
       '<td style="color:var(--accent);font-weight:900;">' + cod + '</td>' +
       '<td>' + (j.celular||'-') + '</td>' +
-      '<td style="font-size:0.72rem;color:#aaa;line-height:1.5;">' + pagos + '</td>' +
+      '<td style="font-size:0.72rem;color:#aaa;line-height:1.6;">' + pagos + '</td>' +
       '<td><span class="' + tagCls + '">' + tagTxt + '</span></td>' +
-      '<td style="font-size:0.82rem;color:#00ff99;font-weight:700;text-align:center;">' + valorPagadoStr + '</td>' +
+      '<td style="text-align:center;">' + valorPagadoStr + '</td>' +
       '<td style="font-size:0.75rem;color:var(--gold);font-weight:700;text-align:center;">' + creadoPor + '</td>' +
       '<td style="display:flex;gap:4px;flex-wrap:wrap;">' +
       '<button onclick="togglePago(\'' + cod + '\')" style="background:' + (j.pago==='pagado'?'#555':'var(--mexico)') + ';color:#fff;border:none;padding:3px 8px;cursor:pointer;border-radius:3px;font-size:0.7rem;">' + (j.pago==='pagado'?'Quitar':'Pago') + '</button>' +
       '<button onclick="toggleBloqueo(\'' + cod + '\')" style="background:' + (j.bloqueado?'#006847':'#7f1a1a') + ';color:#fff;border:none;padding:3px 8px;cursor:pointer;border-radius:3px;font-size:0.7rem;">' + (j.bloqueado?'Desbloquear':'Bloquear') + '</button>' +
       '<button onclick="eliminarJugador(\'' + cod + '\')" style="background:#c0392b;color:#fff;border:none;padding:3px 8px;cursor:pointer;border-radius:3px;font-size:0.7rem;">Del</button>' +
-        '<button onclick="resetearClave(\'' + cod + '\')" style="background:#7f4a00;color:#ffbb00;border:none;padding:3px 8px;cursor:pointer;border-radius:3px;font-size:0.7rem;">Reset</button>' +
+      '<button onclick="resetearClave(\'' + cod + '\')" style="background:#7f4a00;color:#ffbb00;border:none;padding:3px 8px;cursor:pointer;border-radius:3px;font-size:0.7rem;">Reset</button>' +
       '</td></tr>';
   }).join('');
+  // Mostrar total de jugadores filtrados
+  var contadorEl = document.getElementById('contadorJugadores');
+  if (contadorEl) contadorEl.innerText = jugadores.length + ' jugador' + (jugadores.length!==1?'es':'');
 }
 
 function togglePago(cod) {
@@ -2872,6 +2872,11 @@ window.enviarWhatsApp = enviarWhatsApp;
 window.buscarJugador = buscarJugador;
 window.guardarEdicionJugador = guardarEdicionJugador;
 window.filtrarJugadores = filtrarJugadores;
+document.addEventListener('click', function(e){
+  var drop = document.getElementById('dropAdmins');
+  if (drop && !drop.parentElement.contains(e.target)) drop.style.display = 'none';
+});
+
 window.togglePago = togglePago;
 window.toggleBloqueo = toggleBloqueo;
 window.eliminarJugador = eliminarJugador;
