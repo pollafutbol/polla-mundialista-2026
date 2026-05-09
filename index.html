@@ -826,6 +826,7 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
           </div>
         </div>
         <span id="contadorJugadores" style="font-family:'Barlow Condensed';font-size:0.85rem;color:#555;margin-left:6px;align-self:center;"></span>
+        <button onclick="exportarExcel()" style="background:linear-gradient(135deg,#1a6b1a,#006400);color:#fff;border:none;padding:7px 14px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed';font-weight:700;font-size:0.85rem;letter-spacing:1px;display:flex;align-items:center;gap:5px;">📊 EXPORTAR EXCEL</button>
       </div>
       <div style="overflow-x:auto;">
         <table class="jugadores-table" id="tablaJugadores">
@@ -1981,6 +1982,16 @@ function buscarJugador(q) {
       '<div class="field"><label>Estado Pago</label><select id="edit_pago_' + cod + '" style="background:#0d1b2a;border:1px solid #233554;border-radius:5px;color:#fff;padding:8px;width:100%;">' +
       '<option value="pendiente"' + (j.pago!=='pagado'?' selected':'') + '>Pendiente</option>' +
       '<option value="pagado"' + (j.pago==='pagado'?' selected':'') + '>Pagado</option></select></div>' +
+      (usuarioActual&&usuarioActual.codigo==='H175' ? 
+        '<div class="field" style="border:1px solid #ff9900;border-radius:6px;padding:8px;background:rgba(255,153,0,0.05);">' +
+        '<label style="color:#ff9900;font-size:0.7rem;">🔑 SOLO H175 — Cambiar Admin que lo creó</label>' +
+        '<select id="edit_creadoPor_' + cod + '" style="background:#0d1b2a;border:1px solid #ff9900;border-radius:5px;color:#fff;padding:8px;width:100%;margin-top:4px;">' +
+        '<option value="H175"' + ((j.creadoPor||'')==='H175'?' selected':'') + '>H175 — Hector</option>' +
+        '<option value="A228"' + ((j.creadoPor||'')==='A228'?' selected':'') + '>A228</option>' +
+        '<option value="S357"' + ((j.creadoPor||'')==='S357'?' selected':'') + '>S357</option>' +
+        '<option value="J802"' + ((j.creadoPor||'')==='J802'?' selected':'') + '>J802</option>' +
+        '</select></div>'
+      : '') +
       '</div>' +
       '<div class="grid-3" style="margin-top:10px;">' +
       "<div style='display:grid;grid-template-columns:1fr 1fr;gap:8px;'>" +
@@ -2024,9 +2035,11 @@ function guardarEdicionJugador(cod) {
       document.getElementById('edit_f3_' + cod).value
     ]
   };
-  // Solo H175 guarda los valores de pago
+  // Solo H175 guarda valores de pago y puede cambiar el admin creador
   if (esH175) {
     updates.valores = [v1, v2, v3];
+    var creadoPorEl = document.getElementById('edit_creadoPor_' + cod);
+    if (creadoPorEl) updates.creadoPor = creadoPorEl.value;
   }
   showLoading('Guardando cambios...');
   fbUpdateJugador(cod, updates, function() {
@@ -2872,6 +2885,106 @@ window.enviarWhatsApp = enviarWhatsApp;
 window.buscarJugador = buscarJugador;
 window.guardarEdicionJugador = guardarEdicionJugador;
 window.filtrarJugadores = filtrarJugadores;
+
+function exportarExcel() {
+  // Obtener jugadores según filtro activo (misma lógica que renderizarTablaJugadores)
+  var jugadores = Object.entries(jugadoresCache).filter(function(e){
+    var j = e[1];
+    if (filtroActualJugadores === 'pagado')    return j.pago === 'pagado' && !j.bloqueado;
+    if (filtroActualJugadores === 'pendiente') return j.pago !== 'pagado' && !j.bloqueado;
+    if (filtroActualJugadores === 'bloqueado') return j.bloqueado;
+    if (filtroAdminJugadores !== 'todos')      return (j.creadoPor||'?') === filtroAdminJugadores;
+    return true;
+  });
+
+  // Ordenar alfabeticamente
+  jugadores.sort(function(a,b){
+    var na=(a[1].nombre||'').toLowerCase(), nb=(b[1].nombre||'').toLowerCase();
+    return na<nb?-1:na>nb?1:0;
+  });
+
+  if (jugadores.length === 0) { alert('No hay jugadores para exportar.'); return; }
+
+  // Título del filtro activo
+  var tituloFiltro = 'Todos los jugadores';
+  if (filtroActualJugadores === 'pagado')    tituloFiltro = 'Jugadores Pagados';
+  if (filtroActualJugadores === 'pendiente') tituloFiltro = 'Jugadores Pendientes';
+  if (filtroActualJugadores === 'bloqueado') tituloFiltro = 'Jugadores Bloqueados';
+  if (filtroAdminJugadores !== 'todos')      tituloFiltro = 'Jugadores de Admin: ' + filtroAdminJugadores;
+
+  // Construir tabla HTML para Excel
+  var fechaHoy = new Date().toLocaleDateString('es-CO');
+  var filas = jugadores.map(function(e, idx){
+    var cod = e[0], j = e[1];
+    var vals = j.valores || [];
+    var v1 = parseFloat(vals[0])||0;
+    var v2 = parseFloat(vals[1])||0;
+    var v3 = parseFloat(vals[2])||0;
+    var total = v1+v2+v3;
+    var faltante = 50000 - total;
+    var fechas = (j.fechas||[]).filter(function(f){return f;}).join(' / ') || '-';
+    var estado = j.bloqueado ? 'Bloqueado' : (j.pago==='pagado' ? 'Pagado' : 'Pendiente');
+    return '<tr>' +
+      '<td style="text-align:center;">' + (idx+1) + '</td>' +
+      '<td><b>' + (j.nombre||'-') + '</b></td>' +
+      '<td style="color:#1a6b1a;font-weight:bold;">' + cod + '</td>' +
+      '<td>' + (j.celular||'-') + '</td>' +
+      '<td>' + (j.email||'-') + '</td>' +
+      '<td>' + (j.ciudad||'-') + '</td>' +
+      '<td style="text-align:center;">' + estado + '</td>' +
+      '<td style="text-align:right;">$' + v1.toLocaleString('es-CO') + '</td>' +
+      '<td style="text-align:right;">$' + v2.toLocaleString('es-CO') + '</td>' +
+      '<td style="text-align:right;">$' + v3.toLocaleString('es-CO') + '</td>' +
+      '<td style="text-align:right;font-weight:bold;color:' + (total>=50000?'#006400':total>0?'#996600':'#cc0000') + ';">$' + total.toLocaleString('es-CO') + '</td>' +
+      '<td style="text-align:right;color:' + (faltante<=0?'#006400':'#cc0000') + ';">$' + Math.max(0,faltante).toLocaleString('es-CO') + '</td>' +
+      '<td>' + fechas + '</td>' +
+      '<td style="text-align:center;">' + (j.creadoPor||'-') + '</td>' +
+      '</tr>';
+  });
+
+  // HTML completo para Excel
+  var html_excel = (
+    '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">' +
+    '<head><meta charset="UTF-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>' +
+    '<x:Name>Polla 2026</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>' +
+    '</x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body>' +
+    '<table border="1" style="border-collapse:collapse;font-family:Arial,sans-serif;font-size:12px;">' +
+    '<tr><td colspan="14" style="background:#003366;color:#FFD700;font-size:16px;font-weight:bold;padding:10px;text-align:center;">POLLA MUNDIALISTA 2026 — ' + tituloFiltro.toUpperCase() + '</td></tr>' +
+    '<tr><td colspan="14" style="background:#f0f0f0;color:#555;font-size:11px;padding:6px;text-align:center;">Exportado el ' + fechaHoy + ' · Total jugadores: ' + jugadores.length + '</td></tr>' +
+    '<tr style="background:#003366;color:#fff;font-weight:bold;">' +
+    '<th style="padding:6px 10px;">#</th>' +
+    '<th style="padding:6px 10px;">Nombre</th>' +
+    '<th style="padding:6px 10px;">Codigo</th>' +
+    '<th style="padding:6px 10px;">WhatsApp</th>' +
+    '<th style="padding:6px 10px;">Correo</th>' +
+    '<th style="padding:6px 10px;">Ciudad</th>' +
+    '<th style="padding:6px 10px;">Estado</th>' +
+    '<th style="padding:6px 10px;">Pago 1</th>' +
+    '<th style="padding:6px 10px;">Pago 2</th>' +
+    '<th style="padding:6px 10px;">Pago 3</th>' +
+    '<th style="padding:6px 10px;">Total Pagado</th>' +
+    '<th style="padding:6px 10px;">Saldo</th>' +
+    '<th style="padding:6px 10px;">Fechas de Pago</th>' +
+    '<th style="padding:6px 10px;">Creado Por</th>' +
+    '</tr>' +
+    filas.join('') +
+    '</table></body></html>'
+  );
+
+  // Descargar como .xls
+  var blob = new Blob([html_excel], {type:'application/vnd.ms-excel;charset=utf-8'});
+  var url  = URL.createObjectURL(blob);
+  var a    = document.createElement('a');
+  var nombreArchivo = 'Polla2026_' + tituloFiltro.replace(/[^a-zA-Z0-9]/g,'_') + '_' + fechaHoy.replace(/\//g,'-') + '.xls';
+  a.href     = url;
+  a.download = nombreArchivo;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+window.exportarExcel = exportarExcel;
+
 document.addEventListener('click', function(e){
   var drop = document.getElementById('dropAdmins');
   if (drop && !drop.parentElement.contains(e.target)) drop.style.display = 'none';
