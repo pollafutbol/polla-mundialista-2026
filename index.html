@@ -746,8 +746,14 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
         <div style="display:flex;align-items:flex-end;"><button class="btn-action btn-gold" onclick="generarCredenciales()" style="width:100%;padding:12px;">GENERAR</button></div>
       </div>
       <div class="grid-3">
-        <div class="field"><label>Nombre del Jugador</label><input type="text" id="adm-nombre" placeholder="Nombre completo"></div>
-        <div class="field"><label>WhatsApp</label>
+        <!-- Nombre OBLIGATORIO -->
+        <div class="field">
+          <label>Nombre del Jugador <span style="color:#ff4444;">*</span></label>
+          <input type="text" id="adm-nombre" placeholder="Nombre completo" style="border:1px solid #233554;border-radius:5px;background:#0d1b2a;color:#fff;padding:8px;width:100%;">
+        </div>
+        <!-- WhatsApp OBLIGATORIO -->
+        <div class="field">
+          <label>WhatsApp <span style="color:#ff4444;">*</span></label>
           <div style="display:flex;gap:6px;align-items:center;">
             <select id="adm-indicativo" onchange="actualizarPlaceholderCelular()" style="background:#0d1b2a;border:1px solid #233554;border-radius:5px;color:#fff;padding:8px;width:auto;min-width:120px;font-size:0.85rem;">
               <option value="57">🇨🇴 +57</option>
@@ -777,37 +783,44 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
         </div>
         <div class="field"><label>Correo Electronico</label><input type="email" id="adm-email" placeholder="correo_ejemplo"></div>
       </div>
+      <!-- PAGOS -->
       <div style="margin-top:15px;">
         <label style="font-size:0.8rem;color:#aaa;letter-spacing:1px;display:block;margin-bottom:8px;">PAGOS (Fecha + Valor · máx. 3 abonos · Inscripción total: $50.000)</label>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px;">
-          <div class="field"><label>Fecha Pago 1</label><input type="date" id="adm-fecha1"></div>
-          <div class="field"><label>Valor Pago 1 ($)</label><input type="number" id="adm-valor1" min="0" max="50000" placeholder="Ej: 25000" style="background:#0d1b2a;border:1px solid #233554;border-radius:5px;color:#fff;padding:8px;width:100%;"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:2px;">
+          <div class="field">
+            <label>Fecha Pago 1</label>
+            <!-- Cambio 4: ícono calendario visible en blanco/dorado -->
+            <input type="date" id="adm-fecha1" style="background:#0d1b2a;border:1px solid #233554;border-radius:5px;color:#fff;padding:8px;width:100%;color-scheme:dark;">
+          </div>
+          <div class="field">
+            <label>Valor Pago 1 <span style="color:#ff4444;">*</span></label>
+            <input type="number" id="adm-valor1" min="0" placeholder="Ej: 25000" oninput="calcularSaldo()" style="background:#0d1b2a;border:1px solid #233554;border-radius:5px;color:#fff;padding:8px;width:100%;-moz-appearance:textfield;appearance:textfield;">
+          </div>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px;">
-          <div class="field"><label>Fecha Pago 2</label><input type="date" id="adm-fecha2" disabled></div>
-          <div class="field"><label>Valor Pago 2 ($)</label><input type="number" id="adm-valor2" min="0" max="50000" placeholder="Ej: 25000" disabled style="background:#0d1b2a;border:1px solid #233554;border-radius:5px;color:#fff;padding:8px;width:100%;"></div>
+        <!-- Aviso cambio 3 -->
+        <div style="margin-bottom:8px;padding:5px 10px;background:rgba(0,200,150,0.08);border-left:3px solid var(--accent);border-radius:4px;">
+          <span style="font-family:'Barlow Condensed';font-size:0.78rem;color:var(--accent);">💡 Si el jugador <strong>no ha hecho abono</strong>, coloca <strong>$0</strong> en Valor Pago 1</span>
         </div>
-        <div style="margin-bottom:8px;"><button type="button" class="btn-action" style="background:#1a3a5a;color:var(--accent);border:1px dashed var(--accent);font-size:0.75rem;padding:7px 14px;" onclick="habilitarAbono(2)">➕ Agregar Abono 2</button></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px;">
-          <div class="field"><label>Fecha Pago 3</label><input type="date" id="adm-fecha3" disabled></div>
-          <div class="field"><label>Valor Pago 3 ($)</label><input type="number" id="adm-valor3" min="0" max="50000" placeholder="Ej: 25000" disabled style="background:#0d1b2a;border:1px solid #233554;border-radius:5px;color:#fff;padding:8px;width:100%;"></div>
-        </div>
-        <div style="margin-bottom:6px;"><button type="button" class="btn-action" style="background:#1a3a5a;color:var(--accent);border:1px dashed var(--accent);font-size:0.75rem;padding:7px 14px;" onclick="habilitarAbono(3)">➕ Agregar Abono 3</button></div>
-        <div id="adm-saldo-info" style="font-family:'Barlow Condensed';font-size:0.85rem;color:#aaa;margin-top:4px;"></div>
+        <div id="adm-saldo-info" style="font-family:'Barlow Condensed';font-size:0.85rem;color:#aaa;margin-bottom:6px;min-height:18px;"></div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;">
+      <!-- Ciudad OBLIGATORIA -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
         <div class="field">
           <label>Estado de Pago</label>
           <select id="adm-pago" class="pm-select"><option value="pendiente">Pendiente</option><option value="pagado">Pagado</option></select>
         </div>
         <div class="field">
-          <label>Ciudad</label>
+          <label>Ciudad <span style="color:#ff4444;">*</span></label>
           <input type="text" id="adm-ciudad" placeholder="Ciudad del jugador" style="background:#0d1b2a;border:1px solid #233554;border-radius:5px;color:#fff;padding:8px;width:100%;">
         </div>
       </div>
+      <!-- Botones: REGISTRAR solo H175, WHATSAPP todos -->
       <div style="display:flex;gap:10px;margin-top:15px;flex-wrap:wrap;">
-        <button class="btn-action btn-green" onclick="registrarJugador()" style="flex:1;">REGISTRAR JUGADOR</button>
-        <button class="btn-action btn-blue" onclick="enviarWhatsApp()" style="flex:1;">ENVIAR POR WHATSAPP</button>
+        <button id="btnRegistrarJugador" class="btn-action btn-green" onclick="registrarJugador()" style="flex:1;display:none;">REGISTRAR JUGADOR</button>
+        <button class="btn-action btn-blue" onclick="enviarWhatsApp()" style="flex:1;">📱 ENVIAR POR WHATSAPP</button>
+      </div>
+      <div style="margin-top:6px;text-align:center;">
+        <span style="font-size:0.7rem;color:#444;font-family:'Barlow Condensed';letter-spacing:1px;"><span style="color:#ff4444;">*</span> Campos obligatorios</span>
       </div>
     </div>
     <!-- BUSCADOR CON EDICION -->
@@ -1677,6 +1690,9 @@ function mostrarInterfazAdmin(cod) {
   irA('admin');
   renderizarTablaJugadores();
   setTimeout(aplicarRestriccionFechas, 300);
+  // Botón REGISTRAR solo visible para H175
+  var btnReg = document.getElementById('btnRegistrarJugador');
+  if (btnReg) btnReg.style.display = (cod === 'H175') ? 'block' : 'none';
 }
 
 function activarCuenta() {
@@ -1905,10 +1921,12 @@ function registrarJugador() {
   var v2     = parseFloat(document.getElementById('adm-valor2')&&document.getElementById('adm-valor2').value||0)||0;
   var v3     = parseFloat(document.getElementById('adm-valor3')&&document.getElementById('adm-valor3').value||0)||0;
   var ciudad = (document.getElementById('adm-ciudad')&&document.getElementById('adm-ciudad').value)||'';
-  if (!cod || !clave || !nombre) { alert('Genera credenciales y completa el nombre.'); return; }
-  // Validar valor1 obligatorio (0-50000)
-  if (v1 === 0 && !document.getElementById('adm-valor1').value) { alert('⚠️ El Valor de Pago 1 es obligatorio. Ingresa un valor entre $0 y $50.000.'); document.getElementById('adm-valor1').focus(); return; }
-  if (v1 < 0 || v1 > 50000) { alert('⚠️ El Valor de Pago 1 debe estar entre $0 y $50.000.'); return; }
+  if (!cod || !clave) { alert('Primero genera las credenciales con el botón GENERAR.'); return; }
+  if (!nombre) { var nel=document.getElementById('adm-nombre'); nel.style.border='2px solid #ff4444'; alert('⚠️ El Nombre del jugador es obligatorio.'); nel.focus(); return; }
+  if (!_num || _num.length < 7) { var cel2=document.getElementById('adm-celular'); cel2.style.border='2px solid #ff4444'; alert('⚠️ El número de WhatsApp es obligatorio.'); cel2.focus(); return; }
+  if (!ciudad) { var ciudEl=document.getElementById('adm-ciudad'); ciudEl.style.border='2px solid #ff4444'; alert('⚠️ La Ciudad es obligatoria.'); ciudEl.focus(); return; }
+  if (document.getElementById('adm-valor1').value === '') { var v1El=document.getElementById('adm-valor1'); v1El.style.border='2px solid #ff4444'; alert('⚠️ El Valor Pago 1 es obligatorio. Si no hubo abono coloca 0.'); v1El.focus(); return; }
+  if (v1 < 0) { alert('⚠️ El Valor no puede ser negativo.'); return; }
   // Validar: si hay fecha, debe tener valor
   if ((f2 && !v2)||(f3 && !v3)) { alert('⚠️ Cada fecha de abono debe tener su valor correspondiente.'); return; }
   // Calcular pago automático según suma de valores
@@ -1943,7 +1961,11 @@ function enviarWhatsApp() {
   var v2     = parseFloat((document.getElementById('adm-valor2')||{value:0}).value||0)||0;
   var v3     = parseFloat((document.getElementById('adm-valor3')||{value:0}).value||0)||0;
   var ciudad = (document.getElementById('adm-ciudad')||{value:''}).value||'';
-  if (!_num) { alert('Ingresa el numero de WhatsApp.'); return; }
+  if (!_num || _num.length < 7) { var _celWA=document.getElementById('adm-celular'); if(_celWA){_celWA.style.border='2px solid #ff4444';_celWA.focus();} alert('⚠️ El número de WhatsApp es obligatorio.'); return; }
+  var _nomWA=document.getElementById('adm-nombre'); if(!nombre){_nomWA.style.border='2px solid #ff4444';_nomWA.focus();alert('⚠️ El Nombre es obligatorio.');return;}
+  var _ciuWA=(document.getElementById('adm-ciudad')||{value:''}).value.trim();
+  if(!_ciuWA){var _ciuEl=document.getElementById('adm-ciudad');if(_ciuEl){_ciuEl.style.border='2px solid #ff4444';_ciuEl.focus();}alert('⚠️ La Ciudad es obligatoria.');return;}
+  if(document.getElementById('adm-valor1').value===''){var _v1WA=document.getElementById('adm-valor1');_v1WA.style.border='2px solid #ff4444';_v1WA.focus();alert('⚠️ El Valor Pago 1 es obligatorio. Si no hubo abono coloca 0.');return;}
   if (!cod || !clave || !nombre) { alert('Genera credenciales y completa el nombre.'); return; }
   var totalPagado = v1+v2+v3;
   if (totalPagado >= 50000) pago = 'pagado';
@@ -2934,6 +2956,12 @@ function toggleOjo(inputId, btn) {
   else { inp.type = 'password'; btn.innerText = '👁️'; }
 }
 window.toggleOjo = toggleOjo;
+
+document.addEventListener('input', function(e) {
+  if (e.target && e.target.style && e.target.style.border === '1px solid #ff4444') {
+    e.target.style.border = '1px solid #233554';
+  }
+});
 window.registrarJugador = registrarJugador;
 window.enviarWhatsApp = enviarWhatsApp;
 window.buscarJugador = buscarJugador;
