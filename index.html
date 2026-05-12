@@ -802,6 +802,11 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
           <span style="font-family:'Barlow Condensed';font-size:0.78rem;color:var(--accent);">💡 Si el jugador <strong>no ha hecho abono</strong>, coloca <strong>$0</strong> en Valor Pago 1</span>
         </div>
         <div id="adm-saldo-info" style="font-family:'Barlow Condensed';font-size:0.85rem;color:#aaa;margin-bottom:6px;min-height:18px;"></div>
+        <!-- Campos ocultos para abonos 2 y 3 — se usan solo al editar -->
+        <input type="hidden" id="adm-fecha2" value="">
+        <input type="hidden" id="adm-fecha3" value="">
+        <input type="hidden" id="adm-valor2" value="0">
+        <input type="hidden" id="adm-valor3" value="0">
       </div>
       <!-- Ciudad OBLIGATORIA -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
