@@ -929,7 +929,7 @@ db.ref('jugadores').on('value', function(snap) {
   }
   // Actualizar UI si admin esta logueado
   var tbody = document.getElementById('jugadoresBody');
-  if (tbody && tbody.innerHTML !== '') renderizarTablaJugadores();
+  if (tbody) renderizarTablaJugadores();
   if (document.getElementById('sec-ranking').classList.contains('active')) renderizarRanking();
   // Status online
   document.getElementById('fbStatus').innerHTML = '<span class="fb-online">&#9679; Conectado a la nube &mdash; datos sincronizados en tiempo real</span>';
@@ -1943,30 +1943,13 @@ function enviarWhatsApp() {
     + '\n\ud83d\udccb Revisa las reglas en la hoja REGLAMENTO.'
     + '\n\ud83d\udd25 RECOMPENSA PRONTO PAGO: Si te pones al d\u00eda antes del 25 de mayo, \u00a1entras al sorteo del Reloj Conmemorativo del Mundial!';
 
-  // *** CLAVE PARA iPHONE ***
-  // Safari bloquea window.open() dentro de callbacks async (Firebase)
-  // SOLUCIÓN: abrir WhatsApp PRIMERO (hilo directo del clic) y registrar DESPUÉS
+  // Abrir WhatsApp directamente en el hilo del clic (antes del callback Firebase)
+  // Esto es clave para iPhone/Safari que bloquea window.open en callbacks async
   var waUrl = 'https://api.whatsapp.com/send?phone=' + cel + '&text=' + encodeURIComponent(msg);
   var waWindow = window.open(waUrl, '_blank');
-
-  // Si Safari bloqueó el popup, ofrecer alternativas
+  // Si Safari bloqueó popup, intentar con location.href silenciosamente
   if (!waWindow || waWindow.closed || typeof waWindow.closed === 'undefined') {
-    // Intentar con location.href como fallback
-    var fallback = confirm(
-      'Safari bloqueó la apertura de WhatsApp.\n\n' +
-      'Opciones:\n• ACEPTAR = Intentar abrir WhatsApp de otra forma\n• CANCELAR = Copiar mensaje al portapapeles'
-    );
-    if (fallback) {
-      window.location.href = waUrl;
-    } else {
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(msg).then(function(){
-          alert('Mensaje copiado. Abre WhatsApp y pegalo al jugador ' + nombre + '.');
-        });
-      } else {
-        prompt('Copia este mensaje:', msg);
-      }
-    }
+    window.location.href = waUrl;
   }
 
   // Registrar jugador en Firebase en background (ya no bloquea el popup)
