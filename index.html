@@ -374,27 +374,41 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
   <div class="activation-wrap">
     <div class="login-card">
       <h2 id="tituloActivacion" style="font-family:'Bebas Neue';color:var(--accent);font-size:1.8rem;letter-spacing:3px;text-align:center;margin-bottom:8px;">Activacion de Cuenta</h2>
-      <p class="sub">Crea tu contrasena personal para ingresar al sistema</p>
-      <div class="nota-req">8 caracteres &middot; Mayusculas &middot; Minusculas &middot; Numeros &middot; Sin caracteres especiales</div>
-      <div class="field"><label>Nueva Contrasena</label><div style="position:relative;display:flex;align-items:center;">
-          <input type="password" id="newPass1" maxlength="8" placeholder="8 caracteres" style="width:100%;padding-right:40px;">
-          <button type="button" onclick="toggleOjo('newPass1',this)" style="position:absolute;right:8px;background:none;border:none;cursor:pointer;color:#aaa;font-size:1.1rem;padding:4px;">👁️</button>
-        </div></div>
-      <div class="field"><label>Confirmar Contrasena</label><div style="position:relative;display:flex;align-items:center;">
-          <input type="password" id="newPass2" maxlength="8" placeholder="Repite la clave" style="width:100%;padding-right:40px;">
-          <button type="button" onclick="toggleOjo('newPass2',this)" style="position:absolute;right:8px;background:none;border:none;cursor:pointer;color:#aaa;font-size:1.1rem;padding:4px;">👁️</button>
-        </div></div>
-      <div id="bloqueRifa">
-        <div class="aviso-rifa-warn">ATENCION: Una vez registres tus numeros de rifa NO podras cambiarlos.</div>
-        <p style="color:var(--muted);font-size:0.8rem;text-align:center;margin-bottom:12px;">4 numeros de 4 digitos cada uno (solo numeros)</p>
-        <div class="nums-grid">
-          <div class="field"><label>Numero 1</label><input type="number" id="n1" min="0" max="9999" placeholder="####" oninput="limitarDigitos(this)"></div>
-          <div class="field"><label>Numero 2</label><input type="number" id="n2" min="0" max="9999" placeholder="####" oninput="limitarDigitos(this)"></div>
-          <div class="field"><label>Numero 3</label><input type="number" id="n3" min="0" max="9999" placeholder="####" oninput="limitarDigitos(this)"></div>
-          <div class="field"><label>Numero 4</label><input type="number" id="n4" min="0" max="9999" placeholder="####" oninput="limitarDigitos(this)"></div>
+
+      <!-- PASO 1: Cambio de clave -->
+      <div id="paso1Activacion">
+        <p class="sub" style="text-align:center;">Paso 1 de 2 &mdash; Crea tu contrasena personal</p>
+        <div class="nota-req">8 caracteres &middot; Mayusculas &middot; Minusculas &middot; Numeros &middot; Sin especiales</div>
+        <div class="field"><label>Nueva Contrasena</label>
+          <div style="position:relative;display:flex;align-items:center;">
+            <input type="password" id="newPass1" maxlength="8" placeholder="8 caracteres" style="width:100%;padding-right:40px;">
+            <button type="button" onclick="toggleOjo('newPass1',this)" style="position:absolute;right:8px;background:none;border:none;cursor:pointer;color:#aaa;font-size:1.1rem;padding:4px;">👁️</button>
+          </div>
         </div>
+        <div class="field"><label>Confirmar Contrasena</label>
+          <div style="position:relative;display:flex;align-items:center;">
+            <input type="password" id="newPass2" maxlength="8" placeholder="Repite la clave" style="width:100%;padding-right:40px;">
+            <button type="button" onclick="toggleOjo('newPass2',this)" style="position:absolute;right:8px;background:none;border:none;cursor:pointer;color:#aaa;font-size:1.1rem;padding:4px;">👁️</button>
+          </div>
+        </div>
+        <button class="btn-entrar" onclick="guardarClavePaso1()">Continuar &rarr; Paso 2</button>
       </div>
-      <button class="btn-entrar" onclick="activarCuenta()">Finalizar Registro</button>
+
+      <!-- PASO 2: Numeros de rifa -->
+      <div id="paso2Activacion" style="display:none;">
+        <p class="sub" style="text-align:center;">Paso 2 de 2 &mdash; Registra tus numeros de rifa</p>
+        <div id="bloqueRifa">
+          <div class="aviso-rifa-warn">ATENCION: Una vez registres tus numeros de rifa NO podras cambiarlos.</div>
+          <p style="color:var(--muted);font-size:0.8rem;text-align:center;margin-bottom:12px;">4 numeros de 4 digitos cada uno (solo numeros)</p>
+          <div class="nums-grid">
+            <div class="field"><label>Numero 1</label><input type="number" id="n1" min="0" max="9999" placeholder="####" oninput="limitarDigitos(this)"></div>
+            <div class="field"><label>Numero 2</label><input type="number" id="n2" min="0" max="9999" placeholder="####" oninput="limitarDigitos(this)"></div>
+            <div class="field"><label>Numero 3</label><input type="number" id="n3" min="0" max="9999" placeholder="####" oninput="limitarDigitos(this)"></div>
+            <div class="field"><label>Numero 4</label><input type="number" id="n4" min="0" max="9999" placeholder="####" oninput="limitarDigitos(this)"></div>
+          </div>
+        </div>
+        <button class="btn-entrar" onclick="activarCuenta()">Finalizar Registro</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1637,9 +1651,15 @@ function login() {
     if (j.pass !== pass) { alert('Codigo o contrasena incorrectos.'); return; }
     usuarioActual = { codigo: cod, esAdmin: false, nombre: j.nombre };
     sessionStorage.setItem('pollaUser', JSON.stringify(usuarioActual));
-    if (j.estado === 'nuevo' || j.estado === 'recuperacion') {
+    if (j.estado === 'nuevo' || j.estado === 'pendiente' || j.estado === 'recuperacion') {
       document.getElementById('tituloActivacion').innerText = j.estado === 'recuperacion' ? 'Restablecer Clave' : 'Activacion de Cuenta';
       document.getElementById('bloqueRifa').style.display = (j.nums && j.nums.length > 0) ? 'none' : 'block';
+      var _p1 = document.getElementById('paso1Activacion');
+      var _p2 = document.getElementById('paso2Activacion');
+      if (_p1) _p1.style.display = 'block';
+      if (_p2) _p2.style.display = 'none';
+      var _np1 = document.getElementById('newPass1'); if(_np1) _np1.value='';
+      var _np2 = document.getElementById('newPass2'); if(_np2) _np2.value='';
       irA('activacion');
     } else {
       cargarPerfil(cod, j);
@@ -1660,22 +1680,16 @@ function mostrarInterfazAdmin(cod) {
 }
 
 function activarCuenta() {
-  var u  = usuarioActual.codigo;
-  var p1 = document.getElementById('newPass1').value;
-  var p2 = document.getElementById('newPass2').value;
-  if (!validarClave(p1)) { alert('La clave debe tener 8 caracteres con mayusculas, minusculas y numeros. Sin caracteres especiales.'); return; }
-  if (p1 !== p2) { alert('Las claves no coinciden.'); return; }
+  var u = usuarioActual.codigo;
+  if (!confirm('ATENCION: Una vez registres tus numeros de rifa NO podras cambiarlos. Deseas continuar?')) return;
+  var v = [document.getElementById('n1').value, document.getElementById('n2').value,
+           document.getElementById('n3').value, document.getElementById('n4').value];
+  if (v.some(function(n){ return !/^\d{4}$/.test(n); })) { alert('Cada numero debe tener exactamente 4 digitos.'); return; }
+  showLoading('Guardando...');
   fbGetJugador(u, function(j) {
-    if (!j) { alert('Error: jugador no encontrado.'); return; }
-    if (!j.nums || j.nums.length === 0) {
-      if (!confirm('ATENCION: Una vez registres tus numeros de rifa NO podras cambiarlos. Deseas continuar?')) return;
-      var v = [document.getElementById('n1').value, document.getElementById('n2').value,
-               document.getElementById('n3').value, document.getElementById('n4').value];
-      if (v.some(function(n){ return !/^\d{4}$/.test(n); })) { alert('Cada numero debe tener exactamente 4 digitos.'); return; }
-      j.nums = v;
-    }
-    j.pass = p1; j.estado = 'activo';
-    showLoading('Guardando...');
+    if (!j) { hideLoading(); alert('Error: jugador no encontrado.'); return; }
+    j.nums = v;
+    j.estado = 'activo';
     fbSetJugador(u, j, function() {
       hideLoading();
       cargarPerfil(u, j);
@@ -2884,6 +2898,30 @@ window.mostrarElimSub = mostrarElimSub;
 window.validarElim = validarElim;
 window.cambiarClaveModal = cambiarClaveModal;
 window.guardarNuevaClave = guardarNuevaClave;
+
+function guardarClavePaso1() {
+  var p1 = document.getElementById('newPass1').value;
+  var p2 = document.getElementById('newPass2').value;
+  if (!validarClave(p1)) { alert('La clave debe tener 8 caracteres con mayusculas, minusculas y numeros. Sin caracteres especiales.'); return; }
+  if (p1 !== p2) { alert('Las claves no coinciden.'); return; }
+  var u = usuarioActual.codigo;
+  showLoading('Guardando clave...');
+  fbGetJugador(u, function(j) {
+    if (!j) { hideLoading(); alert('Error: jugador no encontrado.'); return; }
+    j.pass = p1;
+    if (j.nums && j.nums.length > 0 && j.nums[0] && j.nums[0] !== '--') {
+      j.estado = 'activo';
+      fbSetJugador(u, j, function() { hideLoading(); cargarPerfil(u, j); });
+      return;
+    }
+    fbSetJugador(u, j, function() {
+      hideLoading();
+      document.getElementById('paso1Activacion').style.display = 'none';
+      document.getElementById('paso2Activacion').style.display = 'block';
+    });
+  });
+}
+window.guardarClavePaso1 = guardarClavePaso1;
 window.activarCuenta = activarCuenta;
 window.confirmarGuardadoPM = confirmarGuardadoPM;
 window.cargarJugadores = cargarJugadores;
