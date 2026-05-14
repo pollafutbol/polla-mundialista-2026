@@ -862,7 +862,7 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
       </div>
       <div style="overflow-x:auto;">
         <table class="jugadores-table" id="tablaJugadores">
-          <thead><tr><th>#</th><th>Nombre</th><th style="color:#00ff99;">Activado</th><th>Codigo</th><th>WhatsApp</th><th>Pagos</th><th>Estado</th><th style="color:var(--gold);">Valor Pagado</th><th>Creado Por</th><th>Acciones</th></tr></thead>
+          <thead><tr><th>#</th><th>Nombre</th><th style="color:#00ff99;">Activado</th><th style="color:#aabbff;">Nums Rifa</th><th>Codigo</th><th>WhatsApp</th><th>Pagos</th><th>Estado</th><th style="color:var(--gold);">Valor Pagado</th><th>Creado Por</th><th>Acciones</th></tr></thead>
           <tbody id="jugadoresBody"></tbody>
         </table>
       </div>
@@ -1671,13 +1671,24 @@ function login() {
     sessionStorage.setItem('pollaUser', JSON.stringify(usuarioActual));
     if (j.estado === 'nuevo' || j.estado === 'pendiente' || j.estado === 'recuperacion') {
       document.getElementById('tituloActivacion').innerText = j.estado === 'recuperacion' ? 'Restablecer Clave' : 'Activacion de Cuenta';
-      document.getElementById('bloqueRifa').style.display = (j.nums && j.nums.length > 0) ? 'none' : 'block';
       var _p1 = document.getElementById('paso1Activacion');
       var _p2 = document.getElementById('paso2Activacion');
-      if (_p1) _p1.style.display = 'block';
-      if (_p2) _p2.style.display = 'none';
       var _np1 = document.getElementById('newPass1'); if(_np1) _np1.value='';
       var _np2 = document.getElementById('newPass2'); if(_np2) _np2.value='';
+      var noTieneNums = !j.nums || j.nums.length === 0 || !j.nums[0] || j.nums[0] === '--';
+      // LÓGICA CONFIABLE: comparar la clave con la que entró vs la guardada en Firebase
+      // Si son IGUALES = está usando la provisional = mostrar Paso 1 (cambiar clave)
+      // Si son DISTINTAS = ya cambió la clave antes = saltar directo al Paso 2 (números)
+      var yaCanbioClave = (pass !== j.pass); // pass = lo que escribió, j.pass = lo guardado
+      if (yaCanbioClave && noTieneNums) {
+        // Ya cambió clave pero no puso números → ir directo al Paso 2
+        if (_p1) _p1.style.display = 'none';
+        if (_p2) _p2.style.display = 'block';
+      } else {
+        // Primera vez o recuperación → mostrar Paso 1
+        if (_p1) _p1.style.display = 'block';
+        if (_p2) _p2.style.display = 'none';
+      }
       irA('activacion');
     } else {
       cargarPerfil(cod, j);
@@ -2134,7 +2145,7 @@ function renderizarTablaJugadores() {
     var na=(a[1].nombre||'').toLowerCase(), nb=(b[1].nombre||'').toLowerCase();
     return na<nb?-1:na>nb?1:0;
   });
-  if (jugadores.length === 0) { tbody.innerHTML = '<tr><td colspan="10" style="color:#555;padding:20px;">No hay jugadores en esta categoria.</td></tr>'; return; }
+  if (jugadores.length === 0) { tbody.innerHTML = '<tr><td colspan="11" style="color:#555;padding:20px;">No hay jugadores en esta categoria.</td></tr>'; return; }
   tbody.innerHTML = jugadores.map(function(e, idx){
     var cod=e[0], j=e[1];
     var tagCls = j.bloqueado ? 'tag-bloqueado' : (j.pago==='pagado' ? 'tag-pagado' : 'tag-pendiente');
@@ -2164,6 +2175,11 @@ function renderizarTablaJugadores() {
         var estaActivo = j.estado === 'activo';
         if (tieneNums && estaActivo) return '<span style="background:#006847;color:#fff;padding:2px 10px;border-radius:10px;font-size:0.75rem;font-weight:700;">SI</span>';
         return '<span style="background:#7f1a1a;color:#faa;padding:2px 10px;border-radius:10px;font-size:0.75rem;font-weight:700;">NO</span>';
+      })() + '</td>' +
+      '<td style="text-align:center;font-size:0.72rem;">' + (function(){
+        var nums = j.nums && j.nums.length >= 4 && j.nums[0] && j.nums[0] !== '--' ? j.nums : null;
+        if (!nums) return '<span style="color:#555;font-style:italic;">Pendiente</span>';
+        return '<span style="color:#aabbff;letter-spacing:1px;font-weight:700;">' + nums.join(' &middot; ') + '</span>';
       })() + '</td>' +
       '<td style="color:var(--accent);font-weight:900;">' + cod + '</td>' +
       '<td>' + (j.celular||'-') + '</td>' +
