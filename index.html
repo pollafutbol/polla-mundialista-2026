@@ -2213,17 +2213,49 @@ function toggleBloqueo(cod) {
 }
 function eliminarJugador(cod) {
   if (cod === 'DEMO') { alert('El jugador DEMO no se puede eliminar.'); return; }
-  if (!confirm('Eliminar al jugador ' + cod + '?')) return;
-  showLoading('Eliminando...');
-  fbDeleteJugador(cod, function(){ hideLoading(); });
+  if (!confirm('Eliminar definitivamente al jugador ' + cod + '? Esta accion no se puede deshacer.')) return;
+  showLoading('Eliminando jugador ' + cod + '...');
+  fbDeleteJugador(cod, function() {
+    hideLoading();
+    // Quitar del cache local y actualizar tabla inmediatamente
+    if (jugadoresCache && jugadoresCache[cod]) delete jugadoresCache[cod];
+    renderizarTablaJugadores();
+    alert('Jugador ' + cod + ' eliminado correctamente.');
+  });
 }
 
 function resetearClave(cod) {
-  if (!confirm('Resetear clave del jugador ' + cod + ' a TEMP1234?')) return;
+  if (!confirm('Resetear clave del jugador ' + cod + ' a TEMP1234? Se abrira WhatsApp para notificarle.')) return;
   showLoading('Reseteando clave...');
-  fbUpdateJugador(cod, {pass: 'TEMP1234', estado: 'recuperacion'}, function() {
-    hideLoading();
-    alert('Clave de ' + cod + ' reseteada a TEMP1234. Avisa al jugador por WhatsApp.');
+  fbGetJugador(cod, function(j) {
+    if (!j) { hideLoading(); alert('Jugador no encontrado.'); return; }
+    fbUpdateJugador(cod, {pass: 'TEMP1234', estado: 'recuperacion'}, function() {
+      hideLoading();
+      var nombre = j.nombre || cod;
+      var cel = (j.celular || '').replace(/[^0-9]/g,'');
+      var msg = 'Hola ' + nombre + ', tu clave de acceso a POLLA MUNDIALISTA 2026 fue reseteada.'
+        + '\n\nTu nueva clave provisional es: TEMP1234'
+        + '\n\nIngresa al portal, crea tu nueva clave personal y sigue participando:'
+        + '\nhttps://pollafutbol.github.io/polla-mundialista-2026'
+        + '\n\nSi tienes dudas contacta a tu administrador.';
+      if (cel) {
+        // Abrir WhatsApp directamente (mismo hilo, no async)
+        var waUrl = 'https://api.whatsapp.com/send?phone=' + cel + '&text=' + encodeURIComponent(msg);
+        var waWin = window.open(waUrl, '_blank');
+        if (!waWin || waWin.closed || typeof waWin.closed === 'undefined') {
+          window.location.href = waUrl;
+        }
+      } else {
+        // Si no tiene celular registrado, copiar mensaje
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(msg).then(function(){
+            alert('No hay celular registrado para ' + cod + '. Mensaje copiado al portapapeles.');
+          });
+        } else {
+          prompt('Copia este mensaje para ' + nombre + ':', msg);
+        }
+      }
+    });
   });
 }
 window.resetearClave = resetearClave;
