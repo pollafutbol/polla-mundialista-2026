@@ -1668,6 +1668,25 @@ function login() {
   var cod  = document.getElementById('loginCodigo').value.trim().toUpperCase();
   var pass = document.getElementById('loginPass').value;
   if (!cod || !pass) { alert('Ingresa tu codigo y contrasena.'); return; }
+  // Verificar modo mantenimiento ANTES de dejar entrar (excepto H175)
+  if (cod !== 'H175') {
+    db.ref('config/mantenimiento').once('value', function(snapMant) {
+      if (snapMant.val() === true) {
+        // Mostrar pantalla de mantenimiento
+        var m = document.getElementById('sec-mantenimiento');
+        if (m) m.style.display = 'flex';
+        return;
+      }
+      // Si no hay mantenimiento, continuar login normal
+      loginContinuar(cod, pass);
+    });
+    return;
+  }
+  // H175 siempre pasa directamente
+  loginContinuar(cod, pass);
+}
+
+function loginContinuar(cod, pass) {
   // Admin login (datos en codigo, sin Firebase)
   if (ADMINS[cod] && ADMINS[cod].pass === pass) {
     usuarioActual = { codigo: cod, esAdmin: true, nombre: ADMINS[cod].nombre };
