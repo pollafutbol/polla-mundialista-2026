@@ -1678,8 +1678,17 @@ function login() {
   var cod  = document.getElementById('loginCodigo').value.trim().toUpperCase();
   var pass = document.getElementById('loginPass').value;
   if (!cod || !pass) { alert('Ingresa tu codigo y contrasena.'); return; }
-  // Continuar login (mantenimiento ya fue verificado al cargar la página)
-  loginContinuar(cod, pass);
+  // Si es H175 siempre deja entrar
+  if (cod === 'H175') { loginContinuar(cod, pass); return; }
+  // Para todos los demas verificar mantenimiento en tiempo real
+  db.ref('config/mantenimiento').once('value', function(snap) {
+    if (snap.val() === true) {
+      var m = document.getElementById('sec-mantenimiento');
+      if (m) m.style.display = 'flex';
+      return;
+    }
+    loginContinuar(cod, pass);
+  });
 }
 
 function loginContinuar(cod, pass) {
@@ -3225,6 +3234,29 @@ window.toggleBloqueo = toggleBloqueo;
 window.eliminarJugador = eliminarJugador;
 window.sincronizarFIFA = sincronizarFIFA;
 window.limitarDigitos = limitarDigitos;
+</script>
+<script>
+// Verificar mantenimiento INMEDIATAMENTE al cargar - antes de que el usuario vea nada
+(function() {
+  // Esperar a que Firebase esté disponible
+  var intentos = 0;
+  var interval = setInterval(function() {
+    intentos++;
+    if (typeof db !== 'undefined') {
+      clearInterval(interval);
+      db.ref('config/mantenimiento').once('value', function(snap) {
+        if (snap.val() === true) {
+          var m = document.getElementById('sec-mantenimiento');
+          if (m) { m.style.display = 'flex'; }
+          // Bloquear el botón de login también
+          var btnLogin = document.querySelector('.btn-entrar');
+          if (btnLogin) btnLogin.onclick = function(){ return false; };
+        }
+      });
+    }
+    if (intentos > 50) clearInterval(interval); // max 5 segundos
+  }, 100);
+})();
 </script>
 </body>
 </html>
