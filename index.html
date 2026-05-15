@@ -343,12 +343,20 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
 </div>
 
 <!-- LOGIN -->
-<!-- PANTALLA MANTENIMIENTO -->
-<div id="sec-mantenimiento" style="display:none;position:fixed;inset:0;background:#060d28;z-index:9999;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px;">
+<!-- PANTALLA MANTENIMIENTO - cubre TODO incluyendo login -->
+<div id="sec-mantenimiento" style="display:none;position:fixed;inset:0;background:#060d28;z-index:99999;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px;">
   <div style="font-size:4rem;margin-bottom:16px;">🔧</div>
-  <div style="font-family:'Bebas Neue',sans-serif;font-size:2.5rem;color:#FFD700;letter-spacing:4px;margin-bottom:8px;">PAGINA EN MANTENIMIENTO</div>
-  <div style="font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;color:#aaa;max-width:400px;line-height:1.6;margin-bottom:20px;">Estamos realizando mejoras en la plataforma. Vuelve pronto.</div>
-  <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.85rem;color:#555;">POLLA MUNDIALISTA 2026</div>
+  <div style="font-family:'Bebas Neue',sans-serif;font-size:2.8rem;color:#FFD700;letter-spacing:4px;margin-bottom:8px;">PAGINA EN MANTENIMIENTO</div>
+  <div style="font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;color:#ccc;max-width:420px;line-height:1.7;margin-bottom:24px;">Estamos realizando mejoras en la plataforma.<br>Vuelve pronto. Gracias por tu paciencia.</div>
+  <div style="font-family:'Bebas Neue',sans-serif;font-size:1rem;color:#FFD700;letter-spacing:3px;margin-bottom:4px;">⚽ POLLA MUNDIALISTA 2026 ⚽</div>
+  <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.75rem;color:#333;margin-top:20px;">Si eres administrador principal, recarga la pagina e ingresa tu codigo.</div>
+  <!-- Campo oculto para que H175 pueda entrar -->
+  <div style="margin-top:16px;">
+    <input type="text" id="mantCodigoH175" placeholder="Codigo administrador" maxlength="4"
+      style="background:rgba(255,255,255,0.05);border:1px solid #333;border-radius:6px;color:#fff;padding:8px 14px;text-align:center;font-family:'Barlow Condensed';font-size:0.9rem;letter-spacing:2px;width:160px;"
+      onkeydown="if(event.key==='Enter') verificarAccesoH175()">
+    <button onclick="verificarAccesoH175()" style="background:none;border:1px solid #333;color:#555;padding:8px 12px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed';font-size:0.8rem;margin-left:6px;">Entrar</button>
+  </div>
 </div>
 
 <div id="sec-login" class="seccion active">
@@ -981,6 +989,8 @@ db.ref('jugadores').on('value', function(snap) {
   if (document.getElementById('sec-ranking').classList.contains('active')) renderizarRanking();
   // Status online
   document.getElementById('fbStatus').innerHTML = '<span class="fb-online">&#9679; Conectado a la nube &mdash; datos sincronizados en tiempo real</span>';
+  // Verificar mantenimiento al cargar — bloquea antes del login
+  verificarMantenimientoInicio();
 });
 
 db.ref('.info/connected').on('value', function(snap) {
@@ -1668,21 +1678,7 @@ function login() {
   var cod  = document.getElementById('loginCodigo').value.trim().toUpperCase();
   var pass = document.getElementById('loginPass').value;
   if (!cod || !pass) { alert('Ingresa tu codigo y contrasena.'); return; }
-  // Verificar modo mantenimiento ANTES de dejar entrar (excepto H175)
-  if (cod !== 'H175') {
-    db.ref('config/mantenimiento').once('value', function(snapMant) {
-      if (snapMant.val() === true) {
-        // Mostrar pantalla de mantenimiento
-        var m = document.getElementById('sec-mantenimiento');
-        if (m) m.style.display = 'flex';
-        return;
-      }
-      // Si no hay mantenimiento, continuar login normal
-      loginContinuar(cod, pass);
-    });
-    return;
-  }
-  // H175 siempre pasa directamente
+  // Continuar login (mantenimiento ya fue verificado al cargar la página)
   loginContinuar(cod, pass);
 }
 
@@ -3159,31 +3155,46 @@ function exportarExcel() {
 window.exportarExcel = exportarExcel;
 
 // ============================================================
-// MODO MANTENIMIENTO — solo H175 puede activar/desactivar
+// MODO MANTENIMIENTO
 // ============================================================
-function verificarMantenimiento() {
+
+// Verificar al cargar la página — antes de mostrar nada
+function verificarMantenimientoInicio() {
   db.ref('config/mantenimiento').once('value', function(snap) {
-    var activo = snap.val() === true;
-    var esH175 = usuarioActual && usuarioActual.codigo === 'H175';
-    if (activo && !esH175) {
-      // Mostrar pantalla de mantenimiento
+    if (snap.val() === true) {
       var m = document.getElementById('sec-mantenimiento');
       if (m) m.style.display = 'flex';
-    } else {
-      var m = document.getElementById('sec-mantenimiento');
-      if (m) m.style.display = 'none';
     }
-    // Mostrar botones de mantenimiento en panel H175
-    if (esH175) {
-      var bm = document.getElementById('bloqueMantenimiento');
-      var ba = document.getElementById('btnActivarMant');
-      if (activo) {
-        if (bm) bm.style.display = 'flex';
-        if (ba) ba.style.display = 'none';
-      } else {
-        if (bm) bm.style.display = 'none';
-        if (ba) ba.style.display = 'block';
-      }
+  });
+}
+
+// H175 puede entrar desde la pantalla de mantenimiento
+function verificarAccesoH175() {
+  var cod = (document.getElementById('mantCodigoH175')||{value:''}).value.trim().toUpperCase();
+  if (cod === 'H175') {
+    var m = document.getElementById('sec-mantenimiento');
+    if (m) m.style.display = 'none';
+    // Llenar el campo de login con H175
+    var loginCod = document.getElementById('loginCodigo');
+    if (loginCod) { loginCod.value = 'H175'; loginCod.focus(); }
+  } else if (cod) {
+    alert('Solo el administrador principal puede acceder durante el mantenimiento.');
+  }
+}
+window.verificarAccesoH175 = verificarAccesoH175;
+
+function verificarMantenimiento() {
+  if (!usuarioActual || usuarioActual.codigo !== 'H175') return;
+  db.ref('config/mantenimiento').once('value', function(snap) {
+    var activo = snap.val() === true;
+    var bm = document.getElementById('bloqueMantenimiento');
+    var ba = document.getElementById('btnActivarMant');
+    if (activo) {
+      if (bm) bm.style.display = 'flex';
+      if (ba) ba.style.display = 'none';
+    } else {
+      if (bm) bm.style.display = 'none';
+      if (ba) ba.style.display = 'block';
     }
   });
 }
@@ -3194,26 +3205,14 @@ function toggleMantenimiento() {
     var actual = snap.val() === true;
     var nuevo = !actual;
     db.ref('config/mantenimiento').set(nuevo, function() {
-      alert(nuevo ? '🔧 Modo Mantenimiento ACTIVADO. Los jugadores ven pantalla de mantenimiento.' : '✅ Modo Mantenimiento DESACTIVADO. La plataforma está disponible para todos.');
+      alert(nuevo
+        ? 'Modo Mantenimiento ACTIVADO. Nadie puede entrar excepto H175.'
+        : 'Modo Mantenimiento DESACTIVADO. La plataforma esta disponible para todos.');
       verificarMantenimiento();
     });
   });
 }
 window.toggleMantenimiento = toggleMantenimiento;
-
-// Escuchar cambios en tiempo real del modo mantenimiento
-db.ref('config/mantenimiento').on('value', function(snap) {
-  var activo = snap.val() === true;
-  var esH175 = usuarioActual && usuarioActual.codigo === 'H175';
-  var m = document.getElementById('sec-mantenimiento');
-  if (m) m.style.display = (activo && !esH175) ? 'flex' : 'none';
-  if (esH175) {
-    var bm = document.getElementById('bloqueMantenimiento');
-    var ba = document.getElementById('btnActivarMant');
-    if (bm) bm.style.display = activo ? 'flex' : 'none';
-    if (ba) ba.style.display = activo ? 'none' : 'block';
-  }
-});
 
 
 document.addEventListener('click', function(e){
