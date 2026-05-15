@@ -343,6 +343,14 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
 </div>
 
 <!-- LOGIN -->
+<!-- PANTALLA MANTENIMIENTO -->
+<div id="sec-mantenimiento" style="display:none;position:fixed;inset:0;background:#060d28;z-index:9999;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px;">
+  <div style="font-size:4rem;margin-bottom:16px;">🔧</div>
+  <div style="font-family:'Bebas Neue',sans-serif;font-size:2.5rem;color:#FFD700;letter-spacing:4px;margin-bottom:8px;">PAGINA EN MANTENIMIENTO</div>
+  <div style="font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;color:#aaa;max-width:400px;line-height:1.6;margin-bottom:20px;">Estamos realizando mejoras en la plataforma. Vuelve pronto.</div>
+  <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.85rem;color:#555;">POLLA MUNDIALISTA 2026</div>
+</div>
+
 <div id="sec-login" class="seccion active">
   <div class="login-wrap">
     <div class="login-card">
@@ -739,6 +747,14 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
   <div class="admin-wrap">
     <h2 class="admin-title">Panel de Administracion</h2>
     <div class="form-card">
+      <div id="bloqueMantenimiento" style="display:none;margin-bottom:16px;background:rgba(255,50,50,0.08);border:1px solid #ff4444;border-radius:10px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+        <div>
+          <div style="font-family:'Bebas Neue';font-size:1rem;color:#ff4444;letter-spacing:2px;">🔧 MODO MANTENIMIENTO</div>
+          <div style="font-family:'Barlow Condensed';font-size:0.78rem;color:#aaa;">Los jugadores ven pantalla de mantenimiento. Solo H175 puede entrar.</div>
+        </div>
+        <button onclick="toggleMantenimiento()" id="btnMantenimiento" style="background:#ff4444;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-family:'Bebas Neue';font-size:0.9rem;letter-spacing:1px;white-space:nowrap;">DESACTIVAR</button>
+      </div>
+      <button onclick="toggleMantenimiento()" id="btnActivarMant" style="margin-bottom:16px;background:rgba(255,153,0,0.1);border:1px solid #ff9900;color:#ff9900;padding:7px 14px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed';font-weight:700;font-size:0.82rem;letter-spacing:1px;width:100%;display:none;">🔧 Activar Modo Mantenimiento</button>
       <h3>Registrar Nuevo Jugador</h3>
       <div class="grid-3" style="margin-bottom:15px;">
         <div class="field"><label>Codigo Generado</label><input type="text" id="adm-codigo" readonly placeholder="Auto-generado"></div>
@@ -862,7 +878,7 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
       </div>
       <div style="overflow-x:auto;">
         <table class="jugadores-table" id="tablaJugadores">
-          <thead><tr><th>#</th><th>Nombre</th><th style="color:#00ff99;">Activado</th><th style="color:#aabbff;">Nums Rifa</th><th>Codigo</th><th>WhatsApp</th><th>Pagos</th><th>Estado</th><th style="color:var(--gold);">Valor Pagado</th><th>Creado Por</th><th>Acciones</th></tr></thead>
+          <thead><tr><th>#</th><th>Nombre</th><th style="color:#00ff99;">Activado</th><th style="color:#aabbff;">Nums Rifa</th><th>Codigo</th><th>Pagos</th><th>Estado</th><th style="color:var(--gold);">Valor Pagado</th><th>Creado Por</th><th>Acciones</th></tr></thead>
           <tbody id="jugadoresBody"></tbody>
         </table>
       </div>
@@ -1706,6 +1722,7 @@ function mostrarInterfazAdmin(cod) {
   irA('admin');
   renderizarTablaJugadores();
   setTimeout(aplicarRestriccionFechas, 300);
+  verificarMantenimiento();
   // Botón REGISTRAR solo visible para H175
   var btnReg = document.getElementById('btnRegistrarJugador');
   if (btnReg) btnReg.style.display = (cod === 'H175') ? 'block' : 'none';
@@ -2145,7 +2162,7 @@ function renderizarTablaJugadores() {
     var na=(a[1].nombre||'').toLowerCase(), nb=(b[1].nombre||'').toLowerCase();
     return na<nb?-1:na>nb?1:0;
   });
-  if (jugadores.length === 0) { tbody.innerHTML = '<tr><td colspan="11" style="color:#555;padding:20px;">No hay jugadores en esta categoria.</td></tr>'; return; }
+  if (jugadores.length === 0) { tbody.innerHTML = '<tr><td colspan="10" style="color:#555;padding:20px;">No hay jugadores en esta categoria.</td></tr>'; return; }
   tbody.innerHTML = jugadores.map(function(e, idx){
     var cod=e[0], j=e[1];
     var tagCls = j.bloqueado ? 'tag-bloqueado' : (j.pago==='pagado' ? 'tag-pagado' : 'tag-pendiente');
@@ -2182,7 +2199,6 @@ function renderizarTablaJugadores() {
         return '<span style="color:#aabbff;letter-spacing:1px;font-weight:700;">' + nums.join(' &middot; ') + '</span>';
       })() + '</td>' +
       '<td style="color:var(--accent);font-weight:900;">' + cod + '</td>' +
-      '<td>' + (j.celular||'-') + '</td>' +
       '<td style="font-size:0.72rem;color:#aaa;line-height:1.6;">' + pagos + '</td>' +
       '<td><span class="' + tagCls + '">' + tagTxt + '</span></td>' +
       '<td style="text-align:center;">' + valorPagadoStr + '</td>' +
@@ -3028,7 +3044,6 @@ window.guardarEdicionJugador = guardarEdicionJugador;
 window.filtrarJugadores = filtrarJugadores;
 
 function exportarExcel() {
-  // Obtener jugadores según filtro activo (misma lógica que renderizarTablaJugadores)
   var jugadores = Object.entries(jugadoresCache).filter(function(e){
     var j = e[1];
     if (filtroActualJugadores === 'pagado')    return j.pago === 'pagado' && !j.bloqueado;
@@ -3037,94 +3052,150 @@ function exportarExcel() {
     if (filtroAdminJugadores !== 'todos')      return (j.creadoPor||'?') === filtroAdminJugadores;
     return true;
   });
-
-  // Ordenar alfabeticamente
   jugadores.sort(function(a,b){
     var na=(a[1].nombre||'').toLowerCase(), nb=(b[1].nombre||'').toLowerCase();
     return na<nb?-1:na>nb?1:0;
   });
-
   if (jugadores.length === 0) { alert('No hay jugadores para exportar.'); return; }
 
-  // Título del filtro activo
   var tituloFiltro = 'Todos los jugadores';
   if (filtroActualJugadores === 'pagado')    tituloFiltro = 'Jugadores Pagados';
   if (filtroActualJugadores === 'pendiente') tituloFiltro = 'Jugadores Pendientes';
   if (filtroActualJugadores === 'bloqueado') tituloFiltro = 'Jugadores Bloqueados';
   if (filtroAdminJugadores !== 'todos')      tituloFiltro = 'Jugadores de Admin: ' + filtroAdminJugadores;
 
-  // Construir tabla HTML para Excel
   var fechaHoy = new Date().toLocaleDateString('es-CO');
+  var COLS = 14;
+
   var filas = jugadores.map(function(e, idx){
     var cod = e[0], j = e[1];
-    var vals = j.valores || [];
+    var vals   = j.valores || [];
+    var fechas = j.fechas  || [];
     var v1 = parseFloat(vals[0])||0;
     var v2 = parseFloat(vals[1])||0;
     var v3 = parseFloat(vals[2])||0;
-    var total = v1+v2+v3;
-    var faltante = 50000 - total;
-    var fechas = (j.fechas||[]).filter(function(f){return f;}).join(' / ') || '-';
-    var estado = j.bloqueado ? 'Bloqueado' : (j.pago==='pagado' ? 'Pagado' : 'Pendiente');
-    return '<tr>' +
-      '<td style="text-align:center;">' + (idx+1) + '</td>' +
-      '<td><b>' + (j.nombre||'-') + '</b></td>' +
-      '<td style="color:#1a6b1a;font-weight:bold;">' + cod + '</td>' +
-      '<td>' + (j.celular||'-') + '</td>' +
-      '<td>' + (j.email||'-') + '</td>' +
-      '<td>' + (j.ciudad||'-') + '</td>' +
-      '<td style="text-align:center;">' + estado + '</td>' +
-      '<td style="text-align:right;">$' + v1.toLocaleString('es-CO') + '</td>' +
-      '<td style="text-align:right;">$' + v2.toLocaleString('es-CO') + '</td>' +
-      '<td style="text-align:right;">$' + v3.toLocaleString('es-CO') + '</td>' +
-      '<td style="text-align:right;font-weight:bold;color:' + (total>=50000?'#006400':total>0?'#996600':'#cc0000') + ';">$' + total.toLocaleString('es-CO') + '</td>' +
-      '<td style="text-align:right;color:' + (faltante<=0?'#006400':'#cc0000') + ';">$' + Math.max(0,faltante).toLocaleString('es-CO') + '</td>' +
-      '<td>' + fechas + '</td>' +
-      '<td style="text-align:center;">' + (j.creadoPor||'-') + '</td>' +
+    var f1 = fechas[0]||'';
+    var f2 = fechas[1]||'';
+    var f3 = fechas[2]||'';
+    var total    = v1+v2+v3;
+    var faltante = Math.max(0, 50000-total);
+    var estado   = j.bloqueado?'Bloqueado':(j.pago==='pagado'?'Pagado':'Pendiente');
+    var colorTotal  = total>=50000?'#006400':total>0?'#996600':'#cc0000';
+    var colorSaldo  = faltante<=0?'#006400':'#cc0000';
+    var bgRow = idx%2===0?'#ffffff':'#f5f8ff';
+    return '<tr style="background:'+bgRow+';">' +
+      '<td style="text-align:center;color:#555;">'+(idx+1)+'</td>' +
+      '<td style="font-weight:bold;">'+(j.nombre||'-')+'</td>' +
+      '<td style="color:#1a6b1a;font-weight:bold;text-align:center;">'+cod+'</td>' +
+      '<td>'+(j.ciudad||'-')+'</td>' +
+      '<td style="text-align:center;">'+estado+'</td>' +
+      '<td style="text-align:center;color:#555;">'+f1+'</td>' +
+      '<td style="text-align:right;">$'+v1.toLocaleString('es-CO')+'</td>' +
+      '<td style="text-align:center;color:#555;">'+f2+'</td>' +
+      '<td style="text-align:right;">$'+v2.toLocaleString('es-CO')+'</td>' +
+      '<td style="text-align:center;color:#555;">'+f3+'</td>' +
+      '<td style="text-align:right;">$'+v3.toLocaleString('es-CO')+'</td>' +
+      '<td style="text-align:right;font-weight:bold;color:'+colorTotal+';">$'+total.toLocaleString('es-CO')+'</td>' +
+      '<td style="text-align:right;font-weight:bold;color:'+colorSaldo+';">$'+faltante.toLocaleString('es-CO')+'</td>' +
+      '<td style="text-align:center;color:var(--gold);">'+(j.creadoPor||'-')+'</td>' +
       '</tr>';
   });
 
-  // HTML completo para Excel
   var html_excel = (
     '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">' +
     '<head><meta charset="UTF-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>' +
     '<x:Name>Polla 2026</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>' +
     '</x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body>' +
     '<table border="1" style="border-collapse:collapse;font-family:Arial,sans-serif;font-size:12px;">' +
-    '<tr><td colspan="14" style="background:#003366;color:#FFD700;font-size:16px;font-weight:bold;padding:10px;text-align:center;">POLLA MUNDIALISTA 2026 — ' + tituloFiltro.toUpperCase() + '</td></tr>' +
-    '<tr><td colspan="14" style="background:#f0f0f0;color:#555;font-size:11px;padding:6px;text-align:center;">Exportado el ' + fechaHoy + ' · Total jugadores: ' + jugadores.length + '</td></tr>' +
+    '<tr><td colspan="'+COLS+'" style="background:#003366;color:#FFD700;font-size:16px;font-weight:bold;padding:10px;text-align:center;">POLLA MUNDIALISTA 2026 — ' + tituloFiltro.toUpperCase() + '</td></tr>' +
+    '<tr><td colspan="'+COLS+'" style="background:#f0f0f0;color:#555;font-size:11px;padding:6px;text-align:center;">Exportado el ' + fechaHoy + ' · Total jugadores: ' + jugadores.length + '</td></tr>' +
     '<tr style="background:#003366;color:#fff;font-weight:bold;">' +
     '<th style="padding:6px 10px;">#</th>' +
     '<th style="padding:6px 10px;">Nombre</th>' +
     '<th style="padding:6px 10px;">Codigo</th>' +
-    '<th style="padding:6px 10px;">WhatsApp</th>' +
-    '<th style="padding:6px 10px;">Correo</th>' +
     '<th style="padding:6px 10px;">Ciudad</th>' +
     '<th style="padding:6px 10px;">Estado</th>' +
+    '<th style="padding:6px 10px;">Fecha 1</th>' +
     '<th style="padding:6px 10px;">Pago 1</th>' +
+    '<th style="padding:6px 10px;">Fecha 2</th>' +
     '<th style="padding:6px 10px;">Pago 2</th>' +
+    '<th style="padding:6px 10px;">Fecha 3</th>' +
     '<th style="padding:6px 10px;">Pago 3</th>' +
     '<th style="padding:6px 10px;">Total Pagado</th>' +
     '<th style="padding:6px 10px;">Saldo</th>' +
-    '<th style="padding:6px 10px;">Fechas de Pago</th>' +
     '<th style="padding:6px 10px;">Creado Por</th>' +
     '</tr>' +
     filas.join('') +
     '</table></body></html>'
   );
 
-  // Descargar como .xls
   var blob = new Blob([html_excel], {type:'application/vnd.ms-excel;charset=utf-8'});
   var url  = URL.createObjectURL(blob);
   var a    = document.createElement('a');
   var nombreArchivo = 'Polla2026_' + tituloFiltro.replace(/[^a-zA-Z0-9]/g,'_') + '_' + fechaHoy.replace(/\//g,'-') + '.xls';
-  a.href     = url;
-  a.download = nombreArchivo;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  a.href = url; a.download = nombreArchivo;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
 }
 window.exportarExcel = exportarExcel;
+
+// ============================================================
+// MODO MANTENIMIENTO — solo H175 puede activar/desactivar
+// ============================================================
+function verificarMantenimiento() {
+  db.ref('config/mantenimiento').once('value', function(snap) {
+    var activo = snap.val() === true;
+    var esH175 = usuarioActual && usuarioActual.codigo === 'H175';
+    if (activo && !esH175) {
+      // Mostrar pantalla de mantenimiento
+      var m = document.getElementById('sec-mantenimiento');
+      if (m) m.style.display = 'flex';
+    } else {
+      var m = document.getElementById('sec-mantenimiento');
+      if (m) m.style.display = 'none';
+    }
+    // Mostrar botones de mantenimiento en panel H175
+    if (esH175) {
+      var bm = document.getElementById('bloqueMantenimiento');
+      var ba = document.getElementById('btnActivarMant');
+      if (activo) {
+        if (bm) bm.style.display = 'flex';
+        if (ba) ba.style.display = 'none';
+      } else {
+        if (bm) bm.style.display = 'none';
+        if (ba) ba.style.display = 'block';
+      }
+    }
+  });
+}
+
+function toggleMantenimiento() {
+  if (!usuarioActual || usuarioActual.codigo !== 'H175') return;
+  db.ref('config/mantenimiento').once('value', function(snap) {
+    var actual = snap.val() === true;
+    var nuevo = !actual;
+    db.ref('config/mantenimiento').set(nuevo, function() {
+      alert(nuevo ? '🔧 Modo Mantenimiento ACTIVADO. Los jugadores ven pantalla de mantenimiento.' : '✅ Modo Mantenimiento DESACTIVADO. La plataforma está disponible para todos.');
+      verificarMantenimiento();
+    });
+  });
+}
+window.toggleMantenimiento = toggleMantenimiento;
+
+// Escuchar cambios en tiempo real del modo mantenimiento
+db.ref('config/mantenimiento').on('value', function(snap) {
+  var activo = snap.val() === true;
+  var esH175 = usuarioActual && usuarioActual.codigo === 'H175';
+  var m = document.getElementById('sec-mantenimiento');
+  if (m) m.style.display = (activo && !esH175) ? 'flex' : 'none';
+  if (esH175) {
+    var bm = document.getElementById('bloqueMantenimiento');
+    var ba = document.getElementById('btnActivarMant');
+    if (bm) bm.style.display = activo ? 'flex' : 'none';
+    if (ba) ba.style.display = activo ? 'none' : 'block';
+  }
+});
+
 
 document.addEventListener('click', function(e){
   var drop = document.getElementById('dropAdmins');
