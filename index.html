@@ -2969,14 +2969,32 @@ window.addEventListener('load', function(){
   var t1=document.getElementById('timer1');
   if(t1)startTimer(9910,t1);
   actualizarHorariosPronostico();
-  // Restaurar sesion
-  var ss=sessionStorage.getItem('pollaUser');
-  if(ss){
-    try{
-      usuarioActual = JSON.parse(ss);
-      if(usuarioActual.esAdmin) mostrarInterfazAdmin(usuarioActual.codigo);
-      else cargarPerfil(usuarioActual.codigo, null);
-    }catch(e){}
+  // Restaurar sesion — verificar mantenimiento primero
+  var ss = sessionStorage.getItem('pollaUser');
+  if (ss) {
+    try {
+      var usuarioSS = JSON.parse(ss);
+      if (usuarioSS && usuarioSS.codigo === 'H175') {
+        // H175 siempre entra sin verificar mantenimiento
+        usuarioActual = usuarioSS;
+        mostrarInterfazAdmin(usuarioActual.codigo);
+      } else {
+        // Todos los demas verifican mantenimiento antes de restaurar sesion
+        db.ref('config/mantenimiento').once('value', function(snapMant) {
+          if (snapMant.val() === true) {
+            // Hay mantenimiento — borrar sesion y mostrar pantalla
+            sessionStorage.removeItem('pollaUser');
+            var m = document.getElementById('sec-mantenimiento');
+            if (m) m.style.display = 'flex';
+            return;
+          }
+          // Sin mantenimiento — restaurar sesion normal
+          usuarioActual = usuarioSS;
+          if (usuarioActual.esAdmin) mostrarInterfazAdmin(usuarioActual.codigo);
+          else cargarPerfil(usuarioActual.codigo, null);
+        });
+      }
+    } catch(e) { sessionStorage.removeItem('pollaUser'); }
   }
 });
 
