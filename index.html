@@ -361,7 +361,6 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
       </div>
       <button class="btn-entrar" onclick="login()">Entrar al Sistema</button>
       <div class="forgot-link"><a href="#" onclick="recuperarClave()">¿Olvidaste tu clave? Haz clic aquí para recuperarla por WhatsApp.</a></div>
-      
     </div>
   </div>
 </div>
@@ -371,27 +370,41 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
   <div class="activation-wrap">
     <div class="login-card">
       <h2 id="tituloActivacion" style="font-family:'Bebas Neue';color:var(--accent);font-size:1.8rem;letter-spacing:3px;text-align:center;margin-bottom:8px;">Activacion de Cuenta</h2>
-      <p class="sub">Crea tu contrasena personal para ingresar al sistema</p>
-      <div class="nota-req">8 caracteres &middot; Mayusculas &middot; Minusculas &middot; Numeros &middot; Sin caracteres especiales</div>
-      <div class="field"><label>Nueva Contrasena</label><div style="position:relative;display:flex;align-items:center;">
-          <input type="password" id="newPass1" maxlength="8" placeholder="8 caracteres" style="width:100%;padding-right:40px;">
-          <button type="button" onclick="toggleOjo('newPass1',this)" style="position:absolute;right:8px;background:none;border:none;cursor:pointer;color:#aaa;font-size:1.1rem;padding:4px;">👁️</button>
-        </div></div>
-      <div class="field"><label>Confirmar Contrasena</label><div style="position:relative;display:flex;align-items:center;">
-          <input type="password" id="newPass2" maxlength="8" placeholder="Repite la clave" style="width:100%;padding-right:40px;">
-          <button type="button" onclick="toggleOjo('newPass2',this)" style="position:absolute;right:8px;background:none;border:none;cursor:pointer;color:#aaa;font-size:1.1rem;padding:4px;">👁️</button>
-        </div></div>
-      <div id="bloqueRifa">
-        <div class="aviso-rifa-warn">ATENCION: Una vez registres tus numeros de rifa NO podras cambiarlos.</div>
-        <p style="color:var(--muted);font-size:0.8rem;text-align:center;margin-bottom:12px;">4 numeros de 4 digitos cada uno (solo numeros)</p>
-        <div class="nums-grid">
-          <div class="field"><label>Numero 1</label><input type="number" id="n1" min="0" max="9999" placeholder="####" oninput="limitarDigitos(this)"></div>
-          <div class="field"><label>Numero 2</label><input type="number" id="n2" min="0" max="9999" placeholder="####" oninput="limitarDigitos(this)"></div>
-          <div class="field"><label>Numero 3</label><input type="number" id="n3" min="0" max="9999" placeholder="####" oninput="limitarDigitos(this)"></div>
-          <div class="field"><label>Numero 4</label><input type="number" id="n4" min="0" max="9999" placeholder="####" oninput="limitarDigitos(this)"></div>
+
+      <!-- PASO 1: Cambio de clave -->
+      <div id="paso1Activacion">
+        <p class="sub" style="text-align:center;">Paso 1 de 2 &mdash; Crea tu contrasena personal</p>
+        <div class="nota-req">8 caracteres &middot; Mayusculas &middot; Minusculas &middot; Numeros &middot; Sin especiales</div>
+        <div class="field"><label>Nueva Contrasena</label>
+          <div style="position:relative;display:flex;align-items:center;">
+            <input type="password" id="newPass1" maxlength="8" placeholder="8 caracteres" style="width:100%;padding-right:40px;">
+            <button type="button" onclick="toggleOjo('newPass1',this)" style="position:absolute;right:8px;background:none;border:none;cursor:pointer;color:#aaa;font-size:1.1rem;padding:4px;">👁️</button>
+          </div>
         </div>
+        <div class="field"><label>Confirmar Contrasena</label>
+          <div style="position:relative;display:flex;align-items:center;">
+            <input type="password" id="newPass2" maxlength="8" placeholder="Repite la clave" style="width:100%;padding-right:40px;">
+            <button type="button" onclick="toggleOjo('newPass2',this)" style="position:absolute;right:8px;background:none;border:none;cursor:pointer;color:#aaa;font-size:1.1rem;padding:4px;">👁️</button>
+          </div>
+        </div>
+        <button class="btn-entrar" onclick="guardarClavePaso1()">Continuar &rarr; Paso 2</button>
       </div>
-      <button class="btn-entrar" onclick="activarCuenta()">Finalizar Registro</button>
+
+      <!-- PASO 2: Numeros de rifa -->
+      <div id="paso2Activacion" style="display:none;">
+        <p class="sub" style="text-align:center;">Paso 2 de 2 &mdash; Registra tus numeros de rifa</p>
+        <div id="bloqueRifa">
+          <div class="aviso-rifa-warn">ATENCION: Una vez registres tus numeros de rifa NO podras cambiarlos.</div>
+          <p style="color:var(--muted);font-size:0.8rem;text-align:center;margin-bottom:12px;">4 numeros de 4 digitos cada uno (solo numeros)</p>
+          <div class="nums-grid">
+            <div class="field"><label>Numero 1</label><input type="number" id="n1" min="0" max="9999" placeholder="####" oninput="limitarDigitos(this)"></div>
+            <div class="field"><label>Numero 2</label><input type="number" id="n2" min="0" max="9999" placeholder="####" oninput="limitarDigitos(this)"></div>
+            <div class="field"><label>Numero 3</label><input type="number" id="n3" min="0" max="9999" placeholder="####" oninput="limitarDigitos(this)"></div>
+            <div class="field"><label>Numero 4</label><input type="number" id="n4" min="0" max="9999" placeholder="####" oninput="limitarDigitos(this)"></div>
+          </div>
+        </div>
+        <button class="btn-entrar" onclick="activarCuenta()">Finalizar Registro</button>
+      </div>
     </div>
   </div>
 </div>
@@ -729,8 +742,14 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
         <div style="display:flex;align-items:flex-end;"><button class="btn-action btn-gold" onclick="generarCredenciales()" style="width:100%;padding:12px;">GENERAR</button></div>
       </div>
       <div class="grid-3">
-        <div class="field"><label>Nombre del Jugador</label><input type="text" id="adm-nombre" placeholder="Nombre completo"></div>
-        <div class="field"><label>WhatsApp</label>
+        <!-- Nombre OBLIGATORIO -->
+        <div class="field">
+          <label>Nombre del Jugador <span style="color:#ff4444;">*</span></label>
+          <input type="text" id="adm-nombre" placeholder="Nombre completo" style="border:1px solid #233554;border-radius:5px;background:#0d1b2a;color:#fff;padding:8px;width:100%;">
+        </div>
+        <!-- WhatsApp OBLIGATORIO -->
+        <div class="field">
+          <label>WhatsApp <span style="color:#ff4444;">*</span></label>
           <div style="display:flex;gap:6px;align-items:center;">
             <select id="adm-indicativo" onchange="actualizarPlaceholderCelular()" style="background:#0d1b2a;border:1px solid #233554;border-radius:5px;color:#fff;padding:8px;width:auto;min-width:120px;font-size:0.85rem;">
               <option value="57">🇨🇴 +57</option>
@@ -760,37 +779,49 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
         </div>
         <div class="field"><label>Correo Electronico</label><input type="email" id="adm-email" placeholder="correo_ejemplo"></div>
       </div>
+      <!-- PAGOS -->
       <div style="margin-top:15px;">
         <label style="font-size:0.8rem;color:#aaa;letter-spacing:1px;display:block;margin-bottom:8px;">PAGOS (Fecha + Valor · máx. 3 abonos · Inscripción total: $50.000)</label>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px;">
-          <div class="field"><label>Fecha Pago 1</label><input type="date" id="adm-fecha1"></div>
-          <div class="field"><label>Valor Pago 1 ($)</label><input type="number" id="adm-valor1" min="0" max="50000" placeholder="Ej: 25000" style="background:#0d1b2a;border:1px solid #233554;border-radius:5px;color:#fff;padding:8px;width:100%;"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:2px;">
+          <div class="field">
+            <label>Fecha Pago 1</label>
+            <!-- Cambio 4: ícono calendario visible en blanco/dorado -->
+            <input type="date" id="adm-fecha1" style="background:#0d1b2a;border:1px solid #233554;border-radius:5px;color:#fff;padding:8px;width:100%;color-scheme:dark;">
+          </div>
+          <div class="field">
+            <label>Valor Pago 1 <span style="color:#ff4444;">*</span></label>
+            <input type="number" id="adm-valor1" min="0" placeholder="Ej: 25000" oninput="calcularSaldo()" style="background:#0d1b2a;border:1px solid #233554;border-radius:5px;color:#fff;padding:8px;width:100%;-moz-appearance:textfield;appearance:textfield;">
+          </div>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px;">
-          <div class="field"><label>Fecha Pago 2</label><input type="date" id="adm-fecha2" disabled></div>
-          <div class="field"><label>Valor Pago 2 ($)</label><input type="number" id="adm-valor2" min="0" max="50000" placeholder="Ej: 25000" disabled style="background:#0d1b2a;border:1px solid #233554;border-radius:5px;color:#fff;padding:8px;width:100%;"></div>
+        <!-- Aviso cambio 3 -->
+        <div style="margin-bottom:8px;padding:5px 10px;background:rgba(0,200,150,0.08);border-left:3px solid var(--accent);border-radius:4px;">
+          <span style="font-family:'Barlow Condensed';font-size:0.78rem;color:var(--accent);">💡 Si el jugador <strong>no ha hecho abono</strong>, coloca <strong>$0</strong> en Valor Pago 1</span>
         </div>
-        <div style="margin-bottom:8px;"><button type="button" class="btn-action" style="background:#1a3a5a;color:var(--accent);border:1px dashed var(--accent);font-size:0.75rem;padding:7px 14px;" onclick="habilitarAbono(2)">➕ Agregar Abono 2</button></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px;">
-          <div class="field"><label>Fecha Pago 3</label><input type="date" id="adm-fecha3" disabled></div>
-          <div class="field"><label>Valor Pago 3 ($)</label><input type="number" id="adm-valor3" min="0" max="50000" placeholder="Ej: 25000" disabled style="background:#0d1b2a;border:1px solid #233554;border-radius:5px;color:#fff;padding:8px;width:100%;"></div>
-        </div>
-        <div style="margin-bottom:6px;"><button type="button" class="btn-action" style="background:#1a3a5a;color:var(--accent);border:1px dashed var(--accent);font-size:0.75rem;padding:7px 14px;" onclick="habilitarAbono(3)">➕ Agregar Abono 3</button></div>
-        <div id="adm-saldo-info" style="font-family:'Barlow Condensed';font-size:0.85rem;color:#aaa;margin-top:4px;"></div>
+        <div id="adm-saldo-info" style="font-family:'Barlow Condensed';font-size:0.85rem;color:#aaa;margin-bottom:6px;min-height:18px;"></div>
+        <!-- Campos ocultos para abonos 2 y 3 — se usan solo al editar -->
+        <input type="hidden" id="adm-fecha2" value="">
+        <input type="hidden" id="adm-fecha3" value="">
+        <input type="hidden" id="adm-valor2" value="0">
+        <input type="hidden" id="adm-valor3" value="0">
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;">
+      <!-- Ciudad OBLIGATORIA -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
         <div class="field">
           <label>Estado de Pago</label>
           <select id="adm-pago" class="pm-select"><option value="pendiente">Pendiente</option><option value="pagado">Pagado</option></select>
         </div>
         <div class="field">
-          <label>Ciudad</label>
+          <label>Ciudad <span style="color:#ff4444;">*</span></label>
           <input type="text" id="adm-ciudad" placeholder="Ciudad del jugador" style="background:#0d1b2a;border:1px solid #233554;border-radius:5px;color:#fff;padding:8px;width:100%;">
         </div>
       </div>
+      <!-- Botones: REGISTRAR solo H175, WHATSAPP todos -->
       <div style="display:flex;gap:10px;margin-top:15px;flex-wrap:wrap;">
-        <button class="btn-action btn-green" onclick="registrarJugador()" style="flex:1;">REGISTRAR JUGADOR</button>
-        <button class="btn-action btn-blue" onclick="enviarWhatsApp()" style="flex:1;">ENVIAR POR WHATSAPP</button>
+        <button id="btnRegistrarJugador" class="btn-action btn-green" onclick="registrarJugador()" style="flex:1;display:none;">REGISTRAR JUGADOR</button>
+        <button class="btn-action btn-blue" onclick="enviarWhatsApp()" style="flex:1;">📱 ENVIAR POR WHATSAPP</button>
+      </div>
+      <div style="margin-top:6px;text-align:center;">
+        <span style="font-size:0.7rem;color:#444;font-family:'Barlow Condensed';letter-spacing:1px;"><span style="color:#ff4444;">*</span> Campos obligatorios</span>
       </div>
     </div>
     <!-- BUSCADOR CON EDICION -->
@@ -812,10 +843,19 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
         <button class="btn-action btn-green" onclick="filtrarJugadores('pagado')">Pagados</button>
         <button class="btn-action" style="background:#7f4a00;color:#ffbb00;" onclick="filtrarJugadores('pendiente')">Pendientes</button>
         <button class="btn-action" style="background:#333;color:#ff4444;" onclick="filtrarJugadores('bloqueado')">Bloqueados</button>
+        <div style="position:relative;display:inline-block;">
+          <button class="btn-action" style="background:#1a1a4a;color:#aabbff;border:1px solid #333;" onclick="document.getElementById('dropAdmins').style.display=document.getElementById('dropAdmins').style.display==='none'?'block':'none'">👤 Por Admin ▾</button>
+          <div id="dropAdmins" style="display:none;position:absolute;top:110%;left:0;background:#0d1b2a;border:1px solid #233554;border-radius:6px;z-index:100;min-width:140px;box-shadow:0 4px 16px rgba(0,0,0,0.5);">
+            <div onclick="filtrarPorAdmin('todos');document.getElementById('dropAdmins').style.display='none'" style="padding:8px 14px;cursor:pointer;color:#aaa;font-family:'Barlow Condensed';font-size:0.85rem;border-bottom:1px solid #1a2a3a;">Todos los admins</div>
+            <div onclick="filtrarPorAdmin('H175');document.getElementById('dropAdmins').style.display='none'" style="padding:8px 14px;cursor:pointer;color:#FFD700;font-family:'Barlow Condensed';font-size:0.85rem;font-weight:700;border-bottom:1px solid #1a2a3a;">H175 — Hector</div>
+          </div>
+        </div>
+        <span id="contadorJugadores" style="font-family:'Barlow Condensed';font-size:0.85rem;color:#555;margin-left:6px;align-self:center;"></span>
+        <button onclick="exportarExcel()" style="background:linear-gradient(135deg,#1a6b1a,#006400);color:#fff;border:none;padding:7px 14px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed';font-weight:700;font-size:0.85rem;letter-spacing:1px;display:flex;align-items:center;gap:5px;">📊 EXPORTAR EXCEL</button>
       </div>
       <div style="overflow-x:auto;">
         <table class="jugadores-table" id="tablaJugadores">
-          <thead><tr><th>Codigo</th><th>Nombre</th><th>WhatsApp</th><th>Pagos</th><th>Estado</th><th>Creado Por</th><th>Acciones</th></tr></thead>
+          <thead><tr><th style="color:#aaa;font-size:0.9rem;">#</th><th>Nombre</th><th style="color:#00ff99;">Activado</th><th style="color:#aabbff;">Nums Rifa</th><th>Codigo</th><th>Pagos</th><th>Estado</th><th style="color:var(--gold);">Valor Pagado</th><th>Creado Por</th><th>Acciones</th></tr></thead>
           <tbody id="jugadoresBody"></tbody>
         </table>
       </div>
@@ -889,7 +929,6 @@ var ADMINS = {
 };
 
 
-
 // ============================================================
 // FIREBASE — OPERACIONES
 // ============================================================
@@ -901,7 +940,7 @@ db.ref('jugadores').on('value', function(snap) {
 
   // Actualizar UI si admin esta logueado
   var tbody = document.getElementById('jugadoresBody');
-  if (tbody && tbody.innerHTML !== '') renderizarTablaJugadores();
+  if (tbody) renderizarTablaJugadores();
   if (document.getElementById('sec-ranking').classList.contains('active')) renderizarRanking();
   // Status online
   document.getElementById('fbStatus').innerHTML = '<span class="fb-online">&#9679; Conectado a la nube &mdash; datos sincronizados en tiempo real</span>';
@@ -1609,9 +1648,26 @@ function login() {
     if (j.pass !== pass) { alert('Codigo o contrasena incorrectos.'); return; }
     usuarioActual = { codigo: cod, esAdmin: false, nombre: j.nombre };
     sessionStorage.setItem('pollaUser', JSON.stringify(usuarioActual));
-    if (j.estado === 'nuevo' || j.estado === 'recuperacion') {
+    if (j.estado === 'nuevo' || j.estado === 'pendiente' || j.estado === 'recuperacion') {
       document.getElementById('tituloActivacion').innerText = j.estado === 'recuperacion' ? 'Restablecer Clave' : 'Activacion de Cuenta';
-      document.getElementById('bloqueRifa').style.display = (j.nums && j.nums.length > 0) ? 'none' : 'block';
+      var _p1 = document.getElementById('paso1Activacion');
+      var _p2 = document.getElementById('paso2Activacion');
+      var _np1 = document.getElementById('newPass1'); if(_np1) _np1.value='';
+      var _np2 = document.getElementById('newPass2'); if(_np2) _np2.value='';
+      var noTieneNums = !j.nums || j.nums.length === 0 || !j.nums[0] || j.nums[0] === '--';
+      // LÓGICA CONFIABLE: comparar la clave con la que entró vs la guardada en Firebase
+      // Si son IGUALES = está usando la provisional = mostrar Paso 1 (cambiar clave)
+      // Si son DISTINTAS = ya cambió la clave antes = saltar directo al Paso 2 (números)
+      var yaCanbioClave = (pass !== j.pass); // pass = lo que escribió, j.pass = lo guardado
+      if (yaCanbioClave && noTieneNums) {
+        // Ya cambió clave pero no puso números → ir directo al Paso 2
+        if (_p1) _p1.style.display = 'none';
+        if (_p2) _p2.style.display = 'block';
+      } else {
+        // Primera vez o recuperación → mostrar Paso 1
+        if (_p1) _p1.style.display = 'block';
+        if (_p2) _p2.style.display = 'none';
+      }
       irA('activacion');
     } else {
       cargarPerfil(cod, j);
@@ -1629,25 +1685,22 @@ function mostrarInterfazAdmin(cod) {
   irA('admin');
   renderizarTablaJugadores();
   setTimeout(aplicarRestriccionFechas, 300);
+  // Botón REGISTRAR solo visible para H175
+  var btnReg = document.getElementById('btnRegistrarJugador');
+  if (btnReg) btnReg.style.display = (cod === 'H175') ? 'block' : 'none';
 }
 
 function activarCuenta() {
-  var u  = usuarioActual.codigo;
-  var p1 = document.getElementById('newPass1').value;
-  var p2 = document.getElementById('newPass2').value;
-  if (!validarClave(p1)) { alert('La clave debe tener 8 caracteres con mayusculas, minusculas y numeros. Sin caracteres especiales.'); return; }
-  if (p1 !== p2) { alert('Las claves no coinciden.'); return; }
+  var u = usuarioActual.codigo;
+  if (!confirm('ATENCION: Una vez registres tus numeros de rifa NO podras cambiarlos. Deseas continuar?')) return;
+  var v = [document.getElementById('n1').value, document.getElementById('n2').value,
+           document.getElementById('n3').value, document.getElementById('n4').value];
+  if (v.some(function(n){ return !/^\d{4}$/.test(n); })) { alert('Cada numero debe tener exactamente 4 digitos.'); return; }
+  showLoading('Guardando...');
   fbGetJugador(u, function(j) {
-    if (!j) { alert('Error: jugador no encontrado.'); return; }
-    if (!j.nums || j.nums.length === 0) {
-      if (!confirm('ATENCION: Una vez registres tus numeros de rifa NO podras cambiarlos. Deseas continuar?')) return;
-      var v = [document.getElementById('n1').value, document.getElementById('n2').value,
-               document.getElementById('n3').value, document.getElementById('n4').value];
-      if (v.some(function(n){ return !/^\d{4}$/.test(n); })) { alert('Cada numero debe tener exactamente 4 digitos.'); return; }
-      j.nums = v;
-    }
-    j.pass = p1; j.estado = 'activo';
-    showLoading('Guardando...');
+    if (!j) { hideLoading(); alert('Error: jugador no encontrado.'); return; }
+    j.nums = v;
+    j.estado = 'activo';
     fbSetJugador(u, j, function() {
       hideLoading();
       cargarPerfil(u, j);
@@ -1863,10 +1916,12 @@ function registrarJugador() {
   var v2     = parseFloat(document.getElementById('adm-valor2')&&document.getElementById('adm-valor2').value||0)||0;
   var v3     = parseFloat(document.getElementById('adm-valor3')&&document.getElementById('adm-valor3').value||0)||0;
   var ciudad = (document.getElementById('adm-ciudad')&&document.getElementById('adm-ciudad').value)||'';
-  if (!cod || !clave || !nombre) { alert('Genera credenciales y completa el nombre.'); return; }
-  // Validar valor1 obligatorio (0-50000)
-  if (v1 === 0 && !document.getElementById('adm-valor1').value) { alert('⚠️ El Valor de Pago 1 es obligatorio. Ingresa un valor entre $0 y $50.000.'); document.getElementById('adm-valor1').focus(); return; }
-  if (v1 < 0 || v1 > 50000) { alert('⚠️ El Valor de Pago 1 debe estar entre $0 y $50.000.'); return; }
+  if (!cod || !clave) { alert('Primero genera las credenciales con el botón GENERAR.'); return; }
+  if (!nombre) { var nel=document.getElementById('adm-nombre'); nel.style.border='2px solid #ff4444'; alert('⚠️ El Nombre del jugador es obligatorio.'); nel.focus(); return; }
+  if (!_num || _num.length < 7) { var cel2=document.getElementById('adm-celular'); cel2.style.border='2px solid #ff4444'; alert('⚠️ El número de WhatsApp es obligatorio.'); cel2.focus(); return; }
+  if (!ciudad) { var ciudEl=document.getElementById('adm-ciudad'); ciudEl.style.border='2px solid #ff4444'; alert('⚠️ La Ciudad es obligatoria.'); ciudEl.focus(); return; }
+  if (document.getElementById('adm-valor1').value === '') { var v1El=document.getElementById('adm-valor1'); v1El.style.border='2px solid #ff4444'; alert('⚠️ El Valor Pago 1 es obligatorio. Si no hubo abono coloca 0.'); v1El.focus(); return; }
+  if (v1 < 0) { alert('⚠️ El Valor no puede ser negativo.'); return; }
   // Validar: si hay fecha, debe tener valor
   if ((f2 && !v2)||(f3 && !v3)) { alert('⚠️ Cada fecha de abono debe tener su valor correspondiente.'); return; }
   // Calcular pago automático según suma de valores
@@ -1887,45 +1942,65 @@ function enviarWhatsApp() {
   var cod    = document.getElementById('adm-codigo').value.trim();
   var clave  = document.getElementById('adm-clave').value.trim();
   var nombre = document.getElementById('adm-nombre').value.trim();
-  var _indEl  = document.getElementById('adm-indicativo');
-  var _ind    = _indEl ? _indEl.value : '57';
-  var _num    = document.getElementById('adm-celular').value.trim().replace(/[^0-9]/g,'');
-  var cel     = _num ? _ind + _num : '';
+  var _indEl = document.getElementById('adm-indicativo');
+  var _ind   = _indEl ? _indEl.value : '57';
+  var _numEl = document.getElementById('adm-celular-num') || document.getElementById('adm-celular');
+  var _num   = (_numEl ? _numEl.value : '').replace(/[^0-9]/g,'');
+  var cel    = _num ? _ind + _num : '';
   var email  = document.getElementById('adm-email').value.trim();
   var pago   = document.getElementById('adm-pago').value;
   var f1     = document.getElementById('adm-fecha1').value;
   var f2     = document.getElementById('adm-fecha2').value;
   var f3     = document.getElementById('adm-fecha3').value;
-  var v1     = parseFloat(document.getElementById('adm-valor1')&&document.getElementById('adm-valor1').value||0)||0;
-  var v2     = parseFloat(document.getElementById('adm-valor2')&&document.getElementById('adm-valor2').value||0)||0;
-  var v3     = parseFloat(document.getElementById('adm-valor3')&&document.getElementById('adm-valor3').value||0)||0;
-  var ciudad = (document.getElementById('adm-ciudad')&&document.getElementById('adm-ciudad').value)||'';
-  if (!cel) { alert('Ingresa el numero de WhatsApp.'); return; }
-  if (!cod || !clave || !nombre) { alert('Genera credenciales y completa el nombre antes de enviar WhatsApp.'); return; }
-  // Calcular pago automático
+  var v1     = parseFloat((document.getElementById('adm-valor1')||{value:0}).value||0)||0;
+  var v2     = parseFloat((document.getElementById('adm-valor2')||{value:0}).value||0)||0;
+  var v3     = parseFloat((document.getElementById('adm-valor3')||{value:0}).value||0)||0;
+  var ciudad = (document.getElementById('adm-ciudad')||{value:''}).value||'';
+  if (!_num || _num.length < 7) { var _celWA=document.getElementById('adm-celular'); if(_celWA){_celWA.style.border='2px solid #ff4444';_celWA.focus();} alert('⚠️ El número de WhatsApp es obligatorio.'); return; }
+  var _nomWA=document.getElementById('adm-nombre'); if(!nombre){_nomWA.style.border='2px solid #ff4444';_nomWA.focus();alert('⚠️ El Nombre es obligatorio.');return;}
+  var _ciuWA=(document.getElementById('adm-ciudad')||{value:''}).value.trim();
+  if(!_ciuWA){var _ciuEl=document.getElementById('adm-ciudad');if(_ciuEl){_ciuEl.style.border='2px solid #ff4444';_ciuEl.focus();}alert('⚠️ La Ciudad es obligatoria.');return;}
+  if(document.getElementById('adm-valor1').value===''){var _v1WA=document.getElementById('adm-valor1');_v1WA.style.border='2px solid #ff4444';_v1WA.focus();alert('⚠️ El Valor Pago 1 es obligatorio. Si no hubo abono coloca 0.');return;}
+  if (!cod || !clave || !nombre) { alert('Genera credenciales y completa el nombre.'); return; }
   var totalPagado = v1+v2+v3;
   if (totalPagado >= 50000) pago = 'pagado';
-  // REGISTRAR JUGADOR AUTOMÁTICAMENTE
-  var jugador = { pass:clave, nombre:nombre, celular:cel, email:email, pago:pago, ciudad:ciudad, estado:'pendiente', nums:[], bloqueado:false,
-    fechas:[f1,f2,f3], valores:[v1,v2,v3], creadoPor: usuarioActual ? usuarioActual.codigo : '?',
-    pts:{exacto:0,ganador:0,empate:0,tarjetas:0,extra:0,penales:0,premundial:0} };
-  showLoading('Registrando y abriendo WhatsApp...');
+
+  // Construir mensaje
+  var msg = 'Hola ' + nombre + ', \u00a1Bienvenido a POLLA MUNDIALISTA 2026! \ud83c\udfc6'
+    + '\n\ud83d\udd11 Tu c\u00f3digo: ' + cod
+    + '\n\ud83d\udd12 Clave provisional: ' + clave
+    + '\n\ud83c\udf10 Ingresa al portal: https://pollafutbol.github.io/polla-mundialista-2026'
+    + '\n\u23f3 Fecha l\u00edmite AL D\u00cdA: 2 de Junio 2026.'
+    + '\n\ud83d\udccb Revisa las reglas en la hoja REGLAMENTO.'
+    + '\n\ud83d\udd25 RECOMPENSA PRONTO PAGO: Si te pones al d\u00eda antes del 25 de mayo, \u00a1entras al sorteo de un espectacular Reloj de Pared Conmemorativo del Mundial!';
+
+  // Abrir WhatsApp directamente en el hilo del clic (antes del callback Firebase)
+  // Esto es clave para iPhone/Safari que bloquea window.open en callbacks async
+  var waUrl = 'https://api.whatsapp.com/send?phone=' + cel + '&text=' + encodeURIComponent(msg);
+  var waWindow = window.open(waUrl, '_blank');
+  // Si Safari bloqueó popup, intentar con location.href silenciosamente
+  if (!waWindow || waWindow.closed || typeof waWindow.closed === 'undefined') {
+    window.location.href = waUrl;
+  }
+
+  // Registrar jugador en Firebase en background (ya no bloquea el popup)
+  var jugador = {
+    pass:clave, nombre:nombre, celular:cel, email:email, pago:pago, ciudad:ciudad,
+    estado:'pendiente', nums:[], bloqueado:false,
+    fechas:[f1,f2,f3], valores:[v1,v2,v3],
+    creadoPor: usuarioActual ? usuarioActual.codigo : '?',
+    pts:{exacto:0,ganador:0,empate:0,tarjetas:0,extra:0,penales:0,premundial:0}
+  };
   fbSetJugador(cod, jugador, function() {
-    hideLoading();
-    // Limpiar campos
-    ['adm-codigo','adm-clave','adm-nombre','adm-celular','adm-email','adm-fecha1','adm-fecha2','adm-fecha3','adm-valor1','adm-valor2','adm-valor3','adm-ciudad'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
-    var si=document.getElementById('adm-saldo-info'); if(si) si.innerHTML='';
-    aplicarRestriccionFechas();
-    // Abrir WhatsApp
-    var msg = '\u00a1Bienvenido a POLLA MUNDIALISTA 2026! \ud83c\udfc6\n\ud83d\udd11 Tu c\u00f3digo: ' + cod + '\n\ud83d\udd12 Clave provisional: ' + clave + '\n\ud83c\udf10 Ingresa al portal: https://pollafutbol.github.io/polla-mundialista-2026\n\u23f3 Fecha l\u00edmite para estar AL D\u00cdA: 2 de Junio 2026.\n\ud83d\udccb Por favor revisa las reglas en la hoja REGLAMENTO.\n\ud83d\udd25 RECOMPENSA POR PAGO ANTICIPADO: Si te pones al d\u00eda antes del 25 de mayo, \u00a1entras al sorteo de un espect\u00e1culo Reloj de pared Conmemorativo del Mundial! \u00a1Asegura tu cupo y gana desde ya!';
-    // WhatsApp con compatibilidad iPhone (api.whatsapp.com funciona mejor en iOS)
-    var waUrl = 'https://api.whatsapp.com/send?phone=' + cel.replace(/[^0-9]/g,'') + '&text=' + encodeURIComponent(msg);
-    window.open(waUrl, '_blank');
-    // Botón de copia como respaldo si WA no abre en iPhone
-    setTimeout(function(){
-      var copied = confirm('¿Se abrió WhatsApp correctamente?\n\nSi NO se abrió (iPhone/Safari), haz clic en CANCELAR para copiar el mensaje al portapapeles.');
-      if(!copied){ try{ navigator.clipboard.writeText(msg).then(function(){ alert('✅ Mensaje copiado. Ábrelo en WhatsApp y pégalo al jugador.'); }); }catch(e){ prompt('Copia este mensaje:', msg); } }
-    }, 1500);
+    // Limpiar formulario silenciosamente
+    ['adm-codigo','adm-clave','adm-nombre','adm-celular','adm-celular-num',
+     'adm-email','adm-fecha1','adm-fecha2','adm-fecha3',
+     'adm-valor1','adm-valor2','adm-valor3','adm-ciudad'].forEach(function(id){
+      var el = document.getElementById(id); if(el) el.value='';
+    });
+    var si = document.getElementById('adm-saldo-info'); if(si) si.innerHTML='';
+    if(typeof inicializarFormAdmin==='function') inicializarFormAdmin();
+    renderizarTablaJugadores();
   });
 }
 
@@ -1954,6 +2029,13 @@ function buscarJugador(q) {
       '<div class="field"><label>Estado Pago</label><select id="edit_pago_' + cod + '" style="background:#0d1b2a;border:1px solid #233554;border-radius:5px;color:#fff;padding:8px;width:100%;">' +
       '<option value="pendiente"' + (j.pago!=='pagado'?' selected':'') + '>Pendiente</option>' +
       '<option value="pagado"' + (j.pago==='pagado'?' selected':'') + '>Pagado</option></select></div>' +
+      (usuarioActual&&usuarioActual.codigo==='H175' ? 
+        '<div class="field" style="border:1px solid #ff9900;border-radius:6px;padding:8px;background:rgba(255,153,0,0.05);">' +
+        '<label style="color:#ff9900;font-size:0.7rem;">🔑 SOLO H175 — Cambiar Admin que lo creó</label>' +
+        '<select id="edit_creadoPor_' + cod + '" style="background:#0d1b2a;border:1px solid #ff9900;border-radius:5px;color:#fff;padding:8px;width:100%;margin-top:4px;">' +
+        '<option value="H175"' + ((j.creadoPor||'')==='H175'?' selected':'') + '>H175 — Hector</option>' +
+        '</select></div>'
+      : '') +
       '</div>' +
       '<div class="grid-3" style="margin-top:10px;">' +
       "<div style='display:grid;grid-template-columns:1fr 1fr;gap:8px;'>" +
@@ -1973,62 +2055,123 @@ function buscarJugador(q) {
 }
 
 function guardarEdicionJugador(cod) {
+  var esH175 = usuarioActual && usuarioActual.codigo === 'H175';
+  // Leer valores — solo H175 puede modificarlos
+  var v1El = document.getElementById('edit_v1_' + cod);
+  var v2El = document.getElementById('edit_v2_' + cod);
+  var v3El = document.getElementById('edit_v3_' + cod);
+  var v1 = v1El ? (parseFloat(v1El.value) || 0) : 0;
+  var v2 = v2El ? (parseFloat(v2El.value) || 0) : 0;
+  var v3 = v3El ? (parseFloat(v3El.value) || 0) : 0;
+  var totalPagado = v1 + v2 + v3;
+  // Determinar estado de pago automaticamente segun total
+  var pagoSelect = document.getElementById('edit_pago_' + cod);
+  var pagoVal = pagoSelect ? pagoSelect.value : 'pendiente';
+  if (esH175 && totalPagado >= 50000) pagoVal = 'pagado';
   var updates = {
     nombre:  document.getElementById('edit_nom_'  + cod).value,
     celular: document.getElementById('edit_cel_'  + cod).value,
     email:   document.getElementById('edit_email_'+ cod).value,
-    pago:    document.getElementById('edit_pago_' + cod).value,
+    pago:    pagoVal,
     fechas:  [
       document.getElementById('edit_f1_' + cod).value,
       document.getElementById('edit_f2_' + cod).value,
       document.getElementById('edit_f3_' + cod).value
     ]
   };
+  // Solo H175 guarda valores de pago y puede cambiar el admin creador
+  if (esH175) {
+    updates.valores = [v1, v2, v3];
+    var creadoPorEl = document.getElementById('edit_creadoPor_' + cod);
+    if (creadoPorEl) updates.creadoPor = creadoPorEl.value;
+  }
   showLoading('Guardando cambios...');
   fbUpdateJugador(cod, updates, function() {
     hideLoading();
-    alert('Datos de ' + cod + ' actualizados correctamente.');
-    // Limpiar busqueda
+    alert('Datos de ' + cod + ' actualizados. Total pagado: $' + totalPagado.toLocaleString('es-CO'));
     document.getElementById('buscadorInput').value = '';
     document.getElementById('resultadoBusqueda').style.display = 'none';
     document.getElementById('resultadoBusqueda').innerHTML = '';
+    renderizarTablaJugadores();
   });
 }
 
 var filtroActualJugadores = 'todos';
-function filtrarJugadores(tipo) { filtroActualJugadores = tipo; renderizarTablaJugadores(); }
+var filtroAdminJugadores  = 'todos';
+
+function filtrarJugadores(tipo) { filtroActualJugadores = tipo; filtroAdminJugadores = 'todos'; renderizarTablaJugadores(); }
+function filtrarPorAdmin(admin) { filtroAdminJugadores = admin; filtroActualJugadores = 'todos'; renderizarTablaJugadores(); }
+window.filtrarPorAdmin = filtrarPorAdmin;
 
 function renderizarTablaJugadores() {
   var tbody = document.getElementById('jugadoresBody');
   if (!tbody) return;
   var jugadores = Object.entries(jugadoresCache).filter(function(e){
     var j = e[1];
+    // Filtro por estado
     if (filtroActualJugadores === 'pagado')    return j.pago === 'pagado' && !j.bloqueado;
     if (filtroActualJugadores === 'pendiente') return j.pago !== 'pagado' && !j.bloqueado;
     if (filtroActualJugadores === 'bloqueado') return j.bloqueado;
+    // Filtro por admin
+    if (filtroAdminJugadores !== 'todos') return (j.creadoPor || '?') === filtroAdminJugadores;
     return true;
   });
-  if (jugadores.length === 0) { tbody.innerHTML = '<tr><td colspan="7" style="color:#555;padding:20px;">No hay jugadores en esta categoria.</td></tr>'; return; }
-  tbody.innerHTML = jugadores.map(function(e){
+  // Ordenar alfabeticamente por nombre
+  jugadores.sort(function(a,b){
+    var na=(a[1].nombre||'').toLowerCase(), nb=(b[1].nombre||'').toLowerCase();
+    return na<nb?-1:na>nb?1:0;
+  });
+  if (jugadores.length === 0) { tbody.innerHTML = '<tr><td colspan="10" style="color:#555;padding:20px;">No hay jugadores en esta categoria.</td></tr>'; return; }
+  tbody.innerHTML = jugadores.map(function(e, idx){
     var cod=e[0], j=e[1];
-    var tagCls  = j.bloqueado ? 'tag-bloqueado' : (j.pago==='pagado' ? 'tag-pagado' : 'tag-pendiente');
-    var tagTxt  = j.bloqueado ? 'Bloqueado' : (j.pago==='pagado' ? 'Pagado' : 'Pendiente');
-    var pagos   = (j.fechas||[]).filter(function(f){ return f; }).join(' / ') || '-';
+    var tagCls = j.bloqueado ? 'tag-bloqueado' : (j.pago==='pagado' ? 'tag-pagado' : 'tag-pendiente');
+    var tagTxt = j.bloqueado ? 'Bloqueado' : (j.pago==='pagado' ? 'Pagado' : 'Pendiente');
+    // Pagos con formato
+    var pagosFmt = [];
+    (j.fechas||[]).forEach(function(f,i){
+      if(!f) return;
+      var v = (j.valores&&j.valores[i]) ? ' ($'+(parseFloat(j.valores[i])||0).toLocaleString('es-CO')+')' : '';
+      pagosFmt.push(f + v);
+    });
+    var pagos = pagosFmt.join('<br>') || '-';
     var creadoPor = j.creadoPor || '-';
+    // Valor pagado con colores
+    var vals = j.valores || [];
+    var totalVal = (parseFloat(vals[0])||0)+(parseFloat(vals[1])||0)+(parseFloat(vals[2])||0);
+    var colorVal, bgVal;
+    if (totalVal === 0)       { colorVal='#ff4444'; bgVal='rgba(255,68,68,0.1)'; }
+    else if (totalVal >= 50000) { colorVal='#00ff99'; bgVal='rgba(0,255,153,0.1)'; }
+    else                       { colorVal='#ffdd00'; bgVal='rgba(255,221,0,0.1)'; }
+    var valorPagadoStr = '<span style="color:'+colorVal+';background:'+bgVal+';padding:2px 8px;border-radius:10px;font-weight:700;font-size:0.82rem;">$'+totalVal.toLocaleString('es-CO')+'</span>';
     return '<tr>' +
+      '<td style="color:#fff;font-family:\'Barlow Condensed\';font-size:1rem;font-weight:700;text-align:center;">' + (idx+1) + '</td>' +
+      '<td style="font-weight:700;">' + (j.nombre||'-') + '</td>' +
+      '<td style="text-align:center;">' + (function(){
+        var tieneNums = j.nums && j.nums.length >= 4 && j.nums[0] && j.nums[0] !== '--';
+        var estaActivo = j.estado === 'activo';
+        if (tieneNums && estaActivo) return '<span style="background:#006847;color:#fff;padding:2px 10px;border-radius:10px;font-size:0.75rem;font-weight:700;">SI</span>';
+        return '<span style="background:#7f1a1a;color:#faa;padding:2px 10px;border-radius:10px;font-size:0.75rem;font-weight:700;">NO</span>';
+      })() + '</td>' +
+      '<td style="text-align:center;font-size:0.72rem;">' + (function(){
+        var nums = j.nums && j.nums.length >= 4 && j.nums[0] && j.nums[0] !== '--' ? j.nums : null;
+        if (!nums) return '<span style="color:#555;font-style:italic;">Pendiente</span>';
+        return '<span style="color:#aabbff;letter-spacing:1px;font-weight:700;">' + nums.join(' &middot; ') + '</span>';
+      })() + '</td>' +
       '<td style="color:var(--accent);font-weight:900;">' + cod + '</td>' +
-      '<td>' + (j.nombre||'-') + '</td>' +
-      '<td>' + (j.celular||'-') + '</td>' +
-      '<td style="font-size:0.75rem;color:#aaa;">' + pagos + '</td>' +
+      '<td style="font-size:0.72rem;color:#aaa;line-height:1.6;">' + pagos + '</td>' +
       '<td><span class="' + tagCls + '">' + tagTxt + '</span></td>' +
+      '<td style="text-align:center;">' + valorPagadoStr + '</td>' +
       '<td style="font-size:0.75rem;color:var(--gold);font-weight:700;text-align:center;">' + creadoPor + '</td>' +
       '<td style="display:flex;gap:4px;flex-wrap:wrap;">' +
       '<button onclick="togglePago(\'' + cod + '\')" style="background:' + (j.pago==='pagado'?'#555':'var(--mexico)') + ';color:#fff;border:none;padding:3px 8px;cursor:pointer;border-radius:3px;font-size:0.7rem;">' + (j.pago==='pagado'?'Quitar':'Pago') + '</button>' +
       '<button onclick="toggleBloqueo(\'' + cod + '\')" style="background:' + (j.bloqueado?'#006847':'#7f1a1a') + ';color:#fff;border:none;padding:3px 8px;cursor:pointer;border-radius:3px;font-size:0.7rem;">' + (j.bloqueado?'Desbloquear':'Bloquear') + '</button>' +
       '<button onclick="eliminarJugador(\'' + cod + '\')" style="background:#c0392b;color:#fff;border:none;padding:3px 8px;cursor:pointer;border-radius:3px;font-size:0.7rem;">Del</button>' +
-        '<button onclick="resetearClave(\'' + cod + '\')" style="background:#7f4a00;color:#ffbb00;border:none;padding:3px 8px;cursor:pointer;border-radius:3px;font-size:0.7rem;">Reset</button>' +
+      '<button onclick="resetearClave(\'' + cod + '\')" style="background:#7f4a00;color:#ffbb00;border:none;padding:3px 8px;cursor:pointer;border-radius:3px;font-size:0.7rem;">Reset</button>' +
       '</td></tr>';
   }).join('');
+  // Mostrar total de jugadores filtrados
+  var contadorEl = document.getElementById('contadorJugadores');
+  if (contadorEl) contadorEl.innerText = jugadores.length + ' jugador' + (jugadores.length!==1?'es':'');
 }
 
 function togglePago(cod) {
@@ -2044,17 +2187,50 @@ function toggleBloqueo(cod) {
   });
 }
 function eliminarJugador(cod) {
-  if (!confirm('Eliminar al jugador ' + cod + '?')) return;
-  showLoading('Eliminando...');
-  fbDeleteJugador(cod, function(){ hideLoading(); });
+  if (cod === 'DEMO') { alert('El jugador DEMO no se puede eliminar.'); return; }
+  if (!confirm('Eliminar definitivamente al jugador ' + cod + '? Esta accion no se puede deshacer.')) return;
+  showLoading('Eliminando jugador ' + cod + '...');
+  fbDeleteJugador(cod, function() {
+    hideLoading();
+    // Quitar del cache local y actualizar tabla inmediatamente
+    if (jugadoresCache && jugadoresCache[cod]) delete jugadoresCache[cod];
+    renderizarTablaJugadores();
+    alert('Jugador ' + cod + ' eliminado correctamente.');
+  });
 }
 
 function resetearClave(cod) {
-  if (!confirm('Resetear clave del jugador ' + cod + ' a TEMP1234?')) return;
+  if (!confirm('Resetear clave del jugador ' + cod + ' a TEMP1234? Se abrira WhatsApp para notificarle.')) return;
   showLoading('Reseteando clave...');
-  fbUpdateJugador(cod, {pass: 'TEMP1234', estado: 'recuperacion'}, function() {
-    hideLoading();
-    alert('Clave de ' + cod + ' reseteada a TEMP1234. Avisa al jugador por WhatsApp.');
+  fbGetJugador(cod, function(j) {
+    if (!j) { hideLoading(); alert('Jugador no encontrado.'); return; }
+    fbUpdateJugador(cod, {pass: 'TEMP1234', estado: 'recuperacion'}, function() {
+      hideLoading();
+      var nombre = j.nombre || cod;
+      var cel = (j.celular || '').replace(/[^0-9]/g,'');
+      var msg = 'Hola ' + nombre + ', tu clave de acceso a POLLA MUNDIALISTA 2026 fue reseteada.'
+        + '\n\nTu nueva clave provisional es: TEMP1234'
+        + '\n\nIngresa al portal, crea tu nueva clave personal y sigue participando:'
+        + '\nhttps://pollafutbol.github.io/polla-mundialista-2026'
+        + '\n\nSi tienes dudas contacta a tu administrador.';
+      if (cel) {
+        // Abrir WhatsApp directamente (mismo hilo, no async)
+        var waUrl = 'https://api.whatsapp.com/send?phone=' + cel + '&text=' + encodeURIComponent(msg);
+        var waWin = window.open(waUrl, '_blank');
+        if (!waWin || waWin.closed || typeof waWin.closed === 'undefined') {
+          window.location.href = waUrl;
+        }
+      } else {
+        // Si no tiene celular registrado, copiar mensaje
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(msg).then(function(){
+            alert('No hay celular registrado para ' + cod + '. Mensaje copiado al portapapeles.');
+          });
+        } else {
+          prompt('Copia este mensaje para ' + nombre + ':', msg);
+        }
+      }
+    });
   });
 }
 window.resetearClave = resetearClave;
@@ -2778,6 +2954,30 @@ window.mostrarElimSub = mostrarElimSub;
 window.validarElim = validarElim;
 window.cambiarClaveModal = cambiarClaveModal;
 window.guardarNuevaClave = guardarNuevaClave;
+
+function guardarClavePaso1() {
+  var p1 = document.getElementById('newPass1').value;
+  var p2 = document.getElementById('newPass2').value;
+  if (!validarClave(p1)) { alert('La clave debe tener 8 caracteres con mayusculas, minusculas y numeros. Sin caracteres especiales.'); return; }
+  if (p1 !== p2) { alert('Las claves no coinciden.'); return; }
+  var u = usuarioActual.codigo;
+  showLoading('Guardando clave...');
+  fbGetJugador(u, function(j) {
+    if (!j) { hideLoading(); alert('Error: jugador no encontrado.'); return; }
+    j.pass = p1;
+    if (j.nums && j.nums.length > 0 && j.nums[0] && j.nums[0] !== '--') {
+      j.estado = 'activo';
+      fbSetJugador(u, j, function() { hideLoading(); cargarPerfil(u, j); });
+      return;
+    }
+    fbSetJugador(u, j, function() {
+      hideLoading();
+      document.getElementById('paso1Activacion').style.display = 'none';
+      document.getElementById('paso2Activacion').style.display = 'block';
+    });
+  });
+}
+window.guardarClavePaso1 = guardarClavePaso1;
 window.activarCuenta = activarCuenta;
 window.confirmarGuardadoPM = confirmarGuardadoPM;
 window.cargarJugadores = cargarJugadores;
@@ -2790,11 +2990,122 @@ function toggleOjo(inputId, btn) {
   else { inp.type = 'password'; btn.innerText = '👁️'; }
 }
 window.toggleOjo = toggleOjo;
+
+document.addEventListener('input', function(e) {
+  if (e.target && e.target.style && e.target.style.border === '1px solid #ff4444') {
+    e.target.style.border = '1px solid #233554';
+  }
+});
 window.registrarJugador = registrarJugador;
 window.enviarWhatsApp = enviarWhatsApp;
 window.buscarJugador = buscarJugador;
 window.guardarEdicionJugador = guardarEdicionJugador;
 window.filtrarJugadores = filtrarJugadores;
+
+function exportarExcel() {
+  // Obtener jugadores según filtro activo (misma lógica que renderizarTablaJugadores)
+  var jugadores = Object.entries(jugadoresCache).filter(function(e){
+    var j = e[1];
+    if (filtroActualJugadores === 'pagado')    return j.pago === 'pagado' && !j.bloqueado;
+    if (filtroActualJugadores === 'pendiente') return j.pago !== 'pagado' && !j.bloqueado;
+    if (filtroActualJugadores === 'bloqueado') return j.bloqueado;
+    if (filtroAdminJugadores !== 'todos')      return (j.creadoPor||'?') === filtroAdminJugadores;
+    return true;
+  });
+
+  // Ordenar alfabeticamente
+  jugadores.sort(function(a,b){
+    var na=(a[1].nombre||'').toLowerCase(), nb=(b[1].nombre||'').toLowerCase();
+    return na<nb?-1:na>nb?1:0;
+  });
+
+  if (jugadores.length === 0) { alert('No hay jugadores para exportar.'); return; }
+
+  // Título del filtro activo
+  var tituloFiltro = 'Todos los jugadores';
+  if (filtroActualJugadores === 'pagado')    tituloFiltro = 'Jugadores Pagados';
+  if (filtroActualJugadores === 'pendiente') tituloFiltro = 'Jugadores Pendientes';
+  if (filtroActualJugadores === 'bloqueado') tituloFiltro = 'Jugadores Bloqueados';
+  if (filtroAdminJugadores !== 'todos')      tituloFiltro = 'Jugadores de Admin: ' + filtroAdminJugadores;
+
+  // Construir tabla HTML para Excel
+  var fechaHoy = new Date().toLocaleDateString('es-CO');
+  var filas = jugadores.map(function(e, idx){
+    var cod = e[0], j = e[1];
+    var vals = j.valores || [];
+    var v1 = parseFloat(vals[0])||0;
+    var v2 = parseFloat(vals[1])||0;
+    var v3 = parseFloat(vals[2])||0;
+    var total = v1+v2+v3;
+    var faltante = 50000 - total;
+    var fechas = (j.fechas||[]).filter(function(f){return f;}).join(' / ') || '-';
+    var estado = j.bloqueado ? 'Bloqueado' : (j.pago==='pagado' ? 'Pagado' : 'Pendiente');
+    return '<tr>' +
+      '<td style="text-align:center;">' + (idx+1) + '</td>' +
+      '<td><b>' + (j.nombre||'-') + '</b></td>' +
+      '<td style="color:#1a6b1a;font-weight:bold;">' + cod + '</td>' +
+      '<td>' + (j.celular||'-') + '</td>' +
+      '<td>' + (j.email||'-') + '</td>' +
+      '<td>' + (j.ciudad||'-') + '</td>' +
+      '<td style="text-align:center;">' + estado + '</td>' +
+      '<td style="text-align:right;">$' + v1.toLocaleString('es-CO') + '</td>' +
+      '<td style="text-align:right;">$' + v2.toLocaleString('es-CO') + '</td>' +
+      '<td style="text-align:right;">$' + v3.toLocaleString('es-CO') + '</td>' +
+      '<td style="text-align:right;font-weight:bold;color:' + (total>=50000?'#006400':total>0?'#996600':'#cc0000') + ';">$' + total.toLocaleString('es-CO') + '</td>' +
+      '<td style="text-align:right;color:' + (faltante<=0?'#006400':'#cc0000') + ';">$' + Math.max(0,faltante).toLocaleString('es-CO') + '</td>' +
+      '<td>' + fechas + '</td>' +
+      '<td style="text-align:center;">' + (j.creadoPor||'-') + '</td>' +
+      '</tr>';
+  });
+
+  // HTML completo para Excel
+  var html_excel = (
+    '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">' +
+    '<head><meta charset="UTF-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>' +
+    '<x:Name>Polla 2026</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>' +
+    '</x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body>' +
+    '<table border="1" style="border-collapse:collapse;font-family:Arial,sans-serif;font-size:12px;">' +
+    '<tr><td colspan="14" style="background:#003366;color:#FFD700;font-size:16px;font-weight:bold;padding:10px;text-align:center;">POLLA MUNDIALISTA 2026 — ' + tituloFiltro.toUpperCase() + '</td></tr>' +
+    '<tr><td colspan="14" style="background:#f0f0f0;color:#555;font-size:11px;padding:6px;text-align:center;">Exportado el ' + fechaHoy + ' · Total jugadores: ' + jugadores.length + '</td></tr>' +
+    '<tr style="background:#003366;color:#fff;font-weight:bold;">' +
+    '<th style="padding:6px 10px;">#</th>' +
+    '<th style="padding:6px 10px;">Nombre</th>' +
+    '<th style="padding:6px 10px;">Codigo</th>' +
+    '<th style="padding:6px 10px;">WhatsApp</th>' +
+    '<th style="padding:6px 10px;">Correo</th>' +
+    '<th style="padding:6px 10px;">Ciudad</th>' +
+    '<th style="padding:6px 10px;">Estado</th>' +
+    '<th style="padding:6px 10px;">Pago 1</th>' +
+    '<th style="padding:6px 10px;">Pago 2</th>' +
+    '<th style="padding:6px 10px;">Pago 3</th>' +
+    '<th style="padding:6px 10px;">Total Pagado</th>' +
+    '<th style="padding:6px 10px;">Saldo</th>' +
+    '<th style="padding:6px 10px;">Fechas de Pago</th>' +
+    '<th style="padding:6px 10px;">Creado Por</th>' +
+    '</tr>' +
+    filas.join('') +
+    '</table></body></html>'
+  );
+
+  // Descargar como .xls
+  var blob = new Blob([html_excel], {type:'application/vnd.ms-excel;charset=utf-8'});
+  var url  = URL.createObjectURL(blob);
+  var a    = document.createElement('a');
+  var nombreArchivo = 'Polla2026_' + tituloFiltro.replace(/[^a-zA-Z0-9]/g,'_') + '_' + fechaHoy.replace(/\//g,'-') + '.xls';
+  a.href     = url;
+  a.download = nombreArchivo;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+window.exportarExcel = exportarExcel;
+
+document.addEventListener('click', function(e){
+  var drop = document.getElementById('dropAdmins');
+  if (drop && !drop.parentElement.contains(e.target)) drop.style.display = 'none';
+});
+
 window.togglePago = togglePago;
 window.toggleBloqueo = toggleBloqueo;
 window.eliminarJugador = eliminarJugador;
