@@ -812,11 +812,22 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
       <input type="text" class="busca-input" id="buscadorInput" placeholder="Buscar por codigo o nombre..." oninput="buscarJugador(this.value)">
       <div id="resultadoBusqueda" style="display:none;margin-top:12px;"></div>
     </div>
+    <div class="form-card" style="border-color:var(--accent);">
+      <h3 style="color:var(--accent);">Control de Resultados Oficiales</h3>
+      <p style="font-size:0.8rem;color:#aaa;margin-bottom:14px;">Ingresa el marcador real de cada partido (y si hubo tarjetas). Guarda, y luego dale a <strong style="color:var(--gold);">Ejecutar Escrutinio Global</strong> para repartir los puntos.</p>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;">
+        <button onclick="resJornadaAnterior()" id="btnResAnterior" class="btn-action" style="background:#222;color:#fff;">&#9664; Anterior</button>
+        <div id="resJornadaTitulo" style="font-family:'Bebas Neue',sans-serif;color:var(--gold);font-size:1.2rem;letter-spacing:2px;text-align:center;flex:1;">JORNADA</div>
+        <button onclick="resJornadaSiguiente()" id="btnResSiguiente" class="btn-action" style="background:#222;color:#fff;">Siguiente &#9654;</button>
+      </div>
+      <div id="resultadosContainer"></div>
+    </div>
     <div class="form-card" style="border-color:var(--gold);">
       <h3 style="color:var(--gold);">Escrutinio Global</h3>
-      <p style="font-size:0.8rem;color:#aaa;margin-bottom:15px;">Al ejecutar, el sistema procesara todos los partidos y actualizara el Ranking.</p>
+      <p style="font-size:0.8rem;color:#aaa;margin-bottom:15px;">Al ejecutar, el sistema compara los resultados oficiales contra los pronosticos de todos y reparte los puntos. Puedes ejecutarlo cuantas veces quieras.</p>
       <button class="btn-action btn-gold" onclick="sincronizarFIFA()" style="width:100%;padding:15px;font-size:1rem;">EJECUTAR ESCRUTINIO GLOBAL</button>
-      <div id="statusFIFA" class="status-box">&gt; Conectando...<br><span id="statusLog" style="color:var(--accent);">Esperando...</span></div>
+      <div id="statusFIFA" class="status-box">&gt; Listo para ejecutar.<br><span id="statusLog" style="color:var(--accent);">Esperando...</span></div>
+      <button class="btn-action" onclick="cargarPronosticosPendientes()" style="width:100%;padding:11px;margin-top:12px;background:#1a3a2a;color:var(--green-ok);border:1px solid var(--green-ok);">Cargar 3 pronosticos pendientes (Partido 1)</button>
     </div>
     <div class="form-card">
       <h3>Lista de Jugadores Inscritos</h3>
@@ -1670,6 +1681,7 @@ function mostrarInterfazAdmin(cod) {
   document.getElementById('btnAdmon').style.display = 'inline-block';
   irA('admin');
   renderizarTablaJugadores();
+  renderResultadosAdmin();
   setTimeout(aplicarRestriccionFechas, 300);
   // Botón REGISTRAR solo visible para H175
   var btnReg = document.getElementById('btnRegistrarJugador');
@@ -2220,7 +2232,219 @@ function resetearClave(cod) {
   });
 }
 window.resetearClave = resetearClave;
-function sincronizarFIFA() {
+// ============================================================
+// MOTOR DE PUNTAJE REAL + PANEL DE RESULTADOS (Entrega 2: Bloque A)
+// Reglas por partido: Marcador exacto=3 (incluye al ganador), Ganador=2,
+//   Empate=1, Tarjetas=1, Tiempo extra=1, Penales=1.
+// El campo pts guarda CONTEOS; el ranking multiplica. premundial se preserva.
+// ============================================================
+
+// Calcula los aciertos (conteos) de un pronostico contra el resultado oficial
+function _puntuarPartido(pron, res){
+  var c = {exacto:0, ganador:0, empate:0, tarjetas:0, extra:0, penales:0};
+  if(!pron || !res) return c;
+  var pL=parseInt(pron.golL,10), pV=parseInt(pron.golV,10);
+  var rL=parseInt(res.golL,10),  rV=parseInt(res.golV,10);
+  if(isNaN(pL)||isNaN(pV)||isNaN(rL)||isNaN(rV)) return c;
+  // Marcador y resultado
+  if(pL===rL && pV===rV){
+    c.exacto=1; // exacto ya incluye al ganador, no se suma ganador aparte
+  } else {
+    var resReal = rL>rV?'L':(rL<rV?'V':'E');
+    var resPron = pL>pV?'L':(pL<pV?'V':'E');
+    if(resReal===resPron){
+      if(resReal==='E') c.empate=1; else c.ganador=1;
+    }
+  }
+  // Tarjetas: solo si el pronostico no es N/A y coincide con el resultado
+  if(pron.tarjetas && pron.tarjetas!=='NA' && res.tarjetas && res.tarjetas!=='NA'){
+    if(pron.tarjetas===res.tarjetas) c.tarjetas=1;
+  }
+  // Tiempo extra (solo eliminatorias; en grupos va NA y se ignora)
+  if(pron.extra && pron.extra!=='NA' && res.extra && res.extra!=='NA'){
+    if(pron.extra===res.extra) c.extra=1;
+  }
+  // Penales (solo eliminatorias)
+  if(pron.penales && pron.penales!=='NA' && res.penales && res.penales!=='NA'){
+    if(pron.penales===res.penales) c.penales=1;
+  }
+  return c;
+}
+
+// ESCRUTINIO GLOBAL: recalcula los puntos de TODOS desde cero.
+// Lee resultados oficiales + pronosticos + ajustes manuales, y escribe pts.
+// Es seguro correrlo las veces que quieras (siempre da el total correcto).
+function sincronizarFIFA(){
+  var status = document.getElementById('statusFIFA');
+  var log    = document.getElementById('statusLog');
+  if(status) status.style.display='block';
+  if(log){ log.style.color='var(--accent)'; log.innerText='Leyendo resultados y pronosticos...'; }
+  // Leer las tres ramas en paralelo
+  var refRes = db.ref('resultados').once('value');
+  var refPron= db.ref('pronosticos').once('value');
+  var refAj  = db.ref('ajustes').once('value');
+  Promise.all([refRes, refPron, refAj]).then(function(snaps){
+    var resultados = snaps[0].val() || {};
+    var pronosticos= snaps[1].val() || {};
+    var ajustes    = snaps[2].val() || {};
+    // Contar partidos oficiales con resultado
+    var partidosConResultado = 0;
+    Object.keys(resultados).forEach(function(jk){
+      Object.keys(resultados[jk]||{}).forEach(function(){ partidosConResultado++; });
+    });
+    var jugadores = Object.keys(jugadoresCache);
+    var updates = {};
+    var totalProcesados = 0;
+    jugadores.forEach(function(cod){
+      var acum = {exacto:0, ganador:0, empate:0, tarjetas:0, extra:0, penales:0};
+      var pj = pronosticos[cod] || {};
+      // Recorrer cada jornada/partido pronosticado por este jugador
+      Object.keys(pj).forEach(function(jk){            // jk = 'j2'
+        var partidosJ = pj[jk] || {};
+        var resJ = resultados[jk] || {};
+        Object.keys(partidosJ).forEach(function(pk){   // pk = 'p3'
+          var res = resJ[pk];
+          if(!res) return; // ese partido aun no tiene resultado oficial
+          var c = _puntuarPartido(partidosJ[pk], res);
+          acum.exacto+=c.exacto; acum.ganador+=c.ganador; acum.empate+=c.empate;
+          acum.tarjetas+=c.tarjetas; acum.extra+=c.extra; acum.penales+=c.penales;
+          totalProcesados++;
+        });
+      });
+      // Sumar ajustes manuales (ej. los 3 puntos del Partido 2 - Bloque D)
+      var aj = ajustes[cod] || {};
+      ['exacto','ganador','empate','tarjetas','extra','penales'].forEach(function(k){
+        if(aj[k]) acum[k]+=parseInt(aj[k],10)||0;
+      });
+      // Preservar el premundial ya existente (se calcula al final del torneo)
+      var prev = (jugadoresCache[cod] && jugadoresCache[cod].pts) ? jugadoresCache[cod].pts : {};
+      acum.premundial = prev.premundial || 0;
+      if(aj.premundial) acum.premundial += parseInt(aj.premundial,10)||0;
+      updates['jugadores/'+cod+'/pts'] = acum;
+    });
+    db.ref().update(updates, function(err){
+      if(err){ if(log){ log.style.color='var(--red-alert)'; log.innerText='Error al guardar. Revisa la conexion e intenta de nuevo.'; } return; }
+      if(log){ log.style.color='var(--green-ok)';
+        log.innerHTML = 'OK: '+partidosConResultado+' partido(s) con resultado oficial. OK: '+jugadores.length+' jugador(es) recalculados. OK: Ranking actualizado.'; }
+      if(document.getElementById('sec-ranking') && document.getElementById('sec-ranking').classList.contains('active')) renderizarRanking();
+      alert('Escrutinio completado. El Ranking ya refleja los puntos.');
+    });
+  }).catch(function(){
+    if(log){ log.style.color='var(--red-alert)'; log.innerText='No se pudo leer la base de datos. Revisa tu conexion.'; }
+  });
+}
+
+// ---- PANEL DE RESULTADOS (admin) ----
+var resJornadaVista = null;
+var _resPartidos = [];
+function renderResultadosAdmin(){
+  var data = _getCal();
+  if(!data.nums.length) return;
+  if(resJornadaVista===null) resJornadaVista = calcularJornadaActiva();
+  if(data.nums.indexOf(resJornadaVista)===-1) resJornadaVista = data.nums[0];
+  var partidos = (data.jor[resJornadaVista]||[]).slice().sort(function(a,b){return a.ts-b.ts;});
+  _resPartidos = partidos;
+  var tit = document.getElementById('resJornadaTitulo');
+  if(tit) tit.innerHTML = 'JORNADA '+resJornadaVista+(partidos.length?(' <span style="color:var(--muted);font-size:0.8rem;">'+partidos[0].fec+' 2026</span>'):'');
+  var cont = document.getElementById('resultadosContainer');
+  if(!cont) return;
+  cont.innerHTML = '<p style="color:#888;font-size:0.8rem;">Cargando resultados guardados...</p>';
+  // Leer resultados ya guardados de esta jornada
+  db.ref('resultados/j'+resJornadaVista).once('value', function(snap){
+    var guardados = snap.val() || {};
+    var html = '';
+    partidos.forEach(function(m){
+      var g = guardados['p'+m.num] || {};
+      var golL = (g.golL!==undefined && g.golL!==null) ? g.golL : '';
+      var golV = (g.golV!==undefined && g.golV!==null) ? g.golV : '';
+      var tSi = (g.tarjetas==='SI');
+      html += '<div class="partido-block" data-num="'+m.num+'" style="margin-bottom:14px;">'+
+        '<div class="partido-header"><span>PARTIDO '+m.num+' &middot; Grupo '+m.grupo+'</span>'+
+        '<span class="partido-fecha">'+String(m.local).toUpperCase()+' vs '+String(m.visita).toUpperCase()+'</span></div>'+
+        '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px;background:#0a1422;border:1px solid var(--border);border-radius:0 0 8px 8px;">'+
+          '<div style="text-align:center;"><div style="font-size:0.7rem;color:var(--muted);">'+String(m.local).toUpperCase()+'</div>'+
+            '<input type="number" class="res-golL" min="0" value="'+golL+'" placeholder="0" style="width:60px;padding:8px;text-align:center;font-size:1.1rem;background:#0d1b2a;color:#fff;border:1px solid var(--border);border-radius:5px;"></div>'+
+          '<span style="font-weight:900;color:#666;">-</span>'+
+          '<div style="text-align:center;"><div style="font-size:0.7rem;color:var(--muted);">'+String(m.visita).toUpperCase()+'</div>'+
+            '<input type="number" class="res-golV" min="0" value="'+golV+'" placeholder="0" style="width:60px;padding:8px;text-align:center;font-size:1.1rem;background:#0d1b2a;color:#fff;border:1px solid var(--border);border-radius:5px;"></div>'+
+          '<div style="margin-left:auto;text-align:center;"><div style="font-size:0.7rem;color:var(--muted);margin-bottom:4px;">TARJETAS</div>'+
+            '<div class="res-tarj '+(tSi?'on':'')+'" onclick="toggleResTarjeta(this)" style="cursor:pointer;padding:8px 16px;border-radius:6px;font-weight:700;background:'+(tSi?'var(--green-ok)':'#333')+';color:'+(tSi?'#000':'#aaa')+';min-width:50px;">'+(tSi?'SI':'NO')+'</div></div>'+
+        '</div></div>';
+    });
+    html += '<button class="btn-action btn-green" onclick="guardarResultadosJornada()" style="width:100%;padding:12px;margin-top:6px;">GUARDAR RESULTADOS DE ESTA JORNADA</button>';
+    cont.innerHTML = html;
+  });
+}
+function toggleResTarjeta(el){
+  var on = el.classList.toggle('on');
+  el.innerText = on ? 'SI' : 'NO';
+  el.style.background = on ? 'var(--green-ok)' : '#333';
+  el.style.color = on ? '#000' : '#aaa';
+}
+function resJornadaAnterior(){
+  var data=_getCal(); var idx=data.nums.indexOf(resJornadaVista);
+  if(idx>0){ resJornadaVista=data.nums[idx-1]; renderResultadosAdmin(); }
+}
+function resJornadaSiguiente(){
+  var data=_getCal(); var idx=data.nums.indexOf(resJornadaVista);
+  if(idx<data.nums.length-1){ resJornadaVista=data.nums[idx+1]; renderResultadosAdmin(); }
+}
+function guardarResultadosJornada(){
+  var cont = document.getElementById('resultadosContainer');
+  if(!cont) return;
+  var bloques = cont.querySelectorAll('.partido-block');
+  var datos = {};
+  bloques.forEach(function(b){
+    var num = b.getAttribute('data-num');
+    var gl = b.querySelector('.res-golL');
+    var gv = b.querySelector('.res-golV');
+    var tj = b.querySelector('.res-tarj');
+    if(gl.value==='' || gv.value===''){ return; } // sin marcador completo, no guardar ese partido
+    datos['p'+num] = {
+      num: parseInt(num,10),
+      golL: parseInt(gl.value,10)||0,
+      golV: parseInt(gv.value,10)||0,
+      tarjetas: (tj && tj.classList.contains('on')) ? 'SI' : 'NO',
+      extra: 'NA', penales: 'NA'
+    };
+  });
+  if(Object.keys(datos).length===0){ alert('Escribe el marcador (los dos goles) de al menos un partido.'); return; }
+  showLoading('Guardando resultados...');
+  db.ref('resultados/j'+resJornadaVista).update(datos, function(err){
+    hideLoading();
+    if(err){ alert('Hubo un problema guardando. Revisa tu conexion.'); return; }
+    alert('Resultados guardados. Ahora dale a "Ejecutar Escrutinio Global" para repartir los puntos.');
+  });
+}
+
+// ---- BOTON: cargar los 3 pronosticos pendientes del Partido 1 (Jornada 1) ----
+// Tambien guarda el resultado oficial Mexico 2-0 (con tarjetas) y ejecuta el escrutinio.
+function cargarPronosticosPendientes(){
+  if(!confirm('Esto cargara los 3 pronosticos del Partido 1 (Mexico-Sudafrica), guardara el resultado oficial 2-0 con tarjetas, y repartira los puntos. Es seguro repetirlo. Continuar?')) return;
+  var P1 = {num:1, local:'Mexico', visita:'Sudafrica'};
+  var pendientes = {
+    'W564': {golL:2, golV:0, tarjetas:'NO'},  // Pablo Valencia -> marcador exacto
+    'W291': {golL:1, golV:0, tarjetas:'SI'},  // Hector Fabio Castro -> ganador + tarjetas
+    'W731': {golL:2, golV:1, tarjetas:'SI'}   // Freddy Loaiza -> ganador + tarjetas
+  };
+  showLoading('Cargando pronosticos y resultado...');
+  var updates = {};
+  Object.keys(pendientes).forEach(function(cod){
+    var p = pendientes[cod];
+    updates['pronosticos/'+cod+'/j1/p1'] = {num:1, local:P1.local, visita:P1.visita,
+      golL:p.golL, golV:p.golV, tarjetas:p.tarjetas, extra:'NA', penales:'NA'};
+  });
+  // Resultado oficial del Partido 1: Mexico 2 - 0 Sudafrica, hubo tarjetas
+  updates['resultados/j1/p1'] = {num:1, golL:2, golV:0, tarjetas:'SI', extra:'NA', penales:'NA'};
+  db.ref().update(updates, function(err){
+    hideLoading();
+    if(err){ alert('Hubo un problema. Revisa tu conexion.'); return; }
+    alert('Listo: pronosticos y resultado cargados. Ejecutando escrutinio...');
+    sincronizarFIFA();
+  });
+}
+
+function sincronizarFIFA_old() {
   var status = document.getElementById('statusFIFA');
   var log    = document.getElementById('statusLog');
   status.style.display = 'block';
@@ -2243,53 +2467,35 @@ function abrirModalEnvio() { document.getElementById('modalEnvio').classList.add
 function cerrarModal(id) { document.getElementById(id).classList.remove('open'); }
 function procesarEnvio() {
   cerrarModal('modalEnvio');
-  // Marcar en Firebase que este jugador ya envio ESTA jornada
-  if (usuarioActual) {
-    var jKey = (typeof jornadaVista !== 'undefined' && jornadaVista !== null) ? ('j'+jornadaVista) : new Date().toISOString().split('T')[0];
-    db.ref('envios/' + usuarioActual.codigo + '/' + jKey).set(true);
-  }
-  // Bloquear boton INMEDIATAMENTE
-  var btn = document.querySelector('.btn-enviar');
-  if (btn) {
-    btn.disabled = true;
-    btn.style.background = '#555';
-    btn.style.cursor = 'not-allowed';
-    btn.innerText = '✅ PRONOSTICOS YA ENVIADOS';
-    btn.onclick = null;
-  }
-  // Recoger todos los pronosticos del DOM
-  var lineas = [];
-  lineas.push('POLLA MUNDIALISTA 2026 - PRONOSTICOS');
-  lineas.push('Jugador: ' + (usuarioActual?usuarioActual.nombre:'-') + ' | Codigo: ' + (usuarioActual?usuarioActual.codigo:'-'));
-  lineas.push('Fecha envio: ' + new Date().toLocaleString('es-CO'));
-  lineas.push('');
-  lineas.push('--------------------------------------------------');
-  var bloques = document.querySelectorAll('.partido-block');
+  if (!usuarioActual) { alert('Debes iniciar sesion para enviar pronosticos.'); return; }
+  var cod = usuarioActual.codigo;
+  var jN = (typeof jornadaVista !== 'undefined' && jornadaVista !== null) ? jornadaVista : null;
+  if (jN === null) { alert('No se pudo identificar la jornada.'); return; }
+  // Recoger pronosticos del DOM y mapearlos con los partidos de la jornada
+  var bloques = document.querySelectorAll('#pronosticosContainer .partido-block');
+  var datos = {};
   bloques.forEach(function(bloque, idx) {
-    var header = bloque.querySelector('.partido-header span:first-child');
-    var fechaEl = bloque.querySelector('.partido-fecha');
+    var m = (_partidosVista && _partidosVista[idx]) ? _partidosVista[idx] : null;
     var goles = bloque.querySelectorAll('.in-gol');
     var btnsSI = bloque.querySelectorAll('.btn-si');
-    var celdasNombre = bloque.querySelectorAll('td:first-child');
-    var local = '', visita = '', golL = '-', golV = '-', tarj = '-', extra = '-', penal = '-';
-    if (celdasNombre.length >= 3) {
-      local   = celdasNombre[0].textContent.replace(/[0-9]/g,'').trim();
-      visita  = celdasNombre[2].textContent.replace(/[0-9]/g,'').trim();
-    }
-    if (goles.length >= 2) { golL = goles[0].value||'0'; golV = goles[1].value||'0'; }
-    if (btnsSI.length >= 1) tarj  = btnsSI[0].innerText === 'SI' ? 'SI' : 'NO';
-    if (btnsSI.length >= 2) extra = btnsSI[1].classList.contains('locked') ? 'N/A' : (btnsSI[1].innerText === 'SI' ? 'SI' : 'NO');
-    if (btnsSI.length >= 3) penal = btnsSI[2].classList.contains('locked') ? 'N/A' : (btnsSI[2].innerText === 'SI' ? 'SI' : 'NO');
-    lineas.push('PARTIDO ' + (idx+1) + (header?' | '+header.textContent:''));
-    if (fechaEl) lineas.push('Fecha: ' + fechaEl.textContent);
-    lineas.push(local + ' ' + golL + ' - ' + golV + ' ' + visita);
-    lineas.push('Tarjetas: ' + tarj + ' | Extra T.: ' + extra + ' | Penales: ' + penal);
-    lineas.push('--------------------------------------------------');
+    var golL = (goles[0] && goles[0].value!=='') ? (parseInt(goles[0].value,10)||0) : 0;
+    var golV = (goles[1] && goles[1].value!=='') ? (parseInt(goles[1].value,10)||0) : 0;
+    var tarj = (btnsSI[0] && btnsSI[0].innerText==='SI') ? 'SI' : 'NO';
+    var extra = (btnsSI[1] && !btnsSI[1].classList.contains('locked')) ? (btnsSI[1].innerText==='SI'?'SI':'NO') : 'NA';
+    var penal = (btnsSI[2] && !btnsSI[2].classList.contains('locked')) ? (btnsSI[2].innerText==='SI'?'SI':'NO') : 'NA';
+    var num = m ? m.num : (idx+1);
+    datos['p'+num] = { num:num, local:(m?m.local:''), visita:(m?m.visita:''),
+      golL:golL, golV:golV, tarjetas:tarj, extra:extra, penales:penal };
   });
-    var sep = '\n'; var cuerpoTexto = lineas.join(sep);  var asunto = encodeURIComponent('Pronosticos Polla Mundialista 2026 - ' + (usuarioActual?usuarioActual.codigo:''));
-  var cuerpo = encodeURIComponent(cuerpoTexto);
-  window.location.href = 'mail' + 'to:mipollafutbol' + '@' + 'gmail.com?subject=' + asunto + '&body=' + cuerpo;
-  alert('Pronosticos enviados correctamente.');
+  showLoading('Guardando pronosticos...');
+  db.ref('pronosticos/'+cod+'/j'+jN).update(datos, function(err){
+    db.ref('envios/'+cod+'/j'+jN).set(true);
+    hideLoading();
+    if (err) { alert('Hubo un problema guardando. Revisa tu conexion e intenta de nuevo.'); return; }
+    var btn = document.querySelector('.btn-enviar');
+    if (btn) { btn.disabled=true; btn.style.background='#555'; btn.style.cursor='not-allowed'; btn.innerText='\u2705 PRONOSTICOS YA ENVIADOS'; btn.onclick=null; }
+    alert('Pronosticos guardados correctamente en la nube.');
+  });
 }
 function startTimer(secs, el) {
   var t = secs;
@@ -2360,6 +2566,7 @@ function calcularJornadaActiva(){
   return data.nums.length?data.nums[data.nums.length-1]:1;
 }
 var jornadaVista=null;
+var _partidosVista=[];
 var _timerJorIV=null;
 function renderPronosticos(){
   var data=_getCal();
@@ -2367,6 +2574,7 @@ function renderPronosticos(){
   if(jornadaVista===null) jornadaVista=calcularJornadaActiva();
   if(data.nums.indexOf(jornadaVista)===-1) jornadaVista=data.nums[0];
   var partidos=(data.jor[jornadaVista]||[]).slice().sort(function(a,b){return a.ts-b.ts;});
+  _partidosVista=partidos;
   var cierre=_cierreJornada(jornadaVista);
   var cerrada=Date.now()>=cierre;
   // titulo
@@ -3251,6 +3459,12 @@ window.togglePago = togglePago;
 window.toggleBloqueo = toggleBloqueo;
 window.eliminarJugador = eliminarJugador;
 window.sincronizarFIFA = sincronizarFIFA;
+window.renderResultadosAdmin = renderResultadosAdmin;
+window.resJornadaAnterior = resJornadaAnterior;
+window.resJornadaSiguiente = resJornadaSiguiente;
+window.toggleResTarjeta = toggleResTarjeta;
+window.guardarResultadosJornada = guardarResultadosJornada;
+window.cargarPronosticosPendientes = cargarPronosticosPendientes;
 window.limitarDigitos = limitarDigitos;
 </script>
 </body>
