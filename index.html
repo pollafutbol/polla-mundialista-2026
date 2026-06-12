@@ -512,33 +512,15 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
 <!-- PRONOSTICOS -->
 <div id="sec-pronosticos" class="seccion">
   <div class="pronosticos-wrap">
-    <div class="partido-block">
-      <div class="tendencia-bar">
-        <div class="t-header"><span>LOCAL 70%</span><span>EMPATE 20%</span><span>VISITA 10%</span></div>
-        <div class="t-bar"><div class="t-local" style="width:70%"></div><div class="t-empate" style="width:20%"></div><div class="t-visita" style="width:10%"></div></div>
-      </div>
-      <div class="partido-header">
-        <span>JORNADA 1 &mdash; PARTIDO 1</span>
-        <span class="partido-fecha" id="fechaPartido1">11 Jun 2026 &middot; 2:00 PM</span>
-        <span class="cierre-timer">CIERRE: <span id="timer1">02:45:10</span></span>
-      </div>
-      <div class="tabla-juego-wrap">
-        <table class="tabla-juego">
-          <thead><tr class="tj-subhead"><td>SELECCION LOCAL</td><td>VS</td><td>SELECCION VISITANTE</td><td>TARJETAS</td><td>EXTRA T.</td><td>PENALES</td></tr></thead>
-          <tbody><tr>
-            <td>MEXICO<br><input type="number" class="in-gol" placeholder="0" min="0"></td>
-            <td><span style="background:#000;color:#fff;padding:5px 8px;font-weight:900;">VS</span></td>
-            <td>SUDAFRICA<br><input type="number" class="in-gol" placeholder="0" min="0"></td>
-            <td><div class="btn-si" onclick="toggleSi(this)">-</div></td>
-            <td><div class="btn-si locked">-</div></td>
-            <td><div class="btn-si locked">-</div></td>
-          </tr></tbody>
-        </table>
-      </div>
+    <div id="avisoPronosticos" style="background:#0d1b2a;border:1px solid var(--border);border-left:4px solid var(--gold);border-radius:8px;padding:12px 16px;margin-bottom:16px;color:var(--muted);font-size:0.9rem;line-height:1.45;">
+      Se muestra <strong style="color:var(--accent);">una jornada a la vez</strong> (todos los partidos de un mismo d&iacute;a). Los pron&oacute;sticos se cierran <strong style="color:var(--gold);">2 horas antes</strong> del primer partido de la jornada. Horas en hora de Colombia (puedes cambiar la zona horaria arriba).
     </div>
-    <div class="footer-envio">
-      <button class="btn-enviar" onclick="abrirModalEnvio()">ENVIAR PRONOSTICOS</button>
+    <div class="jornada-nav" style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;">
+      <button id="btnJorAnterior" onclick="jornadaAnterior()" style="background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:8px 14px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;">&#9664; Anterior</button>
+      <div id="jornadaTitulo" style="font-family:'Bebas Neue',sans-serif;color:var(--gold);font-size:1.3rem;letter-spacing:2px;text-align:center;flex:1;line-height:1.1;">JORNADA</div>
+      <button id="btnJorSiguiente" onclick="jornadaSiguiente()" style="background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:8px 14px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;">Siguiente &#9654;</button>
     </div>
+    <div id="pronosticosContainer"></div>
   </div>
 </div>
 
@@ -997,6 +979,10 @@ function cambiarZona(val) {
   tzOffset = parseInt(val) || 0;
   localStorage.setItem('POLLA_TZ', tzOffset);
   actualizarHorariosPronostico();
+  // Si estamos en pronosticos, re-renderizar para actualizar horas
+  if (document.getElementById('sec-pronosticos') && document.getElementById('sec-pronosticos').classList.contains('active') && typeof renderPronosticos === 'function') {
+    renderPronosticos();
+  }
   // Si estamos en simulador, re-renderizar para actualizar horas
   if (document.getElementById('sec-simulador').classList.contains('active')) {
     renderizarGrupo();
@@ -1815,7 +1801,7 @@ function irA(seccion) {
   document.querySelectorAll('.seccion').forEach(function(s){ s.classList.remove('active'); });
   document.getElementById('sec-' + seccion).classList.add('active');
   if (seccion === 'eliminatorias') construirTablaEliminatoria();
-  if (seccion === 'pronosticos') verificarEnvioPronosticos();
+  if (seccion === 'pronosticos') renderPronosticos();
   if (seccion === 'ranking') renderizarRanking();
   if (seccion === 'premundial') { inicializarPaises(); iniciarCuentaRegresivaPM(); verificarEnvioPM(); }
   if (seccion === 'simulador') cambiarGrupo(grupoActual);
@@ -2257,10 +2243,10 @@ function abrirModalEnvio() { document.getElementById('modalEnvio').classList.add
 function cerrarModal(id) { document.getElementById(id).classList.remove('open'); }
 function procesarEnvio() {
   cerrarModal('modalEnvio');
-  // Marcar en Firebase que este jugador ya envio
+  // Marcar en Firebase que este jugador ya envio ESTA jornada
   if (usuarioActual) {
-    var jornada = new Date().toISOString().split('T')[0];
-    db.ref('envios/' + usuarioActual.codigo + '/' + jornada).set(true);
+    var jKey = (typeof jornadaVista !== 'undefined' && jornadaVista !== null) ? ('j'+jornadaVista) : new Date().toISOString().split('T')[0];
+    db.ref('envios/' + usuarioActual.codigo + '/' + jKey).set(true);
   }
   // Bloquear boton INMEDIATAMENTE
   var btn = document.querySelector('.btn-enviar');
@@ -2313,6 +2299,162 @@ function startTimer(secs, el) {
     el.textContent = h+':'+m+':'+s; t--;
   }, 1000);
 }
+
+// ============================================================
+// PRONOSTICOS POR JORNADAS + CALENDARIO REAL + TEMPORIZADOR (Entrega 1: B+C)
+// El calendario se construye a partir de CONFIG_GRUPOS (fase de grupos).
+// Una jornada = todos los partidos de un mismo dia. Hora base = Colombia (UTC-5).
+// ============================================================
+var MESES_PRON = {Ene:0,Feb:1,Mar:2,Abr:3,May:4,Jun:5,Jul:6,Ago:7,Sep:8,Oct:9,Nov:10,Dic:11};
+function _fechaPartidoCol(fec, hor){
+  var pf = String(fec).split('-');
+  var dia = parseInt(pf[0],10);
+  var mes = MESES_PRON[pf[1]]; if(mes===undefined) mes=5;
+  var mh = String(hor).match(/(\d+)\s*(AM|PM)/i);
+  var h = mh?parseInt(mh[1],10):12;
+  var ap = mh?mh[2].toUpperCase():'PM';
+  if(ap==='PM' && h!==12) h+=12;
+  if(ap==='AM' && h===12) h=0;
+  // Colombia = UTC-5 (sin horario de verano): la hora local +5 = UTC
+  return new Date(Date.UTC(2026, mes, dia, h+5, 0, 0));
+}
+var _CALPRON=null,_JORPRON=null,_NUMSJOR=null;
+function _construirCalendario(){
+  var lista=[];
+  if(typeof CONFIG_GRUPOS==='undefined') return lista;
+  Object.keys(CONFIG_GRUPOS).forEach(function(g){
+    var grp=CONFIG_GRUPOS[g];
+    if(!grp||!grp.matches) return;
+    grp.matches.forEach(function(m){
+      lista.push({grupo:g,jor:m.jor,fec:m.fec,hor:m.hor,
+        local:grp.teams[m.l],visita:grp.teams[m.v],city:m.city,
+        ts:_fechaPartidoCol(m.fec,m.hor).getTime()});
+    });
+  });
+  lista.sort(function(a,b){return a.ts-b.ts;});
+  lista.forEach(function(m,i){m.num=i+1;});
+  return lista;
+}
+function _getCal(){
+  if(!_CALPRON){
+    _CALPRON=_construirCalendario();
+    _JORPRON={};
+    _CALPRON.forEach(function(m){ (_JORPRON[m.jor]=_JORPRON[m.jor]||[]).push(m); });
+    _NUMSJOR=Object.keys(_JORPRON).map(Number).sort(function(a,b){return a-b;});
+  }
+  return {cal:_CALPRON,jor:_JORPRON,nums:_NUMSJOR};
+}
+function _cierreJornada(jn){
+  var data=_getCal();
+  var arr=data.jor[jn]||[];
+  if(!arr.length) return Infinity;
+  var primer=Math.min.apply(null,arr.map(function(m){return m.ts;}));
+  return primer - 2*3600*1000; // 2 horas antes del primer partido
+}
+function calcularJornadaActiva(){
+  var data=_getCal();
+  var now=Date.now();
+  for(var i=0;i<data.nums.length;i++){
+    if(now < _cierreJornada(data.nums[i])) return data.nums[i];
+  }
+  return data.nums.length?data.nums[data.nums.length-1]:1;
+}
+var jornadaVista=null;
+var _timerJorIV=null;
+function renderPronosticos(){
+  var data=_getCal();
+  if(!data.nums.length) return;
+  if(jornadaVista===null) jornadaVista=calcularJornadaActiva();
+  if(data.nums.indexOf(jornadaVista)===-1) jornadaVista=data.nums[0];
+  var partidos=(data.jor[jornadaVista]||[]).slice().sort(function(a,b){return a.ts-b.ts;});
+  var cierre=_cierreJornada(jornadaVista);
+  var cerrada=Date.now()>=cierre;
+  // titulo
+  var fechaTxt=partidos.length?(partidos[0].fec+' 2026'):'';
+  var tit=document.getElementById('jornadaTitulo');
+  if(tit) tit.innerHTML='JORNADA '+jornadaVista+'<br><span style="font-size:0.85rem;color:var(--muted);letter-spacing:1px;">'+fechaTxt+'</span>';
+  // botones nav
+  var idx=data.nums.indexOf(jornadaVista);
+  var bA=document.getElementById('btnJorAnterior'), bS=document.getElementById('btnJorSiguiente');
+  if(bA){ bA.disabled=idx<=0; bA.style.opacity=idx<=0?'0.4':'1'; bA.style.cursor=idx<=0?'not-allowed':'pointer'; }
+  if(bS){ bS.disabled=idx>=data.nums.length-1; bS.style.opacity=idx>=data.nums.length-1?'0.4':'1'; bS.style.cursor=idx>=data.nums.length-1?'not-allowed':'pointer'; }
+  // construir HTML
+  var html='';
+  html+='<div style="text-align:center;margin-bottom:16px;">'+
+        '<div style="font-family:\'Barlow Condensed\',sans-serif;color:var(--muted);font-size:0.8rem;letter-spacing:2px;">'+(cerrada?'ESTADO':'CIERRA EN')+'</div>'+
+        '<div id="timerJornada" style="font-family:\'Bebas Neue\',sans-serif;font-size:2rem;letter-spacing:3px;color:'+(cerrada?'var(--red-alert)':'var(--accent)')+';">'+(cerrada?'CERRADA':'--:--:--')+'</div>'+
+        '</div>';
+  partidos.forEach(function(m){
+    html+='<div class="partido-block">'+
+      '<div class="partido-header">'+
+        '<span>PARTIDO '+m.num+' &middot; Grupo '+m.grupo+'</span>'+
+        '<span class="partido-fecha">'+m.fec+' 2026 &middot; '+ajustarHora(m.hor)+'</span>'+
+      '</div>'+
+      '<div class="tabla-juego-wrap"><table class="tabla-juego">'+
+        '<thead><tr class="tj-subhead"><td>SELECCION LOCAL</td><td>VS</td><td>SELECCION VISITANTE</td><td>TARJETAS</td><td>EXTRA T.</td><td>PENALES</td></tr></thead>'+
+        '<tbody><tr>'+
+          '<td>'+String(m.local).toUpperCase()+'<br><input type="number" class="in-gol" placeholder="0" min="0"'+(cerrada?' disabled':'')+'></td>'+
+          '<td><span style="background:#000;color:#fff;padding:5px 8px;font-weight:900;">VS</span></td>'+
+          '<td>'+String(m.visita).toUpperCase()+'<br><input type="number" class="in-gol" placeholder="0" min="0"'+(cerrada?' disabled':'')+'></td>'+
+          '<td><div class="btn-si'+(cerrada?' locked':'')+'" onclick="toggleSi(this)">-</div></td>'+
+          '<td><div class="btn-si locked">-</div></td>'+
+          '<td><div class="btn-si locked">-</div></td>'+
+        '</tr></tbody>'+
+      '</table></div>'+
+    '</div>';
+  });
+  html+='<div class="footer-envio">';
+  if(cerrada){
+    html+='<button class="btn-enviar" disabled style="background:#555;cursor:not-allowed;">JORNADA CERRADA</button>';
+  }else{
+    html+='<button class="btn-enviar" onclick="abrirModalEnvio()">ENVIAR PRONOSTICOS</button>';
+  }
+  html+='</div>';
+  var cont=document.getElementById('pronosticosContainer');
+  if(cont) cont.innerHTML=html;
+  iniciarTimerJornada(cierre, cerrada);
+  verificarEnvioJornada();
+}
+function iniciarTimerJornada(cierre, cerrada){
+  if(_timerJorIV){ clearInterval(_timerJorIV); _timerJorIV=null; }
+  var el=document.getElementById('timerJornada');
+  if(!el) return;
+  if(cerrada){ el.textContent='CERRADA'; return; }
+  function tick(){
+    var el2=document.getElementById('timerJornada');
+    if(!el2){ clearInterval(_timerJorIV); _timerJorIV=null; return; }
+    var rest=cierre-Date.now();
+    if(rest<=0){ el2.textContent='CERRADA'; el2.style.color='var(--red-alert)'; clearInterval(_timerJorIV); _timerJorIV=null; if(document.getElementById('sec-pronosticos').classList.contains('active')) renderPronosticos(); return; }
+    var s=Math.floor(rest/1000);
+    var d=Math.floor(s/86400);
+    var h=Math.floor((s%86400)/3600);
+    var mi=Math.floor((s%3600)/60);
+    var se=s%60;
+    el2.textContent=(d>0?d+'d ':'')+String(h).padStart(2,'0')+':'+String(mi).padStart(2,'0')+':'+String(se).padStart(2,'0');
+  }
+  tick();
+  _timerJorIV=setInterval(tick,1000);
+}
+function verificarEnvioJornada(){
+  if(typeof usuarioActual==='undefined' || !usuarioActual) return;
+  db.ref('envios/'+usuarioActual.codigo+'/j'+jornadaVista).once('value',function(snap){
+    if(snap.val()){
+      var btn=document.querySelector('.btn-enviar');
+      if(btn){ btn.disabled=true; btn.style.background='#555'; btn.style.cursor='not-allowed'; btn.innerText='\u2705 YA ENVIADA'; btn.onclick=null; }
+    }
+  });
+}
+function jornadaAnterior(){
+  var data=_getCal(); var idx=data.nums.indexOf(jornadaVista);
+  if(idx>0){ jornadaVista=data.nums[idx-1]; renderPronosticos(); }
+}
+function jornadaSiguiente(){
+  var data=_getCal(); var idx=data.nums.indexOf(jornadaVista);
+  if(idx<data.nums.length-1){ jornadaVista=data.nums[idx+1]; renderPronosticos(); }
+}
+window.renderPronosticos=renderPronosticos;
+window.jornadaAnterior=jornadaAnterior;
+window.jornadaSiguiente=jornadaSiguiente;
 
 // ============================================================
 // PRE-MUNDIAL
@@ -2901,8 +3043,7 @@ window.addEventListener('load', function(){
   inicializarPaises();
   construirTablaEliminatoria();
   cambiarGrupo('A');
-  var t1=document.getElementById('timer1');
-  if(t1)startTimer(9910,t1);
+  // (Temporizador real: se calcula al abrir Pronosticos, ver renderPronosticos)
   actualizarHorariosPronostico();
   // Restaurar sesion
   var ss=sessionStorage.getItem('pollaUser');
