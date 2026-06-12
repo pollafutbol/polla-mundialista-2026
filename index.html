@@ -498,11 +498,11 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
       <div class="pm-card">
         <h3 style="color:var(--accent);">Premios Individuales</h3>
         <div class="pm-field"><label>Bota de Oro / Goleador <span class="pts-badge">(5 pts)</span></label>
-          <div class="dual-sel"><select class="pm-select pm-select-pais selector-filtro" onchange="cargarJugadores(this,'pm-goleador-list')"><option value="">Pais...</option></select><select class="pm-select" id="pm-goleador-list"><option>Jugador...</option></select></div></div>
+          <div class="dual-sel"><select class="pm-select pm-select-pais selector-filtro" id="pm-goleador-pais" onchange="cargarJugadores(this,'pm-goleador-list')"><option value="">Pais...</option></select><select class="pm-select" id="pm-goleador-list"><option>Jugador...</option></select></div></div>
         <div class="pm-field"><label>Mejor Jugador MVP <span class="pts-badge">(5 pts)</span></label>
-          <div class="dual-sel"><select class="pm-select pm-select-pais selector-filtro" onchange="cargarJugadores(this,'pm-mvp-list')"><option value="">Pais...</option></select><select class="pm-select" id="pm-mvp-list"><option>Jugador...</option></select></div></div>
+          <div class="dual-sel"><select class="pm-select pm-select-pais selector-filtro" id="pm-mvp-pais" onchange="cargarJugadores(this,'pm-mvp-list')"><option value="">Pais...</option></select><select class="pm-select" id="pm-mvp-list"><option>Jugador...</option></select></div></div>
         <div class="pm-field"><label>Mejor Portero <span class="pts-badge">(3 pts)</span></label>
-          <div class="dual-sel"><select class="pm-select pm-select-pais selector-filtro" onchange="cargarJugadores(this,'pm-portero-list',true)"><option value="">Pais...</option></select><select class="pm-select" id="pm-portero-list"><option>Portero...</option></select></div></div>
+          <div class="dual-sel"><select class="pm-select pm-select-pais selector-filtro" id="pm-portero-pais" onchange="cargarJugadores(this,'pm-portero-list',true)"><option value="">Pais...</option></select><select class="pm-select" id="pm-portero-list"><option>Portero...</option></select></div></div>
       </div>
     </div>
     <button class="btn-guardar-pm" onclick="confirmarGuardadoPM()">Guardar Predicciones Pre-Mundial</button>
@@ -847,6 +847,22 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
       <button class="btn-action btn-gold" onclick="sincronizarFIFA()" style="width:100%;padding:15px;font-size:1rem;">EJECUTAR ESCRUTINIO GLOBAL</button>
       <div id="statusFIFA" class="status-box">&gt; Listo para ejecutar.<br><span id="statusLog" style="color:var(--accent);">Esperando...</span></div>
       <button class="btn-action" onclick="cargarPronosticosPendientes()" style="width:100%;padding:11px;margin-top:12px;background:#1a3a2a;color:var(--green-ok);border:1px solid var(--green-ok);">Cargar 3 pronosticos pendientes (Partido 1)</button>
+      <button class="btn-action" onclick="otorgarPuntosPartido2()" style="width:100%;padding:11px;margin-top:10px;background:#3a2a0a;color:var(--gold);border:1px solid var(--gold);">Otorgar 3 puntos a todos (error Partido 2)</button>
+    </div>
+    <div class="form-card" style="border-color:var(--gold2);">
+      <h3 style="color:var(--gold2);">Resultados Oficiales Pre-Mundial</h3>
+      <p style="font-size:0.8rem;color:#aaa;margin-bottom:14px;">Llena esto SOLO al final del torneo. Al guardar y ejecutar el Escrutinio Global, se reparten los bonos del Pre-Mundial a quien acerto.</p>
+      <div class="pm-field"><label>Campeon <span class="pts-badge">(5 pts)</span></label><select class="pm-select selector-paises" id="po-campeon"><option>Elegir Seleccion...</option></select></div>
+      <div class="pm-field"><label>Sub-Campeon <span class="pts-badge">(3 pts)</span></label><select class="pm-select selector-paises" id="po-subcampeon"><option>Elegir Seleccion...</option></select></div>
+      <div class="pm-field"><label>Tercer Puesto <span class="pts-badge">(2 pts)</span></label><select class="pm-select selector-paises" id="po-tercero"><option>Elegir Seleccion...</option></select></div>
+      <div class="pm-field"><label>Cuarto Puesto <span class="pts-badge">(2 pts)</span></label><select class="pm-select selector-paises" id="po-cuarto"><option>Elegir Seleccion...</option></select></div>
+      <div class="pm-field"><label>Bota de Oro / Goleador <span class="pts-badge">(5 pts)</span></label>
+        <div class="dual-sel"><select class="pm-select selector-filtro" id="po-goleador-pais" onchange="cargarJugadores(this,'po-goleador-list')"><option value="">Pais...</option></select><select class="pm-select" id="po-goleador-list"><option>Jugador...</option></select></div></div>
+      <div class="pm-field"><label>Mejor Jugador MVP <span class="pts-badge">(5 pts)</span></label>
+        <div class="dual-sel"><select class="pm-select selector-filtro" id="po-mvp-pais" onchange="cargarJugadores(this,'po-mvp-list')"><option value="">Pais...</option></select><select class="pm-select" id="po-mvp-list"><option>Jugador...</option></select></div></div>
+      <div class="pm-field"><label>Mejor Portero <span class="pts-badge">(3 pts)</span></label>
+        <div class="dual-sel"><select class="pm-select selector-filtro" id="po-portero-pais" onchange="cargarJugadores(this,'po-portero-list',true)"><option value="">Pais...</option></select><select class="pm-select" id="po-portero-list"><option>Portero...</option></select></div></div>
+      <button class="btn-action btn-gold" onclick="guardarPremundialOficial()" style="width:100%;padding:12px;margin-top:10px;">GUARDAR RESULTADOS PRE-MUNDIAL</button>
     </div>
     <div class="form-card">
       <h3>Lista de Jugadores Inscritos</h3>
@@ -1701,6 +1717,8 @@ function mostrarInterfazAdmin(cod) {
   irA('admin');
   renderizarTablaJugadores();
   renderResultadosAdmin();
+  inicializarPaises();
+  cargarPremundialOficial();
   setTimeout(aplicarRestriccionFechas, 300);
   // Botón REGISTRAR solo visible para H175
   var btnReg = document.getElementById('btnRegistrarJugador');
@@ -2298,14 +2316,19 @@ function sincronizarFIFA(){
   var log    = document.getElementById('statusLog');
   if(status) status.style.display='block';
   if(log){ log.style.color='var(--accent)'; log.innerText='Leyendo resultados y pronosticos...'; }
-  // Leer las tres ramas en paralelo
+  // Leer las ramas en paralelo
   var refRes = db.ref('resultados').once('value');
   var refPron= db.ref('pronosticos').once('value');
   var refAj  = db.ref('ajustes').once('value');
-  Promise.all([refRes, refPron, refAj]).then(function(snaps){
+  var refPM  = db.ref('premundial').once('value');
+  var refPMO = db.ref('premundial_oficial').once('value');
+  Promise.all([refRes, refPron, refAj, refPM, refPMO]).then(function(snaps){
     var resultados = snaps[0].val() || {};
     var pronosticos= snaps[1].val() || {};
     var ajustes    = snaps[2].val() || {};
+    var premundial = snaps[3].val() || {};
+    var pmOficial  = snaps[4].val() || {};
+    var hayPMOficial = pmOficial && (pmOficial.campeon||pmOficial.subcampeon||pmOficial.tercero||pmOficial.cuarto||pmOficial.goleador||pmOficial.mvp||pmOficial.portero);
     // Contar partidos oficiales con resultado
     var partidosConResultado = 0;
     Object.keys(resultados).forEach(function(jk){
@@ -2335,9 +2358,13 @@ function sincronizarFIFA(){
       ['exacto','ganador','empate','tarjetas','extra','penales'].forEach(function(k){
         if(aj[k]) acum[k]+=parseInt(aj[k],10)||0;
       });
-      // Preservar el premundial ya existente (se calcula al final del torneo)
+      // Puntaje Pre-Mundial: solo cuando ya hay resultados oficiales (final del torneo)
       var prev = (jugadoresCache[cod] && jugadoresCache[cod].pts) ? jugadoresCache[cod].pts : {};
-      acum.premundial = prev.premundial || 0;
+      if(hayPMOficial){
+        acum.premundial = _puntosPremundial(premundial[cod], pmOficial);
+      } else {
+        acum.premundial = prev.premundial || 0; // aun no hay oficiales: preservar
+      }
       if(aj.premundial) acum.premundial += parseInt(aj.premundial,10)||0;
       updates['jugadores/'+cod+'/pts'] = acum;
     });
@@ -2353,7 +2380,73 @@ function sincronizarFIFA(){
   });
 }
 
-// ---- PANEL DE RESULTADOS (admin) ----
+// ---- BOTON: 3 puntos a todos por el error del Partido 2 (Bloque D) ----
+// Suma 1 acierto exacto (=3 pts) a TODOS como ajuste manual. Es idempotente.
+function otorgarPuntosPartido2(){
+  if(!confirm('Esto otorgara 3 puntos (1 marcador exacto) a TODOS los jugadores por el error del Partido 2. Es seguro repetirlo (no duplica). Continuar?')) return;
+  var jugadores = Object.keys(jugadoresCache);
+  if(jugadores.length===0){ alert('No hay jugadores cargados todavia.'); return; }
+  showLoading('Aplicando puntos a todos...');
+  var updates = {};
+  jugadores.forEach(function(cod){
+    updates['ajustes/'+cod+'/exacto'] = 1; // set, no incrementa -> idempotente
+  });
+  db.ref().update(updates, function(err){
+    hideLoading();
+    if(err){ alert('Hubo un problema. Revisa tu conexion.'); return; }
+    alert('Puntos aplicados. Ejecutando escrutinio para reflejarlos...');
+    sincronizarFIFA();
+  });
+}
+
+// ---- RESULTADOS OFICIALES PRE-MUNDIAL (se llenan al final del torneo) ----
+function guardarPremundialOficial(){
+  function valSel(id){ var e=document.getElementById(id); if(!e) return ''; var v=e.value||''; if(v.indexOf('...')!==-1||v==='Elegir Seleccion...'||v==='Seleccionar...') return ''; return v; }
+  function paisDe(id){ var e=document.getElementById(id); return (e&&e.value)?e.value:''; }
+  var po = {
+    campeon: valSel('po-campeon'),
+    subcampeon: valSel('po-subcampeon'),
+    tercero: valSel('po-tercero'),
+    cuarto: valSel('po-cuarto'),
+    goleador: valSel('po-goleador-list'),
+    goleadorPais: paisDe('po-goleador-pais'),
+    mvp: valSel('po-mvp-list'),
+    mvpPais: paisDe('po-mvp-pais'),
+    portero: valSel('po-portero-list'),
+    porteroPais: paisDe('po-portero-pais')
+  };
+  showLoading('Guardando resultados Pre-Mundial...');
+  db.ref('premundial_oficial').set(po, function(err){
+    hideLoading();
+    if(err){ alert('Hubo un problema guardando. Revisa tu conexion.'); return; }
+    alert('Resultados Pre-Mundial guardados. Dale a "Ejecutar Escrutinio Global" para repartir los bonos.');
+  });
+}
+function cargarPremundialOficial(){
+  db.ref('premundial_oficial').once('value', function(snap){
+    var po = snap.val(); if(!po) return;
+    function setSel(id,val){ var e=document.getElementById(id); if(e&&val) e.value=val; }
+    setSel('po-campeon',po.campeon); setSel('po-subcampeon',po.subcampeon);
+    setSel('po-tercero',po.tercero); setSel('po-cuarto',po.cuarto);
+    _restaurarAwardPM('po-goleador-pais','po-goleador-list', po.goleadorPais, po.goleador, false);
+    _restaurarAwardPM('po-mvp-pais','po-mvp-list', po.mvpPais, po.mvp, false);
+    _restaurarAwardPM('po-portero-pais','po-portero-list', po.porteroPais, po.portero, true);
+  });
+}
+
+// Calcula los puntos de bono del Pre-Mundial de un jugador contra el resultado oficial
+function _puntosPremundial(pred, ofi){
+  if(!pred || !ofi) return 0;
+  var p = 0;
+  if(pred.campeon && ofi.campeon && pred.campeon===ofi.campeon) p+=5;
+  if(pred.subcampeon && ofi.subcampeon && pred.subcampeon===ofi.subcampeon) p+=3;
+  if(pred.tercero && ofi.tercero && pred.tercero===ofi.tercero) p+=2;
+  if(pred.cuarto && ofi.cuarto && pred.cuarto===ofi.cuarto) p+=2;
+  if(pred.goleador && ofi.goleador && pred.goleador===ofi.goleador) p+=5;
+  if(pred.mvp && ofi.mvp && pred.mvp===ofi.mvp) p+=5;
+  if(pred.portero && ofi.portero && pred.portero===ofi.portero) p+=3;
+  return p;
+}
 var resJornadaVista = null;
 var _resPartidos = [];
 function renderResultadosAdmin(){
@@ -2607,6 +2700,11 @@ function renderPronosticos(){
   if(bS){ bS.disabled=idx>=data.nums.length-1; bS.style.opacity=idx>=data.nums.length-1?'0.4':'1'; bS.style.cursor=idx>=data.nums.length-1?'not-allowed':'pointer'; }
   // construir HTML
   var html='';
+  if(jornadaVista===1){
+    html+='<div style="background:rgba(255,221,0,0.08);border:1px solid var(--gold);border-left:4px solid var(--gold);border-radius:8px;padding:12px 16px;margin-bottom:16px;color:#e8d98a;font-size:0.86rem;line-height:1.5;">'+
+          '<strong style="color:var(--gold);">AVISO:</strong> Por un error digital, el Partido 2 de esta jornada (Corea del Sur vs R.Checa) no se pudo enviar a tiempo. Para no perjudicar a nadie, la administracion otorga <strong style="color:var(--gold);">3 puntos a todos los jugadores</strong> en ese partido.'+
+          '</div>';
+  }
   html+='<div style="text-align:center;margin-bottom:16px;">'+
         '<div style="font-family:\'Barlow Condensed\',sans-serif;color:var(--muted);font-size:0.8rem;letter-spacing:2px;">'+(cerrada?'ESTADO':'CIERRA EN')+'</div>'+
         '<div id="timerJornada" style="font-family:\'Bebas Neue\',sans-serif;font-size:2rem;letter-spacing:3px;color:'+(cerrada?'var(--red-alert)':'var(--accent)')+';">'+(cerrada?'CERRADA':'--:--:--')+'</div>'+
@@ -2686,17 +2784,30 @@ window.jornadaSiguiente=jornadaSiguiente;
 // ============================================================
 // PRE-MUNDIAL
 // ============================================================
+function _limitePM(){
+  // El Pre-Mundial cierra al EMPEZAR la Jornada 11 (primer partido del dia 11)
+  var data = _getCal();
+  var arr = (data.jor && data.jor[11]) ? data.jor[11] : [];
+  if(!arr.length) return new Date('2026-06-21T16:00:00-05:00').getTime();
+  return Math.min.apply(null, arr.map(function(m){return m.ts;}));
+}
+function pmCerrado(){ return Date.now() >= _limitePM(); }
+var _timerPMIV=null;
 function iniciarCuentaRegresivaPM() {
-  var limite = new Date('2026-05-30T23:59:00-05:00');
   var el = document.getElementById('timerPM');
   if (!el) return;
+  if(_timerPMIV){ clearInterval(_timerPMIV); _timerPMIV=null; }
+  var limite = _limitePM();
   function tick(){
-    var diff = limite - new Date();
-    if (diff <= 0) { el.innerText = 'CERRADO'; return; }
+    var el2 = document.getElementById('timerPM');
+    if(!el2){ clearInterval(_timerPMIV); _timerPMIV=null; return; }
+    var diff = limite - Date.now();
+    if (diff <= 0) { el2.innerText = 'CERRADO'; clearInterval(_timerPMIV); _timerPMIV=null; bloquearBotonPM('CERRADO - PLAZO VENCIDO'); return; }
     var d=Math.floor(diff/86400000), h=Math.floor((diff%86400000)/3600000), m=Math.floor((diff%3600000)/60000), s=Math.floor((diff%60000)/1000);
-    el.innerText = (d>0?d+'d ':'')+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+    el2.innerText = (d>0?d+'d ':'')+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
   }
-  tick(); setInterval(tick, 1000);
+  tick();
+  _timerPMIV = setInterval(tick, 1000);
 }
 function inicializarPaises() {
   document.querySelectorAll('.selector-paises').forEach(function(sel){
@@ -2715,36 +2826,42 @@ function cargarJugadores(selPais, targetId, soloPorteros) {
   }
 }
 function confirmarGuardadoPM() {
-  if (confirm('ATENCION: Una vez enviadas, las predicciones NO se pueden cambiar. Deseas guardar?')) {
-    if (!usuarioActual) return;
-    // Guardar predicciones en Firebase
-    var pm = {
-      campeon: document.getElementById('pm-campeon').value,
-      subcampeon: document.getElementById('pm-subcampeon').value,
-      tercero: document.getElementById('pm-tercero').value,
-      cuarto: document.getElementById('pm-cuarto').value,
-      enviado: true,
-      fecha: new Date().toISOString()
-    };
-    showLoading('Guardando predicciones...');
-    db.ref('premundial/' + usuarioActual.codigo).set(pm, function() {
-      hideLoading();
-      alert('Predicciones Pre-Mundial guardadas. Buena suerte!');
-      bloquearBotonPM();
-    });
-  }
+  if (pmCerrado()) { alert('El plazo para enviar el Pre-Mundial ya se cerro (cerro al empezar la Jornada 11).'); bloquearBotonPM('CERRADO - PLAZO VENCIDO'); return; }
+  if (!confirm('ATENCION: Una vez enviadas, las predicciones NO se pueden cambiar. Deseas guardar?')) return;
+  if (!usuarioActual) return;
+  function valSel(id){ var e=document.getElementById(id); if(!e) return ''; var v=e.value||''; if(v.indexOf('...')!==-1||v==='Elegir Seleccion...'||v==='Seleccionar...') return ''; return v; }
+  function paisDe(id){ var e=document.getElementById(id); return (e&&e.value)?e.value:''; }
+  var pm = {
+    campeon: valSel('pm-campeon'),
+    subcampeon: valSel('pm-subcampeon'),
+    tercero: valSel('pm-tercero'),
+    cuarto: valSel('pm-cuarto'),
+    goleador: valSel('pm-goleador-list'),
+    goleadorPais: paisDe('pm-goleador-pais'),
+    mvp: valSel('pm-mvp-list'),
+    mvpPais: paisDe('pm-mvp-pais'),
+    portero: valSel('pm-portero-list'),
+    porteroPais: paisDe('pm-portero-pais'),
+    enviado: true,
+    fecha: new Date().toISOString()
+  };
+  showLoading('Guardando predicciones...');
+  db.ref('premundial/' + usuarioActual.codigo).set(pm, function() {
+    hideLoading();
+    alert('Predicciones Pre-Mundial guardadas. Buena suerte!');
+    bloquearBotonPM();
+  });
 }
 
-function bloquearBotonPM() {
+function bloquearBotonPM(msg) {
   var btn = document.querySelector('.btn-guardar-pm');
   if (btn) {
     btn.disabled = true;
     btn.style.background = '#555';
     btn.style.cursor = 'not-allowed';
-    btn.innerText = 'PREDICCIONES YA ENVIADAS';
+    btn.innerText = msg || 'PREDICCIONES YA ENVIADAS';
     btn.onclick = null;
   }
-  // Bloquear todos los selects del pre-mundial
   document.querySelectorAll('.pm-select, .pm-select-pais').forEach(function(sel) {
     sel.disabled = true;
   });
@@ -2756,13 +2873,24 @@ function verificarEnvioPM() {
     var pm = snap.val();
     if (pm && pm.enviado) {
       bloquearBotonPM();
-      // Restaurar valores guardados
       if (pm.campeon) document.getElementById('pm-campeon').value = pm.campeon;
       if (pm.subcampeon) document.getElementById('pm-subcampeon').value = pm.subcampeon;
       if (pm.tercero) document.getElementById('pm-tercero').value = pm.tercero;
       if (pm.cuarto) document.getElementById('pm-cuarto').value = pm.cuarto;
+      _restaurarAwardPM('pm-goleador-pais','pm-goleador-list', pm.goleadorPais, pm.goleador, false);
+      _restaurarAwardPM('pm-mvp-pais','pm-mvp-list', pm.mvpPais, pm.mvp, false);
+      _restaurarAwardPM('pm-portero-pais','pm-portero-list', pm.porteroPais, pm.portero, true);
+    } else if (pmCerrado()) {
+      bloquearBotonPM('CERRADO - PLAZO VENCIDO');
     }
   });
+}
+function _restaurarAwardPM(paisId, listId, pais, jugador, soloPorteros){
+  if(!pais || !jugador) return;
+  var ps = document.getElementById(paisId);
+  if(ps){ ps.value = pais; cargarJugadores(ps, listId, soloPorteros); }
+  var ls = document.getElementById(listId);
+  if(ls) ls.value = jugador;
 }
 window.bloquearBotonPM = bloquearBotonPM;
 window.verificarEnvioPM = verificarEnvioPM;
@@ -3484,6 +3612,9 @@ window.resJornadaSiguiente = resJornadaSiguiente;
 window.toggleResTarjeta = toggleResTarjeta;
 window.guardarResultadosJornada = guardarResultadosJornada;
 window.cargarPronosticosPendientes = cargarPronosticosPendientes;
+window.otorgarPuntosPartido2 = otorgarPuntosPartido2;
+window.guardarPremundialOficial = guardarPremundialOficial;
+window.cargarPremundialOficial = cargarPremundialOficial;
 window.limitarDigitos = limitarDigitos;
 </script>
 </body>
