@@ -656,18 +656,28 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
       </ul>
     </div>
     <div class="reg-section">
-      <h3>2. Sistema de Puntuacion</h3>
+      <h3>2. Sistema de Puntuacion (por partido)</h3>
       <table class="pts-table">
         <thead><tr><th>Acierto</th><th>Puntos</th><th>Descripcion</th></tr></thead>
         <tbody>
-          <tr><td>Marcador Exacto</td><td class="pts-num">3 pts</td><td>Acertas el resultado exacto. No se acumula con Al Ganador ni Al Empate.</td></tr>
-          <tr><td>Al Ganador</td><td class="pts-num">2 pts</td><td>Acertas quien gana pero no el marcador exacto</td></tr>
-          <tr><td>Al Empate</td><td class="pts-num">1 pt</td><td>Acertas el empate (cualquier marcador igualado)</td></tr>
-          <tr><td>Tarjetas</td><td class="pts-num">1 pt</td><td>Marcas SI y hay al menos una tarjeta en el partido</td></tr>
-          <tr><td>Extra Tiempo</td><td class="pts-num">1 pt</td><td>Acertas si hay tiempo extra (solo fase eliminatoria)</td></tr>
-          <tr><td>Penales</td><td class="pts-num">1 pt</td><td>Acertas si el partido se define en penales (solo eliminatoria)</td></tr>
+          <tr><td>Marcador Exacto</td><td class="pts-num">3 pts</td><td>Aciertas el resultado exacto (los dos goles). Ya incluye al ganador: NO se suma ademas "Al Ganador" ni "Al Empate".</td></tr>
+          <tr><td>Al Ganador</td><td class="pts-num">2 pts</td><td>Aciertas que equipo gana, pero no el marcador exacto.</td></tr>
+          <tr><td>Al Empate</td><td class="pts-num">1 pt</td><td>Aciertas que hay empate (cualquier marcador igualado), pero no el marcador exacto.</td></tr>
+          <tr><td>Tarjetas</td><td class="pts-num">1 pt</td><td>Solo lo ganas si marcas <strong>SI</strong> y en el partido hubo al menos una tarjeta. Si lo dejas en "-" (NO), este punto no suma.</td></tr>
+          <tr><td>Tiempo Extra</td><td class="pts-num">1 pt</td><td>Aciertas si el partido se va a tiempo extra. Solo aplica en fase eliminatoria.</td></tr>
+          <tr><td>Penales</td><td class="pts-num">1 pt</td><td>Aciertas si el partido se define en penales. Solo aplica en fase eliminatoria.</td></tr>
         </tbody>
       </table>
+      <div style="background:#0a1f16;border:1px solid var(--green-ok);border-left:4px solid var(--green-ok);border-radius:8px;padding:14px 16px;margin-top:16px;">
+        <p style="color:var(--green-ok);font-weight:700;margin:0 0 8px;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;">EJEMPLO PRACTICO</p>
+        <p style="color:#ccc;font-size:0.88rem;margin:0 0 8px;line-height:1.5;">Resultado real: <strong>Mexico 2 - 0 Sudafrica</strong>, con tarjetas.</p>
+        <ul style="color:#ccc;font-size:0.88rem;line-height:1.6;margin:0;padding-left:18px;">
+          <li>Pronosticaste <strong>2-0</strong> y Tarjetas NO &rarr; acertaste el marcador exacto = <strong>3 pts</strong>. (Las tarjetas no suman porque marcaste NO.)</li>
+          <li>Pronosticaste <strong>1-0</strong> y Tarjetas SI &rarr; acertaste al ganador (2) + tarjetas (1) = <strong>3 pts</strong>.</li>
+          <li>Pronosticaste <strong>0-2</strong> (gana el visitante) &rarr; no acertaste nada = <strong>0 pts</strong>.</li>
+        </ul>
+      </div>
+      <p style="color:#888;font-size:0.82rem;margin-top:12px;">El Ranking muestra cuantos aciertos llevas de cada tipo y el total de puntos. Los puntos se reparten despues de que la administracion carga el resultado oficial de cada partido.</p>
     </div>
     <div class="reg-section">
       <h3>3. Hoja Pre-Mundial (Bonos)</h3>
@@ -691,12 +701,21 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
       </ol>
     </div>
     <div class="reg-section">
-      <h3>5. Cierre de la Polla</h3>
-      <p>El ganador absoluto es quien lidere el Ranking tras la ceremonia de premiacion el <strong>19 de julio de 2026</strong>.</p>
-      <p>Los pronosticos se cierran <strong>2 horas antes</strong> del primer partido de cada jornada.</p>
+      <h3>5. Jornadas y Cierre de Pronosticos</h3>
+      <ul>
+        <li>Una <strong>jornada</strong> son todos los partidos de un mismo dia. La hoja de Pronosticos te muestra <strong>una jornada a la vez</strong>; con los botones <strong>&#9664; Anterior</strong> y <strong>Siguiente &#9654;</strong> puedes ir y volver entre ellas.</li>
+        <li>Los pronosticos de cada jornada se <strong>cierran 2 horas antes</strong> del primer partido de ese dia. Pasada esa hora ya no podras enviar esa jornada (aparece marcada como <strong style="color:var(--red-alert)">CERRADA</strong>).</li>
+        <li>Las horas se muestran en <strong>hora de Colombia</strong>. Si estas en otro pais, puedes cambiar la zona horaria con el selector de la parte de arriba.</li>
+        <li>El reloj de "CIERRA EN" te muestra el tiempo real que te queda para enviar la jornada actual.</li>
+      </ul>
     </div>
     <div class="reg-section">
-      <h3>6. Simulador y Eliminatorias</h3>
+      <h3>6. Cierre de la Polla y Pre-Mundial</h3>
+      <p>El ganador absoluto es quien lidere el Ranking tras la ceremonia de premiacion el <strong>19 de julio de 2026</strong>.</p>
+      <p>Los puntos de la hoja <strong>Pre-Mundial</strong> (campeon, goleador, mejor jugador, etc.) se suman <strong>al final del torneo</strong>, despues del ultimo partido, y se ven reflejados en la columna Pre-Mundial del Ranking.</p>
+    </div>
+    <div class="reg-section">
+      <h3>7. Simulador y Eliminatorias</h3>
       <ul>
         <li>Las pestanas de <strong>Simulador Grupos</strong> y <strong>Eliminatorias</strong> son simuladores — <strong>NO interfieren en los puntos para el Ranking</strong>. Son una herramienta para que puedas visualizar con mas detalle quien podria ser Campeon, Sub-campeon, Tercer y Cuarto puesto.</li>
         <li>Para enviar pronosticos de cada jornada y el Pre-Mundial, el jugador debe tener <strong>datos moviles o WiFi</strong> activo.</li>
@@ -704,7 +723,7 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
       </ul>
     </div>
     <div class="reg-section">
-      <h3>7. Rifa Chontico Noche</h3>
+      <h3>8. Rifa Chontico Noche</h3>
       <p>La rifa se realizara el <strong>Domingo 19 de Julio de 2026</strong> con la loteria <strong>Chontico Noche</strong> a las <strong>8:00 PM</strong>.</p>
       <p>Participan los <strong>4 numeros de 4 digitos</strong> inscritos por cada participante al momento de activar su cuenta.</p>
       <p>El premio es de <strong style="color:var(--gold)">$2.000.000 de pesos colombianos</strong>.</p>
