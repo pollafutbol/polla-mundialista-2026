@@ -2256,9 +2256,9 @@ function _puntuarPartido(pron, res){
       if(resReal==='E') c.empate=1; else c.ganador=1;
     }
   }
-  // Tarjetas: solo si el pronostico no es N/A y coincide con el resultado
-  if(pron.tarjetas && pron.tarjetas!=='NA' && res.tarjetas && res.tarjetas!=='NA'){
-    if(pron.tarjetas===res.tarjetas) c.tarjetas=1;
+  // Tarjetas: el punto se gana SOLO si predijo SI y de verdad hubo tarjetas
+  if(pron.tarjetas==='SI' && res.tarjetas==='SI'){
+    c.tarjetas=1;
   }
   // Tiempo extra (solo eliminatorias; en grupos va NA y se ignora)
   if(pron.extra && pron.extra!=='NA' && res.extra && res.extra!=='NA'){
