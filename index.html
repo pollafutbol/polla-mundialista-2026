@@ -841,6 +841,28 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
       </div>
       <div id="resultadosContainer"></div>
     </div>
+    <div class="form-card" style="border-color:var(--accent);">
+      <h3 style="color:var(--accent);">Pronostico Manual (respaldo admin)</h3>
+      <p style="font-size:0.8rem;color:#aaa;margin-bottom:12px;">Para meter el pronostico de un jugador a mano (casos puntuales). Elige el jugador, la jornada, escribe su marcador y tarjetas, y guarda. Luego dale a <strong style="color:var(--gold);">Ejecutar Escrutinio Global</strong>.</p>
+      <div class="pm-field"><label>Jugador</label><select class="pm-select" id="man-jugador" onchange="seleccionarJugadorManual(this.value)"><option value="">Elegir jugador...</option></select></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin:14px 0;">
+        <button onclick="manualJornadaAnterior()" id="btnManAnterior" class="btn-action" style="background:#222;color:#fff;">&#9664; Anterior</button>
+        <div id="manJornadaTitulo" style="font-family:'Bebas Neue',sans-serif;color:var(--gold);font-size:1.2rem;letter-spacing:2px;text-align:center;flex:1;">JORNADA</div>
+        <button onclick="manualJornadaSiguiente()" id="btnManSiguiente" class="btn-action" style="background:#222;color:#fff;">Siguiente &#9654;</button>
+      </div>
+      <div id="manualContainer"></div>
+    </div>
+    <div class="form-card" style="border-color:var(--accent);">
+      <h3 style="color:var(--accent);">Pronostico Manual del Jugador</h3>
+      <p style="font-size:0.8rem;color:#aaa;margin-bottom:12px;">Respaldo para casos puntuales: ingresa el pronostico de un jugador a mano. Se guarda como si el lo hubiera enviado. Luego dale a Ejecutar Escrutinio Global.</p>
+      <div class="pm-field"><label>Jugador</label><select class="pm-select" id="manual-jugador" onchange="cambiarJugadorManual()"><option value="">Elegir jugador...</option></select></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin:14px 0;">
+        <button onclick="manualJornadaAnterior()" id="btnManualAnterior" class="btn-action" style="background:#222;color:#fff;">&#9664; Anterior</button>
+        <div id="manualJornadaTitulo" style="font-family:'Bebas Neue',sans-serif;color:var(--gold);font-size:1.2rem;letter-spacing:2px;text-align:center;flex:1;">JORNADA</div>
+        <button onclick="manualJornadaSiguiente()" id="btnManualSiguiente" class="btn-action" style="background:#222;color:#fff;">Siguiente &#9654;</button>
+      </div>
+      <div id="manualContainer"></div>
+    </div>
     <div class="form-card" style="border-color:var(--gold);">
       <h3 style="color:var(--gold);">Escrutinio Global</h3>
       <p style="font-size:0.8rem;color:#aaa;margin-bottom:15px;">Al ejecutar, el sistema compara los resultados oficiales contra los pronosticos de todos y reparte los puntos. Puedes ejecutarlo cuantas veces quieras.</p>
@@ -1717,6 +1739,7 @@ function mostrarInterfazAdmin(cod) {
   irA('admin');
   renderizarTablaJugadores();
   renderResultadosAdmin();
+  renderPronosticoManual();
   inicializarPaises();
   cargarPremundialOficial();
   setTimeout(aplicarRestriccionFechas, 300);
@@ -2492,6 +2515,106 @@ function toggleResTarjeta(el){
   el.innerText = on ? 'SI' : 'NO';
   el.style.background = on ? 'var(--green-ok)' : '#333';
   el.style.color = on ? '#000' : '#aaa';
+}
+
+// ---- PRONOSTICO MANUAL DEL JUGADOR (admin) ----
+var manualJornadaVista = null;
+var _manualPartidos = [];
+function _llenarDropdownJugadores(){
+  var sel = document.getElementById('manual-jugador');
+  if(!sel) return;
+  var prev = sel.value;
+  var cods = Object.keys(jugadoresCache).sort(function(a,b){
+    var na=(jugadoresCache[a].nombre||'').toLowerCase(), nb=(jugadoresCache[b].nombre||'').toLowerCase();
+    return na<nb?-1:(na>nb?1:0);
+  });
+  sel.innerHTML = '<option value="">Elegir jugador...</option>';
+  cods.forEach(function(cod){
+    var j=jugadoresCache[cod]||{};
+    var o=document.createElement('option');
+    o.value=cod; o.text=(j.nombre||'?')+' ('+cod+')';
+    sel.appendChild(o);
+  });
+  if(prev) sel.value=prev;
+}
+function renderPronosticoManual(){
+  _llenarDropdownJugadores();
+  var data=_getCal();
+  if(!data.nums.length) return;
+  if(manualJornadaVista===null) manualJornadaVista=calcularJornadaActiva();
+  if(data.nums.indexOf(manualJornadaVista)===-1) manualJornadaVista=data.nums[0];
+  var partidos=(data.jor[manualJornadaVista]||[]).slice().sort(function(a,b){return a.ts-b.ts;});
+  _manualPartidos=partidos;
+  var primer=partidos.length?partidos[0]:null;
+  var tit=document.getElementById('manualJornadaTitulo');
+  if(tit) tit.innerHTML='JORNADA '+manualJornadaVista+(primer?(' <span style="color:var(--muted);font-size:0.8rem;">'+primer.fec+' 2026</span>'):'');
+  var cont=document.getElementById('manualContainer');
+  if(!cont) return;
+  var sel=document.getElementById('manual-jugador');
+  var cod=sel?sel.value:'';
+  if(!cod){ cont.innerHTML='<p style="color:#888;font-size:0.85rem;">Elige un jugador arriba para ingresar su pronostico.</p>'; return; }
+  cont.innerHTML='<p style="color:#888;font-size:0.8rem;">Cargando pronostico guardado...</p>';
+  db.ref('pronosticos/'+cod+'/j'+manualJornadaVista).once('value',function(snap){
+    var guardado=snap.val()||{};
+    var html='';
+    partidos.forEach(function(m){
+      var g=guardado['p'+m.num]||{};
+      var golL=(g.golL!==undefined&&g.golL!==null)?g.golL:'';
+      var golV=(g.golV!==undefined&&g.golV!==null)?g.golV:'';
+      var tSi=(g.tarjetas==='SI');
+      html+='<div class="partido-block" data-num="'+m.num+'" style="margin-bottom:14px;">'+
+        '<div class="partido-header"><span>PARTIDO '+m.num+' &middot; Grupo '+m.grupo+'</span>'+
+        '<span class="partido-fecha">'+String(m.local).toUpperCase()+' vs '+String(m.visita).toUpperCase()+'</span></div>'+
+        '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px;background:#0a1422;border:1px solid var(--border);border-radius:0 0 8px 8px;">'+
+          '<div style="text-align:center;"><div style="font-size:0.7rem;color:var(--muted);">'+String(m.local).toUpperCase()+'</div>'+
+            '<input type="number" class="man-golL" min="0" value="'+golL+'" placeholder="0" style="width:60px;padding:8px;text-align:center;font-size:1.1rem;background:#0d1b2a;color:#fff;border:1px solid var(--border);border-radius:5px;"></div>'+
+          '<span style="font-weight:900;color:#666;">-</span>'+
+          '<div style="text-align:center;"><div style="font-size:0.7rem;color:var(--muted);">'+String(m.visita).toUpperCase()+'</div>'+
+            '<input type="number" class="man-golV" min="0" value="'+golV+'" placeholder="0" style="width:60px;padding:8px;text-align:center;font-size:1.1rem;background:#0d1b2a;color:#fff;border:1px solid var(--border);border-radius:5px;"></div>'+
+          '<div style="margin-left:auto;text-align:center;"><div style="font-size:0.7rem;color:var(--muted);margin-bottom:4px;">TARJETAS</div>'+
+            '<div class="man-tarj '+(tSi?'on':'')+'" onclick="toggleResTarjeta(this)" style="cursor:pointer;padding:8px 16px;border-radius:6px;font-weight:700;background:'+(tSi?'var(--green-ok)':'#333')+';color:'+(tSi?'#000':'#aaa')+';min-width:50px;">'+(tSi?'SI':'NO')+'</div></div>'+
+        '</div></div>';
+    });
+    html+='<button class="btn-action btn-green" onclick="guardarPronosticoManual()" style="width:100%;padding:12px;margin-top:6px;">GUARDAR PRONOSTICO DE ESTE JUGADOR</button>';
+    cont.innerHTML=html;
+  });
+}
+function cambiarJugadorManual(){ renderPronosticoManual(); }
+function manualJornadaAnterior(){
+  var data=_getCal(); var idx=data.nums.indexOf(manualJornadaVista);
+  if(idx>0){ manualJornadaVista=data.nums[idx-1]; renderPronosticoManual(); }
+}
+function manualJornadaSiguiente(){
+  var data=_getCal(); var idx=data.nums.indexOf(manualJornadaVista);
+  if(idx<data.nums.length-1){ manualJornadaVista=data.nums[idx+1]; renderPronosticoManual(); }
+}
+function guardarPronosticoManual(){
+  var sel=document.getElementById('manual-jugador');
+  var cod=sel?sel.value:'';
+  if(!cod){ alert('Elige un jugador primero.'); return; }
+  var cont=document.getElementById('manualContainer');
+  if(!cont) return;
+  var bloques=cont.querySelectorAll('.partido-block');
+  var datos={};
+  bloques.forEach(function(b){
+    var num=parseInt(b.getAttribute('data-num'),10);
+    var m=null; for(var i=0;i<_manualPartidos.length;i++){ if(_manualPartidos[i].num===num){ m=_manualPartidos[i]; break; } }
+    var gl=b.querySelector('.man-golL'), gv=b.querySelector('.man-golV'), tj=b.querySelector('.man-tarj');
+    if(!gl||!gv||gl.value===''||gv.value==='') return;
+    datos['p'+num]={ num:num, local:(m?m.local:''), visita:(m?m.visita:''),
+      golL:parseInt(gl.value,10)||0, golV:parseInt(gv.value,10)||0,
+      tarjetas:(tj&&tj.classList.contains('on'))?'SI':'NO', extra:'NA', penales:'NA' };
+  });
+  if(Object.keys(datos).length===0){ alert('Escribe el marcador (los dos goles) de al menos un partido.'); return; }
+  showLoading('Guardando pronostico del jugador...');
+  var updates={};
+  Object.keys(datos).forEach(function(pk){ updates['pronosticos/'+cod+'/j'+manualJornadaVista+'/'+pk]=datos[pk]; });
+  updates['envios/'+cod+'/j'+manualJornadaVista]=true;
+  db.ref().update(updates,function(err){
+    hideLoading();
+    if(err){ alert('Hubo un problema guardando. Revisa tu conexion.'); return; }
+    alert('Pronostico guardado para el jugador. Ahora dale a "Ejecutar Escrutinio Global" para repartir los puntos.');
+  });
 }
 function resJornadaAnterior(){
   var data=_getCal(); var idx=data.nums.indexOf(resJornadaVista);
@@ -3615,6 +3738,11 @@ window.cargarPronosticosPendientes = cargarPronosticosPendientes;
 window.otorgarPuntosPartido2 = otorgarPuntosPartido2;
 window.guardarPremundialOficial = guardarPremundialOficial;
 window.cargarPremundialOficial = cargarPremundialOficial;
+window.renderPronosticoManual = renderPronosticoManual;
+window.cambiarJugadorManual = cambiarJugadorManual;
+window.manualJornadaAnterior = manualJornadaAnterior;
+window.manualJornadaSiguiente = manualJornadaSiguiente;
+window.guardarPronosticoManual = guardarPronosticoManual;
 window.limitarDigitos = limitarDigitos;
 </script>
 </body>
