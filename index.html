@@ -633,7 +633,7 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
     </div>
     <div class="ranking-table-wrap">
       <table class="tabla-ranking">
-        <thead><tr><th>POS</th><th>USUARIO</th><th>Exacto</th><th>Ganador</th><th>Empate</th><th>Tarjetas</th><th>Extra T.</th><th>Penales</th><th>Pre-M.</th><th class="col-total">TOTAL</th></tr></thead>
+        <thead><tr><th>POS</th><th>USUARIO</th><th>Exacto</th><th>Ganador</th><th>Empate</th><th>Tarjetas</th><th>TR</th><th>Extra T.</th><th>Penales</th><th>Pre-M.</th><th class="col-total">TOTAL</th></tr></thead>
         <tbody id="rankingBody"></tbody>
       </table>
     </div>
@@ -663,21 +663,23 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
           <tr><td>Marcador Exacto</td><td class="pts-num">3 pts</td><td>Aciertas el resultado exacto (los dos goles). Ya incluye al ganador: NO se suma ademas "Al Ganador" ni "Al Empate".</td></tr>
           <tr><td>Al Ganador</td><td class="pts-num">2 pts</td><td>Aciertas que equipo gana, pero no el marcador exacto.</td></tr>
           <tr><td>Al Empate</td><td class="pts-num">1 pt</td><td>Aciertas que hay empate (cualquier marcador igualado), pero no el marcador exacto.</td></tr>
-          <tr><td>Tarjetas</td><td class="pts-num">1 pt</td><td>Solo lo ganas si marcas <strong>SI</strong> y en el partido hubo al menos una tarjeta. Si lo dejas en "-" (NO), este punto no suma.</td></tr>
+          <tr><td>Tarjetas</td><td class="pts-num">0.5 pts</td><td>Solo lo ganas si marcas <strong>SI</strong> y en el partido hubo al menos una tarjeta. Si lo dejas en "-" (NO), este punto no suma. Es un pequeno regalito por participar.</td></tr>
+          <tr><td>Tarjeta Roja</td><td class="pts-num" style="color:#ff8888;">+4 / &minus;1</td><td>Apuesta de riesgo: si marcas <strong>SI</strong> y de verdad hubo tarjeta roja ganas <strong>+4 pts</strong>; pero si marcas SI y NO hubo, pierdes <strong>&minus;1 pt</strong>. Si lo dejas en "-" (NO) no arriesgas nada (ni ganas ni pierdes). Solo juegatela cuando de verdad lo creas.</td></tr>
           <tr><td>Tiempo Extra</td><td class="pts-num">1 pt</td><td>Aciertas si el partido se va a tiempo extra. Solo aplica en fase eliminatoria.</td></tr>
           <tr><td>Penales</td><td class="pts-num">1 pt</td><td>Aciertas si el partido se define en penales. Solo aplica en fase eliminatoria.</td></tr>
         </tbody>
       </table>
       <div style="background:#0a1f16;border:1px solid var(--green-ok);border-left:4px solid var(--green-ok);border-radius:8px;padding:14px 16px;margin-top:16px;">
         <p style="color:var(--green-ok);font-weight:700;margin:0 0 8px;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;">EJEMPLO PRACTICO</p>
-        <p style="color:#ccc;font-size:0.88rem;margin:0 0 8px;line-height:1.5;">Resultado real: <strong>Mexico 2 - 0 Sudafrica</strong>, con tarjetas.</p>
+        <p style="color:#ccc;font-size:0.88rem;margin:0 0 8px;line-height:1.5;">Resultado real: <strong>Mexico 2 - 0 Sudafrica</strong>, con tarjetas y SIN tarjeta roja.</p>
         <ul style="color:#ccc;font-size:0.88rem;line-height:1.6;margin:0;padding-left:18px;">
-          <li>Pronosticaste <strong>2-0</strong> y Tarjetas NO &rarr; acertaste el marcador exacto = <strong>3 pts</strong>. (Las tarjetas no suman porque marcaste NO.)</li>
-          <li>Pronosticaste <strong>1-0</strong> y Tarjetas SI &rarr; acertaste al ganador (2) + tarjetas (1) = <strong>3 pts</strong>.</li>
+          <li>Pronosticaste <strong>2-0</strong>, Tarjetas NO, Roja NO &rarr; acertaste el marcador exacto = <strong>3 pts</strong>.</li>
+          <li>Pronosticaste <strong>1-0</strong>, Tarjetas SI, Roja NO &rarr; ganador (2) + tarjetas (0.5) = <strong>2.5 pts</strong>.</li>
+          <li>Pronosticaste <strong>1-0</strong>, Tarjetas SI, Roja SI &rarr; ganador (2) + tarjetas (0.5) &minus; roja fallada (1) = <strong>1.5 pts</strong>. (Arriesgaste la roja y no hubo: te costo 1 punto.)</li>
           <li>Pronosticaste <strong>0-2</strong> (gana el visitante) &rarr; no acertaste nada = <strong>0 pts</strong>.</li>
         </ul>
       </div>
-      <p style="color:#888;font-size:0.82rem;margin-top:12px;">El Ranking muestra cuantos aciertos llevas de cada tipo y el total de puntos. Los puntos se reparten despues de que la administracion carga el resultado oficial de cada partido.</p>
+      <p style="color:#888;font-size:0.82rem;margin-top:12px;">El Ranking muestra cuantos aciertos llevas de cada tipo y el total de puntos. La columna <strong>TR</strong> muestra los puntos netos de tus apuestas a tarjeta roja (verde si vas ganando, rojo si vas perdiendo). Los puntos se reparten despues de que la administracion carga el resultado oficial de cada partido.</p>
     </div>
     <div class="reg-section">
       <h3>3. Hoja Pre-Mundial (Bonos)</h3>
@@ -833,7 +835,7 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
     </div>
     <div class="form-card" style="border-color:var(--accent);">
       <h3 style="color:var(--accent);">Control de Resultados Oficiales</h3>
-      <p style="font-size:0.8rem;color:#aaa;margin-bottom:14px;">Ingresa el marcador real de cada partido (y si hubo tarjetas). Guarda, y luego dale a <strong style="color:var(--gold);">Ejecutar Escrutinio Global</strong> para repartir los puntos.</p>
+      <p style="font-size:0.8rem;color:#aaa;margin-bottom:14px;">Ingresa el marcador real de cada partido (y si hubo tarjetas y/o tarjeta roja). Guarda, y luego dale a <strong style="color:var(--gold);">Ejecutar Escrutinio Global</strong> para repartir los puntos.</p>
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;">
         <button onclick="resJornadaAnterior()" id="btnResAnterior" class="btn-action" style="background:#222;color:#fff;">&#9664; Anterior</button>
         <div id="resJornadaTitulo" style="font-family:'Bebas Neue',sans-serif;color:var(--gold);font-size:1.2rem;letter-spacing:2px;text-align:center;flex:1;">JORNADA</div>
@@ -843,7 +845,7 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
     </div>
     <div class="form-card" style="border-color:var(--accent);">
       <h3 style="color:var(--accent);">Pronostico Manual (respaldo admin)</h3>
-      <p style="font-size:0.8rem;color:#aaa;margin-bottom:12px;">Para meter el pronostico de un jugador a mano (casos puntuales). Elige el jugador, la jornada, escribe su marcador y tarjetas, y guarda. Luego dale a <strong style="color:var(--gold);">Ejecutar Escrutinio Global</strong>.</p>
+      <p style="font-size:0.8rem;color:#aaa;margin-bottom:12px;">Para meter el pronostico de un jugador a mano (casos puntuales). Elige el jugador, la jornada, escribe su marcador, tarjetas y tarjeta roja, y guarda. Luego dale a <strong style="color:var(--gold);">Ejecutar Escrutinio Global</strong>.</p>
       <div class="pm-field"><label>Jugador</label><select class="pm-select" id="man-jugador" onchange="seleccionarJugadorManual(this.value)"><option value="">Elegir jugador...</option></select></div>
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin:14px 0;">
         <button onclick="manualJornadaAnterior()" id="btnManAnterior" class="btn-action" style="background:#222;color:#fff;">&#9664; Anterior</button>
@@ -855,7 +857,10 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
     <div class="form-card" style="border-color:var(--accent);">
       <h3 style="color:var(--accent);">Pronostico Manual del Jugador</h3>
       <p style="font-size:0.8rem;color:#aaa;margin-bottom:12px;">Respaldo para casos puntuales: ingresa el pronostico de un jugador a mano. Se guarda como si el lo hubiera enviado. Luego dale a Ejecutar Escrutinio Global.</p>
-      <div class="pm-field"><label>Jugador</label><select class="pm-select" id="manual-jugador" onchange="cambiarJugadorManual()"><option value="">Elegir jugador...</option></select></div>
+      <div class="pm-field" style="position:relative;"><label>Jugador (escribe nombre o codigo)</label>
+        <input type="text" id="manual-buscar" autocomplete="off" oninput="filtrarJugadoresManual()" onfocus="this.value='';filtrarJugadoresManual()" onblur="setTimeout(function(){var b=document.getElementById('manual-resultados'); if(b) b.style.display='none';},200)" placeholder="Escribe nombre o codigo..." class="pm-select" style="width:100%;">
+        <div id="manual-resultados" style="display:none;position:absolute;left:0;right:0;top:100%;z-index:50;background:#0d1b2a;border:1px solid var(--border);border-radius:0 0 8px 8px;max-height:240px;overflow-y:auto;"></div>
+      </div>
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin:14px 0;">
         <button onclick="manualJornadaAnterior()" id="btnManualAnterior" class="btn-action" style="background:#222;color:#fff;">&#9664; Anterior</button>
         <div id="manualJornadaTitulo" style="font-family:'Bebas Neue',sans-serif;color:var(--gold);font-size:1.2rem;letter-spacing:2px;text-align:center;flex:1;">JORNADA</div>
@@ -885,6 +890,14 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
       <div class="pm-field"><label>Mejor Portero <span class="pts-badge">(3 pts)</span></label>
         <div class="dual-sel"><select class="pm-select selector-filtro" id="po-portero-pais" onchange="cargarJugadores(this,'po-portero-list',true)"><option value="">Pais...</option></select><select class="pm-select" id="po-portero-list"><option>Portero...</option></select></div></div>
       <button class="btn-action btn-gold" onclick="guardarPremundialOficial()" style="width:100%;padding:12px;margin-top:10px;">GUARDAR RESULTADOS PRE-MUNDIAL</button>
+    </div>
+    <div class="form-card">
+      <h3 style="color:var(--gold2);">Rifa Chontico Noche &mdash; Numero Ganador</h3>
+      <p style="font-size:0.8rem;color:#aaa;margin-bottom:14px;">Escribe aqui el numero que salio en la loteria Chontico Noche. Cada jugador vera automaticamente en su perfil si gano. Este aviso se muestra el dia del sorteo (19 de Julio).</p>
+      <div class="pm-field"><label>Numero ganador (4 digitos)</label>
+        <input type="number" id="chontico-num" min="0" max="9999" placeholder="####" oninput="limitarDigitos(this)" class="pm-select" style="width:100%;"></div>
+      <p id="chontico-actual" style="font-size:0.85rem;color:#aabbff;margin:4px 0 12px;">Numero guardado actualmente: <strong>ninguno</strong></p>
+      <button class="btn-action btn-gold" onclick="guardarChonticoResultado()" style="width:100%;padding:12px;">GUARDAR NUMERO GANADOR</button>
     </div>
     <div class="form-card">
       <h3>Lista de Jugadores Inscritos</h3>
@@ -1742,6 +1755,7 @@ function mostrarInterfazAdmin(cod) {
   renderPronosticoManual();
   inicializarPaises();
   cargarPremundialOficial();
+  cargarChonticoResultado();
   setTimeout(aplicarRestriccionFechas, 300);
   // Botón REGISTRAR solo visible para H175
   var btnReg = document.getElementById('btnRegistrarJugador');
@@ -1818,50 +1832,52 @@ function cerrarSesion() {
 }
 
 function recuperarClave() {
-  var cod = prompt('Ingresa tu codigo de usuario:');
+  var cod = prompt('Paso 1 de 2:\n\nEscribe tu CODIGO de usuario:');
   if (!cod) return;
   var u = cod.toUpperCase().trim();
-  showLoading('Buscando...');
+  showLoading('Buscando tu cuenta...');
   db.ref('jugadores/' + u).once('value', function(s) {
     hideLoading();
     var jugador = s.val();
     if (!jugador) {
-      alert('Código "' + u + '" no encontrado.\n\nVerifica tu código o contacta al administrador.');
+      alert('El codigo "' + u + '" no existe.\n\nRevisa que este bien escrito o contacta al administrador.');
       return;
     }
-    // Verificar que el jugador tenga número de celular registrado
-    var cel = jugador.celular || '';
-    if (!cel || cel.length < 10) {
-      alert('Tu cuenta no tiene un número de WhatsApp registrado.\n\nContacta al administrador para recuperar tu clave.');
+    // El numero de WhatsApp registrado es la "llave" para verificar que eres el dueno
+    var celDigitos = String(jugador.celular || '').replace(/[^0-9]/g, '');
+    if (celDigitos.length < 4) {
+      alert('Tu cuenta no tiene un numero de WhatsApp registrado, asi que no puedo verificar tu identidad por aqui.\n\nContacta al administrador para que te ayude a recuperar la clave.');
       return;
     }
-    // Generar clave temporal aleatoria segura (6 caracteres: letras + números)
-    // Clave temporal de 8 caracteres: al menos 1 minúscula, 1 mayúscula, 1 número
+    var ultimos4Reales = celDigitos.slice(-4);
+    // Paso 2: pedir los ultimos 4 digitos del WhatsApp para confirmar identidad
+    var resp = prompt('Paso 2 de 2:\n\nPara confirmar que eres tu, escribe los ULTIMOS 4 DIGITOS de tu numero de WhatsApp:');
+    if (resp === null) return;
+    var ingresados = String(resp).replace(/[^0-9]/g, '').slice(-4);
+    if (ingresados !== ultimos4Reales) {
+      alert('Esos 4 digitos no coinciden con el WhatsApp registrado.\n\nIntenta de nuevo o contacta al administrador.');
+      return;
+    }
+    // Identidad confirmada: generar clave temporal segura
     var lower = 'abcdefghjkmnpqrstuvwxyz';
     var upper = 'ABCDEFGHJKMNPQRSTUVWXYZ';
     var digits = '23456789';
     var all = lower + upper + digits;
     var claveTemp = '';
-    // Garantizar al menos 1 de cada tipo
     claveTemp += lower.charAt(Math.floor(Math.random() * lower.length));
     claveTemp += upper.charAt(Math.floor(Math.random() * upper.length));
     claveTemp += digits.charAt(Math.floor(Math.random() * digits.length));
-    // Completar hasta 8 caracteres
-    for (var i = 3; i < 8; i++) {
-      claveTemp += all.charAt(Math.floor(Math.random() * all.length));
-    }
-    // Mezclar aleatoriamente
+    for (var i = 3; i < 8; i++) { claveTemp += all.charAt(Math.floor(Math.random() * all.length)); }
     claveTemp = claveTemp.split('').sort(function(){ return Math.random()-0.5; }).join('');
-    // Guardar clave temporal en Firebase
+    showLoading('Generando tu clave temporal...');
     db.ref('jugadores/' + u).update({ pass: claveTemp, estado: 'recuperacion' }, function(err) {
-      if (err) {
-        alert('Error al procesar la solicitud. Intenta de nuevo.');
-        return;
-      }
-      // Enviar clave temporal por WhatsApp AL NÚMERO DEL JUGADOR
-      var msg = '🔐 POLLA MUNDIALISTA 2026\n\nHola ' + (jugador.nombre || u) + '! Tu clave temporal es:\n\n*' + claveTemp + '*\n\nIngresa con esta clave y cámbiala inmediatamente por una nueva.\n\nCódigo de usuario: ' + u;
-      window.open('https://api.whatsapp.com/send?phone=' + cel.replace(/[^0-9]/g,'') + '&text=' + encodeURIComponent(msg), '_blank');
-      alert('✅ Se abrirá WhatsApp para enviarte tu clave temporal al número registrado.\n\nUna vez que ingreses, ve a tu perfil y cambia la clave.');
+      hideLoading();
+      if (err) { alert('Hubo un problema. Revisa tu conexion e intenta de nuevo.'); return; }
+      // MOSTRAR la clave en pantalla al instante (garantizado, no depende de WhatsApp)
+      alert('LISTO! Tu clave temporal es:\n\n' + claveTemp + '\n\nAnotala. Ingresa con ella y el sistema te pedira crear una clave nueva.\n\n(Tambien se abrira WhatsApp con esta clave como respaldo.)');
+      // Respaldo opcional por WhatsApp al numero del jugador
+      var msg = 'POLLA MUNDIALISTA 2026\n\nHola ' + (jugador.nombre || u) + '! Tu clave temporal es: ' + claveTemp + '\n\nIngresa con ella y cambiala por una nueva. Tu codigo es: ' + u;
+      window.open('https://api.whatsapp.com/send?phone=' + celDigitos + '&text=' + encodeURIComponent(msg), '_blank');
     });
   });
 }
@@ -1987,7 +2003,7 @@ function registrarJugador() {
   if (totalPagado >= 50000) pago = 'pagado';
   var jugador = { pass:clave, nombre:nombre, celular:cel, email:email, pago:pago, ciudad:ciudad, estado:'pendiente', nums:[], bloqueado:false,
     fechas:[f1,f2,f3], valores:[v1,v2,v3], creadoPor: usuarioActual ? usuarioActual.codigo : '?',
-    pts:{exacto:0,ganador:0,empate:0,tarjetas:0,extra:0,penales:0,premundial:0} };
+    pts:{exacto:0,ganador:0,empate:0,tarjetas:0,rojaOk:0,rojaMal:0,extra:0,penales:0,premundial:0} };
   showLoading('Registrando jugador...');
   fbSetJugador(cod, jugador, function() {
     hideLoading();
@@ -2047,7 +2063,7 @@ function enviarWhatsApp() {
     estado:'pendiente', nums:[], bloqueado:false,
     fechas:[f1,f2,f3], valores:[v1,v2,v3],
     creadoPor: usuarioActual ? usuarioActual.codigo : '?',
-    pts:{exacto:0,ganador:0,empate:0,tarjetas:0,extra:0,penales:0,premundial:0}
+    pts:{exacto:0,ganador:0,empate:0,tarjetas:0,rojaOk:0,rojaMal:0,extra:0,penales:0,premundial:0}
   };
   fbSetJugador(cod, jugador, function() {
     // Limpiar formulario silenciosamente
@@ -2301,7 +2317,7 @@ window.resetearClave = resetearClave;
 
 // Calcula los aciertos (conteos) de un pronostico contra el resultado oficial
 function _puntuarPartido(pron, res){
-  var c = {exacto:0, ganador:0, empate:0, tarjetas:0, extra:0, penales:0};
+  var c = {exacto:0, ganador:0, empate:0, tarjetas:0, rojaOk:0, rojaMal:0, extra:0, penales:0};
   if(!pron || !res) return c;
   var pL=parseInt(pron.golL,10), pV=parseInt(pron.golV,10);
   var rL=parseInt(res.golL,10),  rV=parseInt(res.golV,10);
@@ -2316,9 +2332,13 @@ function _puntuarPartido(pron, res){
       if(resReal==='E') c.empate=1; else c.ganador=1;
     }
   }
-  // Tarjetas: el punto se gana SOLO si predijo SI y de verdad hubo tarjetas
+  // Tarjetas: el punto (0.5) se gana SOLO si predijo SI y de verdad hubo tarjetas
   if(pron.tarjetas==='SI' && res.tarjetas==='SI'){
     c.tarjetas=1;
+  }
+  // Tarjeta ROJA: solo arriesga quien marca SI. Si acierta gana (+4), si falla pierde (-1).
+  if(pron.roja==='SI'){
+    if(res.roja==='SI') c.rojaOk=1; else c.rojaMal=1;
   }
   // Tiempo extra (solo eliminatorias; en grupos va NA y se ignora)
   if(pron.extra && pron.extra!=='NA' && res.extra && res.extra!=='NA'){
@@ -2361,7 +2381,7 @@ function sincronizarFIFA(){
     var updates = {};
     var totalProcesados = 0;
     jugadores.forEach(function(cod){
-      var acum = {exacto:0, ganador:0, empate:0, tarjetas:0, extra:0, penales:0};
+      var acum = {exacto:0, ganador:0, empate:0, tarjetas:0, rojaOk:0, rojaMal:0, extra:0, penales:0};
       var pj = pronosticos[cod] || {};
       // Recorrer cada jornada/partido pronosticado por este jugador
       Object.keys(pj).forEach(function(jk){            // jk = 'j2'
@@ -2372,13 +2392,14 @@ function sincronizarFIFA(){
           if(!res) return; // ese partido aun no tiene resultado oficial
           var c = _puntuarPartido(partidosJ[pk], res);
           acum.exacto+=c.exacto; acum.ganador+=c.ganador; acum.empate+=c.empate;
-          acum.tarjetas+=c.tarjetas; acum.extra+=c.extra; acum.penales+=c.penales;
+          acum.tarjetas+=c.tarjetas; acum.rojaOk+=c.rojaOk; acum.rojaMal+=c.rojaMal;
+          acum.extra+=c.extra; acum.penales+=c.penales;
           totalProcesados++;
         });
       });
       // Sumar ajustes manuales (ej. los 3 puntos del Partido 2 - Bloque D)
       var aj = ajustes[cod] || {};
-      ['exacto','ganador','empate','tarjetas','extra','penales'].forEach(function(k){
+      ['exacto','ganador','empate','tarjetas','rojaOk','rojaMal','extra','penales'].forEach(function(k){
         if(aj[k]) acum[k]+=parseInt(aj[k],10)||0;
       });
       // Puntaje Pre-Mundial: solo cuando ya hay resultados oficiales (final del torneo)
@@ -2457,6 +2478,34 @@ function cargarPremundialOficial(){
   });
 }
 
+// ---- RIFA CHONTICO NOCHE (admin) ----
+function cargarChonticoResultado(){
+  db.ref('chonticoResultado').once('value', function(snap){
+    var val = snap.val();
+    var inp = document.getElementById('chontico-num');
+    var lbl = document.getElementById('chontico-actual');
+    if(val!==null && val!==undefined && val!==''){
+      if(inp) inp.value = val;
+      if(lbl) lbl.innerHTML = 'Numero guardado actualmente: <strong>'+val+'</strong>';
+    } else {
+      if(lbl) lbl.innerHTML = 'Numero guardado actualmente: <strong>ninguno</strong>';
+    }
+  });
+}
+function guardarChonticoResultado(){
+  var inp = document.getElementById('chontico-num');
+  var val = inp ? String(inp.value).trim() : '';
+  if(!/^\d{4}$/.test(val)){ alert('El numero ganador debe tener exactamente 4 digitos.'); return; }
+  showLoading('Guardando numero ganador...');
+  db.ref('chonticoResultado').set(val, function(err){
+    hideLoading();
+    if(err){ alert('Hubo un problema guardando. Revisa tu conexion.'); return; }
+    var lbl = document.getElementById('chontico-actual');
+    if(lbl) lbl.innerHTML = 'Numero guardado actualmente: <strong>'+val+'</strong>';
+    alert('Numero ganador guardado: '+val+'. Los jugadores lo veran en su perfil el dia del sorteo (19 de Julio).');
+  });
+}
+
 // Calcula los puntos de bono del Pre-Mundial de un jugador contra el resultado oficial
 function _puntosPremundial(pred, ofi){
   if(!pred || !ofi) return 0;
@@ -2493,6 +2542,7 @@ function renderResultadosAdmin(){
       var golL = (g.golL!==undefined && g.golL!==null) ? g.golL : '';
       var golV = (g.golV!==undefined && g.golV!==null) ? g.golV : '';
       var tSi = (g.tarjetas==='SI');
+      var rSi = (g.roja==='SI');
       html += '<div class="partido-block" data-num="'+m.num+'" style="margin-bottom:14px;">'+
         '<div class="partido-header"><span>PARTIDO '+m.num+' &middot; Grupo '+m.grupo+'</span>'+
         '<span class="partido-fecha">'+String(m.local).toUpperCase()+' vs '+String(m.visita).toUpperCase()+'</span></div>'+
@@ -2504,6 +2554,8 @@ function renderResultadosAdmin(){
             '<input type="number" class="res-golV" min="0" value="'+golV+'" placeholder="0" style="width:60px;padding:8px;text-align:center;font-size:1.1rem;background:#0d1b2a;color:#fff;border:1px solid var(--border);border-radius:5px;"></div>'+
           '<div style="margin-left:auto;text-align:center;"><div style="font-size:0.7rem;color:var(--muted);margin-bottom:4px;">TARJETAS</div>'+
             '<div class="res-tarj '+(tSi?'on':'')+'" onclick="toggleResTarjeta(this)" style="cursor:pointer;padding:8px 16px;border-radius:6px;font-weight:700;background:'+(tSi?'var(--green-ok)':'#333')+';color:'+(tSi?'#000':'#aaa')+';min-width:50px;">'+(tSi?'SI':'NO')+'</div></div>'+
+          '<div style="text-align:center;"><div style="font-size:0.7rem;color:#ff6666;margin-bottom:4px;font-weight:700;">T. ROJA</div>'+
+            '<div class="res-roja '+(rSi?'on':'')+'" onclick="toggleResTarjeta(this)" style="cursor:pointer;padding:8px 16px;border-radius:6px;font-weight:700;background:'+(rSi?'#c0392b':'#333')+';color:'+(rSi?'#fff':'#aaa')+';min-width:50px;">'+(rSi?'SI':'NO')+'</div></div>'+
         '</div></div>';
     });
     html += '<button class="btn-action btn-green" onclick="guardarResultadosJornada()" style="width:100%;padding:12px;margin-top:6px;">GUARDAR RESULTADOS DE ESTA JORNADA</button>';
@@ -2520,25 +2572,40 @@ function toggleResTarjeta(el){
 // ---- PRONOSTICO MANUAL DEL JUGADOR (admin) ----
 var manualJornadaVista = null;
 var _manualPartidos = [];
-function _llenarDropdownJugadores(){
-  var sel = document.getElementById('manual-jugador');
-  if(!sel) return;
-  var prev = sel.value;
-  var cods = Object.keys(jugadoresCache).sort(function(a,b){
-    var na=(jugadoresCache[a].nombre||'').toLowerCase(), nb=(jugadoresCache[b].nombre||'').toLowerCase();
-    return na<nb?-1:(na>nb?1:0);
-  });
-  sel.innerHTML = '<option value="">Elegir jugador...</option>';
+var manualJugadorCod = '';
+function filtrarJugadoresManual(){
+  var inp=document.getElementById('manual-buscar');
+  var box=document.getElementById('manual-resultados');
+  if(!inp||!box) return;
+  var q=(inp.value||'').trim().toLowerCase();
+  var cods=Object.keys(jugadoresCache);
+  var matches=[];
   cods.forEach(function(cod){
     var j=jugadoresCache[cod]||{};
-    var o=document.createElement('option');
-    o.value=cod; o.text=(j.nombre||'?')+' ('+cod+')';
-    sel.appendChild(o);
+    var nom=(j.nombre||'').toLowerCase();
+    if(q==='' || nom.indexOf(q)!==-1 || cod.toLowerCase().indexOf(q)!==-1) matches.push(cod);
   });
-  if(prev) sel.value=prev;
+  matches.sort(function(a,b){ var na=(jugadoresCache[a].nombre||'').toLowerCase(),nb=(jugadoresCache[b].nombre||'').toLowerCase(); return na<nb?-1:(na>nb?1:0); });
+  if(matches.length===0){ box.innerHTML='<div style="padding:10px;color:#888;">Sin resultados</div>'; box.style.display='block'; return; }
+  var html='';
+  matches.slice(0,30).forEach(function(cod){
+    var j=jugadoresCache[cod]||{};
+    html+='<div onmousedown="seleccionarJugadorManual(\''+cod+'\')" style="padding:10px 12px;cursor:pointer;border-bottom:1px solid #16263a;color:#ddd;" onmouseover="this.style.background=\'#16263a\'" onmouseout="this.style.background=\'transparent\'">'+(j.nombre||'?')+' <span style="color:var(--muted);">('+cod+')</span></div>';
+  });
+  if(matches.length>30) html+='<div style="padding:8px 12px;color:#888;font-size:0.8rem;">...y '+(matches.length-30)+' mas. Escribe mas letras para afinar.</div>';
+  box.innerHTML=html;
+  box.style.display='block';
+}
+function seleccionarJugadorManual(cod){
+  manualJugadorCod=cod;
+  var j=jugadoresCache[cod]||{};
+  var inp=document.getElementById('manual-buscar');
+  if(inp) inp.value=(j.nombre||'?')+' ('+cod+')';
+  var box=document.getElementById('manual-resultados');
+  if(box) box.style.display='none';
+  renderPronosticoManual();
 }
 function renderPronosticoManual(){
-  _llenarDropdownJugadores();
   var data=_getCal();
   if(!data.nums.length) return;
   if(manualJornadaVista===null) manualJornadaVista=calcularJornadaActiva();
@@ -2550,9 +2617,8 @@ function renderPronosticoManual(){
   if(tit) tit.innerHTML='JORNADA '+manualJornadaVista+(primer?(' <span style="color:var(--muted);font-size:0.8rem;">'+primer.fec+' 2026</span>'):'');
   var cont=document.getElementById('manualContainer');
   if(!cont) return;
-  var sel=document.getElementById('manual-jugador');
-  var cod=sel?sel.value:'';
-  if(!cod){ cont.innerHTML='<p style="color:#888;font-size:0.85rem;">Elige un jugador arriba para ingresar su pronostico.</p>'; return; }
+  var cod=manualJugadorCod;
+  if(!cod){ cont.innerHTML='<p style="color:#888;font-size:0.85rem;">Busca y elige un jugador arriba para ingresar su pronostico.</p>'; return; }
   cont.innerHTML='<p style="color:#888;font-size:0.8rem;">Cargando pronostico guardado...</p>';
   db.ref('pronosticos/'+cod+'/j'+manualJornadaVista).once('value',function(snap){
     var guardado=snap.val()||{};
@@ -2562,6 +2628,7 @@ function renderPronosticoManual(){
       var golL=(g.golL!==undefined&&g.golL!==null)?g.golL:'';
       var golV=(g.golV!==undefined&&g.golV!==null)?g.golV:'';
       var tSi=(g.tarjetas==='SI');
+      var rSi=(g.roja==='SI');
       html+='<div class="partido-block" data-num="'+m.num+'" style="margin-bottom:14px;">'+
         '<div class="partido-header"><span>PARTIDO '+m.num+' &middot; Grupo '+m.grupo+'</span>'+
         '<span class="partido-fecha">'+String(m.local).toUpperCase()+' vs '+String(m.visita).toUpperCase()+'</span></div>'+
@@ -2573,6 +2640,8 @@ function renderPronosticoManual(){
             '<input type="number" class="man-golV" min="0" value="'+golV+'" placeholder="0" style="width:60px;padding:8px;text-align:center;font-size:1.1rem;background:#0d1b2a;color:#fff;border:1px solid var(--border);border-radius:5px;"></div>'+
           '<div style="margin-left:auto;text-align:center;"><div style="font-size:0.7rem;color:var(--muted);margin-bottom:4px;">TARJETAS</div>'+
             '<div class="man-tarj '+(tSi?'on':'')+'" onclick="toggleResTarjeta(this)" style="cursor:pointer;padding:8px 16px;border-radius:6px;font-weight:700;background:'+(tSi?'var(--green-ok)':'#333')+';color:'+(tSi?'#000':'#aaa')+';min-width:50px;">'+(tSi?'SI':'NO')+'</div></div>'+
+          '<div style="text-align:center;"><div style="font-size:0.7rem;color:#ff6666;margin-bottom:4px;font-weight:700;">T. ROJA</div>'+
+            '<div class="man-roja '+(rSi?'on':'')+'" onclick="toggleResTarjeta(this)" style="cursor:pointer;padding:8px 16px;border-radius:6px;font-weight:700;background:'+(rSi?'#c0392b':'#333')+';color:'+(rSi?'#fff':'#aaa')+';min-width:50px;">'+(rSi?'SI':'NO')+'</div></div>'+
         '</div></div>';
     });
     html+='<button class="btn-action btn-green" onclick="guardarPronosticoManual()" style="width:100%;padding:12px;margin-top:6px;">GUARDAR PRONOSTICO DE ESTE JUGADOR</button>';
@@ -2589,9 +2658,8 @@ function manualJornadaSiguiente(){
   if(idx<data.nums.length-1){ manualJornadaVista=data.nums[idx+1]; renderPronosticoManual(); }
 }
 function guardarPronosticoManual(){
-  var sel=document.getElementById('manual-jugador');
-  var cod=sel?sel.value:'';
-  if(!cod){ alert('Elige un jugador primero.'); return; }
+  var cod=manualJugadorCod;
+  if(!cod){ alert('Busca y elige un jugador primero.'); return; }
   var cont=document.getElementById('manualContainer');
   if(!cont) return;
   var bloques=cont.querySelectorAll('.partido-block');
@@ -2599,11 +2667,12 @@ function guardarPronosticoManual(){
   bloques.forEach(function(b){
     var num=parseInt(b.getAttribute('data-num'),10);
     var m=null; for(var i=0;i<_manualPartidos.length;i++){ if(_manualPartidos[i].num===num){ m=_manualPartidos[i]; break; } }
-    var gl=b.querySelector('.man-golL'), gv=b.querySelector('.man-golV'), tj=b.querySelector('.man-tarj');
+    var gl=b.querySelector('.man-golL'), gv=b.querySelector('.man-golV'), tj=b.querySelector('.man-tarj'), rj=b.querySelector('.man-roja');
     if(!gl||!gv||gl.value===''||gv.value==='') return;
     datos['p'+num]={ num:num, local:(m?m.local:''), visita:(m?m.visita:''),
       golL:parseInt(gl.value,10)||0, golV:parseInt(gv.value,10)||0,
-      tarjetas:(tj&&tj.classList.contains('on'))?'SI':'NO', extra:'NA', penales:'NA' };
+      tarjetas:(tj&&tj.classList.contains('on'))?'SI':'NO',
+      roja:(rj&&rj.classList.contains('on'))?'SI':'NO', extra:'NA', penales:'NA' };
   });
   if(Object.keys(datos).length===0){ alert('Escribe el marcador (los dos goles) de al menos un partido.'); return; }
   showLoading('Guardando pronostico del jugador...');
@@ -2634,12 +2703,14 @@ function guardarResultadosJornada(){
     var gl = b.querySelector('.res-golL');
     var gv = b.querySelector('.res-golV');
     var tj = b.querySelector('.res-tarj');
+    var rj = b.querySelector('.res-roja');
     if(gl.value==='' || gv.value===''){ return; } // sin marcador completo, no guardar ese partido
     datos['p'+num] = {
       num: parseInt(num,10),
       golL: parseInt(gl.value,10)||0,
       golV: parseInt(gv.value,10)||0,
       tarjetas: (tj && tj.classList.contains('on')) ? 'SI' : 'NO',
+      roja: (rj && rj.classList.contains('on')) ? 'SI' : 'NO',
       extra: 'NA', penales: 'NA'
     };
   });
@@ -2712,15 +2783,17 @@ function procesarEnvio() {
   bloques.forEach(function(bloque, idx) {
     var m = (_partidosVista && _partidosVista[idx]) ? _partidosVista[idx] : null;
     var goles = bloque.querySelectorAll('.in-gol');
-    var btnsSI = bloque.querySelectorAll('.btn-si');
+    var btnsSI = bloque.querySelectorAll('.btn-si:not(.btn-roja)');
+    var rojaEl = bloque.querySelector('.btn-roja');
     var golL = (goles[0] && goles[0].value!=='') ? (parseInt(goles[0].value,10)||0) : 0;
     var golV = (goles[1] && goles[1].value!=='') ? (parseInt(goles[1].value,10)||0) : 0;
     var tarj = (btnsSI[0] && btnsSI[0].innerText==='SI') ? 'SI' : 'NO';
+    var roja = (rojaEl && rojaEl.innerText==='SI') ? 'SI' : 'NO';
     var extra = (btnsSI[1] && !btnsSI[1].classList.contains('locked')) ? (btnsSI[1].innerText==='SI'?'SI':'NO') : 'NA';
     var penal = (btnsSI[2] && !btnsSI[2].classList.contains('locked')) ? (btnsSI[2].innerText==='SI'?'SI':'NO') : 'NA';
     var num = m ? m.num : (idx+1);
     datos['p'+num] = { num:num, local:(m?m.local:''), visita:(m?m.visita:''),
-      golL:golL, golV:golV, tarjetas:tarj, extra:extra, penales:penal };
+      golL:golL, golV:golV, tarjetas:tarj, roja:roja, extra:extra, penales:penal };
   });
   showLoading('Guardando pronosticos...');
   db.ref('pronosticos/'+cod+'/j'+jN).update(datos, function(err){
@@ -2839,12 +2912,13 @@ function renderPronosticos(){
         '<span class="partido-fecha">'+m.fec+' 2026 &middot; '+ajustarHora(m.hor)+'</span>'+
       '</div>'+
       '<div class="tabla-juego-wrap"><table class="tabla-juego">'+
-        '<thead><tr class="tj-subhead"><td>SELECCION LOCAL</td><td>VS</td><td>SELECCION VISITANTE</td><td>TARJETAS</td><td>EXTRA T.</td><td>PENALES</td></tr></thead>'+
+        '<thead><tr class="tj-subhead"><td>SELECCION LOCAL</td><td>VS</td><td>SELECCION VISITANTE</td><td>TARJETAS</td><td>T. ROJA</td><td>EXTRA T.</td><td>PENALES</td></tr></thead>'+
         '<tbody><tr>'+
           '<td>'+String(m.local).toUpperCase()+'<br><input type="number" class="in-gol" placeholder="0" min="0"'+(cerrada?' disabled':'')+'></td>'+
           '<td><span style="background:#000;color:#fff;padding:5px 8px;font-weight:900;">VS</span></td>'+
           '<td>'+String(m.visita).toUpperCase()+'<br><input type="number" class="in-gol" placeholder="0" min="0"'+(cerrada?' disabled':'')+'></td>'+
           '<td><div class="btn-si'+(cerrada?' locked':'')+'" onclick="toggleSi(this)">-</div></td>'+
+          '<td><div class="btn-si btn-roja'+(cerrada?' locked':'')+'" onclick="toggleSi(this)">-</div></td>'+
           '<td><div class="btn-si locked">-</div></td>'+
           '<td><div class="btn-si locked">-</div></td>'+
         '</tr></tbody>'+
@@ -3453,25 +3527,31 @@ function renderizarRanking(){
     var cod=e[0],j=e[1];
     var p=j.pts||{};
     var ex=p.exacto||0,ga=p.ganador||0,em=p.empate||0,ta=p.tarjetas||0,ex2=p.extra||0,pe=p.penales||0,pm=p.premundial||0;
-    return {cod:cod,nombre:j.nombre||cod,exacto:ex,ganador:ga,empate:em,tarjetas:ta,extra:ex2,penales:pe,premundial:pm,total:ex*3+ga*2+em+ta+ex2+pe+pm};
+    var rOk=p.rojaOk||0, rMal=p.rojaMal||0;
+    var trPts = rOk*4 - rMal*1;                 // puntos netos de tarjeta roja
+    var total = ex*3 + ga*2 + em + ta*0.5 + trPts + ex2 + pe + pm;
+    return {cod:cod,nombre:j.nombre||cod,exacto:ex,ganador:ga,empate:em,tarjetas:ta,tr:trPts,extra:ex2,penales:pe,premundial:pm,total:total};
   });
   jugadores.sort(function(a,b){return b.total-a.total||b.exacto-a.exacto||b.ganador-a.ganador||b.empate-a.empate||b.premundial-a.premundial;});
   var body=document.getElementById('rankingBody');
   if(!body)return;
+  function fmtN(n){ return Number.isInteger(n) ? String(n) : n.toFixed(1); }
   if(jugadores.length===0){
-    body.innerHTML='<tr><td colspan="10" style="color:#555;padding:30px;text-align:center;">No hay jugadores registrados.</td></tr>';
+    body.innerHTML='<tr><td colspan="11" style="color:#555;padding:30px;text-align:center;">No hay jugadores registrados.</td></tr>';
     ['podio1Nombre','podio2Nombre','podio3Nombre'].forEach(function(id){document.getElementById(id).innerText='-';});
     return;
   }
   var medalias=['🥇','🥈','🥉'];
   body.innerHTML=jugadores.map(function(j,i){
     var cls=i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'';
+    var trColor = j.tr>0 ? '#00ff99' : (j.tr<0 ? '#ff6666' : '#ddd');
     return '<tr class="'+cls+'">' +
       '<td>'+(medalias[i]||i+1)+'</td>' +
       '<td style="text-align:left;font-weight:900;">'+j.nombre+'</td>' +
       '<td>'+j.exacto+'</td><td>'+j.ganador+'</td><td>'+j.empate+'</td>' +
-      '<td>'+j.tarjetas+'</td><td>'+j.extra+'</td><td>'+j.penales+'</td>' +
-      '<td>'+j.premundial+'</td><td class="col-total">'+j.total+'</td></tr>';
+      '<td>'+j.tarjetas+'</td><td style="color:'+trColor+';">'+(j.tr>0?'+':'')+fmtN(j.tr)+'</td>' +
+      '<td>'+j.extra+'</td><td>'+j.penales+'</td>' +
+      '<td>'+j.premundial+'</td><td class="col-total">'+fmtN(j.total)+'</td></tr>';
   }).join('');
   document.getElementById('podio1Nombre').innerText=jugadores[0]?jugadores[0].nombre:'-';
   document.getElementById('podio2Nombre').innerText=jugadores[1]?jugadores[1].nombre:'-';
@@ -3743,6 +3823,10 @@ window.cambiarJugadorManual = cambiarJugadorManual;
 window.manualJornadaAnterior = manualJornadaAnterior;
 window.manualJornadaSiguiente = manualJornadaSiguiente;
 window.guardarPronosticoManual = guardarPronosticoManual;
+window.filtrarJugadoresManual = filtrarJugadoresManual;
+window.seleccionarJugadorManual = seleccionarJugadorManual;
+window.guardarChonticoResultado = guardarChonticoResultado;
+window.cargarChonticoResultado = cargarChonticoResultado;
 window.limitarDigitos = limitarDigitos;
 </script>
 </body>
