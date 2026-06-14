@@ -225,6 +225,8 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
 .rank-2{background:rgba(192,192,192,0.1)!important;border-left:4px solid #aaa!important;}
 .rank-3{background:rgba(205,127,50,0.1)!important;border-left:4px solid #cd7f32!important;}
 .col-total{color:#fff!important;font-size:1.1rem!important;font-weight:900!important;background:#002868!important;}
+.tabla-ranking .col-user{max-width:120px;width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tabla-ranking th.th-group{background:#13283d;color:var(--gold2);font-size:0.72rem;letter-spacing:1px;border-bottom:2px solid var(--gold);}
 /* REGLAMENTO */
 .reglamento-wrap{padding:30px 20px;max-width:900px;margin:0 auto;}
 .reg-section{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:25px;margin-bottom:20px;}
@@ -514,7 +516,7 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
 <div id="sec-pronosticos" class="seccion">
   <div class="pronosticos-wrap">
     <div id="avisoPronosticos" style="background:#0d1b2a;border:1px solid var(--border);border-left:4px solid var(--gold);border-radius:8px;padding:12px 16px;margin-bottom:16px;color:var(--muted);font-size:0.9rem;line-height:1.45;">
-      Se muestra <strong style="color:var(--accent);">una jornada a la vez</strong> (todos los partidos de un mismo d&iacute;a). Los pron&oacute;sticos se cierran <strong style="color:var(--gold);">2 horas antes</strong> del primer partido de la jornada. Horas en hora de Colombia (puedes cambiar la zona horaria arriba).
+      Se muestra <strong style="color:var(--accent);">una jornada a la vez</strong> (todos los partidos de un mismo d&iacute;a). Los pron&oacute;sticos se cierran <strong style="color:var(--gold);">30 minutos antes</strong> del primer partido de la jornada. Horas en hora de Colombia (puedes cambiar la zona horaria arriba).
     </div>
     <div class="jornada-nav" style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;">
       <button id="btnJorAnterior" onclick="jornadaAnterior()" style="background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:8px 14px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;">&#9664; Anterior</button>
@@ -645,7 +647,17 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
     </div>
     <div class="ranking-table-wrap">
       <table class="tabla-ranking">
-        <thead><tr><th>POS</th><th>USUARIO</th><th>Exacto</th><th>Ganador</th><th>Empate</th><th>Tarjetas</th><th>TR</th><th>Extra T.</th><th>Penales</th><th>Pre-M.</th><th class="col-total">TOTAL</th></tr></thead>
+        <thead>
+          <tr>
+            <th rowspan="2">POS</th><th rowspan="2" class="col-user">USUARIO</th>
+            <th rowspan="2">Exacto</th><th rowspan="2">Ganador</th><th rowspan="2">Empate</th>
+            <th colspan="4" class="th-group">APUESTAS CON CASTIGO</th>
+            <th rowspan="2">Pre-M.</th><th rowspan="2" class="col-total">TOTAL</th>
+          </tr>
+          <tr>
+            <th>Tarjetas</th><th>TR</th><th>Extra T.</th><th>Penales</th>
+          </tr>
+        </thead>
         <tbody id="rankingBody"></tbody>
       </table>
     </div>
@@ -721,7 +733,7 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
       <h3>5. Jornadas y Cierre de Pronosticos</h3>
       <ul>
         <li>Una <strong>jornada</strong> son todos los partidos de un mismo dia. La hoja de Pronosticos te muestra <strong>una jornada a la vez</strong>; con los botones <strong>&#9664; Anterior</strong> y <strong>Siguiente &#9654;</strong> puedes ir y volver entre ellas.</li>
-        <li>Los pronosticos de cada jornada se <strong>cierran 2 horas antes</strong> del primer partido de ese dia. Pasada esa hora ya no podras enviar esa jornada (aparece marcada como <strong style="color:var(--red-alert)">CERRADA</strong>).</li>
+        <li>Los pronosticos de cada jornada se <strong>cierran 30 minutos antes</strong> del primer partido de ese dia. Pasada esa hora ya no podras enviar esa jornada (aparece marcada como <strong style="color:var(--red-alert)">CERRADA</strong>).</li>
         <li>Las horas se muestran en <strong>hora de Colombia</strong>. Si estas en otro pais, puedes cambiar la zona horaria con el selector de la parte de arriba.</li>
         <li>El reloj de "CIERRA EN" te muestra el tiempo real que te queda para enviar la jornada actual.</li>
       </ul>
@@ -1154,29 +1166,29 @@ var DATA_JUGADORES = {
 };
 var CONFIG_GRUPOS = {
   'A': { teams: ['Mexico','Sudafrica','Corea del Sur','R.Checa'], flags: ['mx','za','kr','cz'],
-    matches: [{jor:1,fec:'11-Jun',hor:'2PM',l:0,v:1,city:'CDMX'},{jor:1,fec:'11-Jun',hor:'7PM',l:2,v:3,city:'Guadalajara'},{jor:8,fec:'18-Jun',hor:'5PM',l:3,v:1,city:'Atlanta'},{jor:8,fec:'18-Jun',hor:'8PM',l:0,v:2,city:'Guadalajara'},{jor:14,fec:'24-Jun',hor:'6PM',l:3,v:0,city:'CDMX'},{jor:14,fec:'24-Jun',hor:'9PM',l:1,v:2,city:'Monterrey'}]},
+    matches: [{jor:1,fec:'11-Jun',hor:'12PM',l:0,v:1,city:'CDMX'},{jor:1,fec:'11-Jun',hor:'3PM',l:2,v:3,city:'Guadalajara'},{jor:8,fec:'18-Jun',hor:'12PM',l:3,v:1,city:'Atlanta'},{jor:8,fec:'18-Jun',hor:'6PM',l:0,v:2,city:'Guadalajara'},{jor:14,fec:'24-Jun',hor:'12PM',l:3,v:0,city:'CDMX'},{jor:14,fec:'24-Jun',hor:'9PM',l:1,v:2,city:'Monterrey'}]},
   'B': { teams: ['Canada','Bosnia','Qatar','Suiza'], flags: ['ca','ba','qa','ch'],
-    matches: [{jor:2,fec:'12-Jun',hor:'3PM',l:0,v:1,city:'Toronto'},{jor:3,fec:'13-Jun',hor:'6PM',l:2,v:3,city:'San Francisco'},{jor:8,fec:'18-Jun',hor:'5PM',l:3,v:1,city:'Los Angeles'},{jor:8,fec:'18-Jun',hor:'8PM',l:0,v:2,city:'Vancouver'},{jor:14,fec:'24-Jun',hor:'6PM',l:3,v:0,city:'Vancouver'},{jor:14,fec:'24-Jun',hor:'9PM',l:1,v:2,city:'Seattle'}]},
+    matches: [{jor:2,fec:'12-Jun',hor:'12PM',l:0,v:1,city:'Toronto'},{jor:3,fec:'13-Jun',hor:'6PM',l:2,v:3,city:'San Francisco'},{jor:8,fec:'18-Jun',hor:'3PM',l:3,v:1,city:'Los Angeles'},{jor:8,fec:'18-Jun',hor:'9PM',l:0,v:2,city:'Vancouver'},{jor:14,fec:'24-Jun',hor:'3PM',l:3,v:0,city:'Vancouver'},{jor:14,fec:'24-Jun',hor:'11PM',l:1,v:2,city:'Seattle'}]},
   'C': { teams: ['Brasil','Marruecos','Haiti','Escocia'], flags: ['br','ma','ht','gb-sct'],
-    matches: [{jor:3,fec:'13-Jun',hor:'2PM',l:0,v:1,city:'Nueva York'},{jor:3,fec:'13-Jun',hor:'5PM',l:2,v:3,city:'Filadelfia'},{jor:9,fec:'19-Jun',hor:'4PM',l:3,v:1,city:'Boston'},{jor:9,fec:'19-Jun',hor:'7PM',l:0,v:2,city:'Filadelfia'},{jor:14,fec:'24-Jun',hor:'6PM',l:3,v:0,city:'Miami'},{jor:14,fec:'24-Jun',hor:'9PM',l:1,v:2,city:'Atlanta'}]},
+    matches: [{jor:3,fec:'13-Jun',hor:'12PM',l:0,v:1,city:'Nueva York'},{jor:3,fec:'13-Jun',hor:'3PM',l:2,v:3,city:'Filadelfia'},{jor:9,fec:'19-Jun',hor:'12PM',l:3,v:1,city:'Boston'},{jor:9,fec:'19-Jun',hor:'6PM',l:0,v:2,city:'Filadelfia'},{jor:14,fec:'24-Jun',hor:'6PM',l:3,v:0,city:'Miami'},{jor:14,fec:'24-Jun',hor:'11PM',l:1,v:2,city:'Atlanta'}]},
   'D': { teams: ['USA','Paraguay','Australia','Turquia'], flags: ['us','py','au','tr'],
-    matches: [{jor:2,fec:'12-Jun',hor:'5PM',l:0,v:1,city:'Los Angeles'},{jor:3,fec:'13-Jun',hor:'7PM',l:2,v:3,city:'Vancouver'},{jor:9,fec:'19-Jun',hor:'4PM',l:3,v:1,city:'San Francisco'},{jor:9,fec:'19-Jun',hor:'7PM',l:0,v:2,city:'Seattle'},{jor:15,fec:'25-Jun',hor:'6PM',l:3,v:0,city:'Los Angeles'},{jor:15,fec:'25-Jun',hor:'9PM',l:1,v:2,city:'San Francisco'}]},
+    matches: [{jor:2,fec:'12-Jun',hor:'3PM',l:0,v:1,city:'Los Angeles'},{jor:3,fec:'13-Jun',hor:'9PM',l:2,v:3,city:'Vancouver'},{jor:9,fec:'19-Jun',hor:'3PM',l:3,v:1,city:'San Francisco'},{jor:9,fec:'19-Jun',hor:'9PM',l:0,v:2,city:'Seattle'},{jor:15,fec:'25-Jun',hor:'12PM',l:3,v:0,city:'Los Angeles'},{jor:15,fec:'25-Jun',hor:'9PM',l:1,v:2,city:'San Francisco'}]},
   'E': { teams: ['Alemania','Curazao','Costa de Marfil','Ecuador'], flags: ['de','cw','ci','ec'],
-    matches: [{jor:4,fec:'14-Jun',hor:'1PM',l:0,v:1,city:'Houston'},{jor:4,fec:'14-Jun',hor:'4PM',l:2,v:3,city:'Filadelfia'},{jor:10,fec:'20-Jun',hor:'5PM',l:0,v:2,city:'Toronto'},{jor:10,fec:'20-Jun',hor:'8PM',l:3,v:1,city:'Kansas City'},{jor:15,fec:'25-Jun',hor:'6PM',l:3,v:0,city:'Nueva York'},{jor:15,fec:'25-Jun',hor:'9PM',l:1,v:2,city:'Filadelfia'}]},
+    matches: [{jor:4,fec:'14-Jun',hor:'12PM',l:0,v:1,city:'Houston'},{jor:4,fec:'14-Jun',hor:'6PM',l:2,v:3,city:'Filadelfia'},{jor:10,fec:'20-Jun',hor:'12PM',l:0,v:2,city:'Toronto'},{jor:10,fec:'20-Jun',hor:'6PM',l:3,v:1,city:'Kansas City'},{jor:15,fec:'25-Jun',hor:'3PM',l:3,v:0,city:'Nueva York'},{jor:15,fec:'25-Jun',hor:'11PM',l:1,v:2,city:'Filadelfia'}]},
   'F': { teams: ['Paises Bajos','Japon','Suecia','Tunez'], flags: ['nl','jp','se','tn'],
-    matches: [{jor:4,fec:'14-Jun',hor:'3PM',l:0,v:1,city:'Dallas'},{jor:4,fec:'14-Jun',hor:'6PM',l:2,v:3,city:'Monterrey'},{jor:10,fec:'20-Jun',hor:'5PM',l:3,v:1,city:'Monterrey'},{jor:10,fec:'20-Jun',hor:'8PM',l:0,v:2,city:'Houston'},{jor:15,fec:'25-Jun',hor:'6PM',l:1,v:2,city:'Dallas'},{jor:15,fec:'25-Jun',hor:'9PM',l:3,v:0,city:'Kansas City'}]},
+    matches: [{jor:4,fec:'14-Jun',hor:'3PM',l:0,v:1,city:'Dallas'},{jor:4,fec:'14-Jun',hor:'9PM',l:2,v:3,city:'Monterrey'},{jor:10,fec:'20-Jun',hor:'3PM',l:3,v:1,city:'Monterrey'},{jor:10,fec:'20-Jun',hor:'9PM',l:0,v:2,city:'Houston'},{jor:15,fec:'25-Jun',hor:'6PM',l:1,v:2,city:'Dallas'},{jor:15,fec:'25-Jun',hor:'11PM',l:3,v:0,city:'Kansas City'}]},
   'G': { teams: ['Belgica','Egipto','Iran','N.Zelanda'], flags: ['be','eg','ir','nz'],
-    matches: [{jor:5,fec:'15-Jun',hor:'2PM',l:0,v:1,city:'Seattle'},{jor:5,fec:'15-Jun',hor:'5PM',l:2,v:3,city:'Los Angeles'},{jor:11,fec:'21-Jun',hor:'4PM',l:0,v:2,city:'Los Angeles'},{jor:11,fec:'21-Jun',hor:'7PM',l:3,v:1,city:'Vancouver'},{jor:16,fec:'26-Jun',hor:'6PM',l:1,v:2,city:'Seattle'},{jor:16,fec:'26-Jun',hor:'9PM',l:3,v:0,city:'Vancouver'}]},
+    matches: [{jor:5,fec:'15-Jun',hor:'12PM',l:0,v:1,city:'Seattle'},{jor:5,fec:'15-Jun',hor:'6PM',l:2,v:3,city:'Los Angeles'},{jor:11,fec:'21-Jun',hor:'12PM',l:0,v:2,city:'Los Angeles'},{jor:11,fec:'21-Jun',hor:'6PM',l:3,v:1,city:'Vancouver'},{jor:16,fec:'26-Jun',hor:'12PM',l:1,v:2,city:'Seattle'},{jor:16,fec:'26-Jun',hor:'9PM',l:3,v:0,city:'Vancouver'}]},
   'H': { teams: ['Espana','Cabo Verde','A.Saudita','Uruguay'], flags: ['es','cv','sa','uy'],
-    matches: [{jor:5,fec:'15-Jun',hor:'3PM',l:0,v:1,city:'Atlanta'},{jor:5,fec:'15-Jun',hor:'6PM',l:2,v:3,city:'Miami'},{jor:11,fec:'21-Jun',hor:'4PM',l:0,v:2,city:'Atlanta'},{jor:11,fec:'21-Jun',hor:'7PM',l:3,v:1,city:'Miami'},{jor:16,fec:'26-Jun',hor:'6PM',l:1,v:2,city:'Houston'},{jor:16,fec:'26-Jun',hor:'9PM',l:3,v:0,city:'Guadalajara'}]},
+    matches: [{jor:5,fec:'15-Jun',hor:'3PM',l:0,v:1,city:'Atlanta'},{jor:5,fec:'15-Jun',hor:'9PM',l:2,v:3,city:'Miami'},{jor:11,fec:'21-Jun',hor:'3PM',l:0,v:2,city:'Atlanta'},{jor:11,fec:'21-Jun',hor:'9PM',l:3,v:1,city:'Miami'},{jor:16,fec:'26-Jun',hor:'3PM',l:1,v:2,city:'Houston'},{jor:16,fec:'26-Jun',hor:'11PM',l:3,v:0,city:'Guadalajara'}]},
   'I': { teams: ['Francia','Senegal','Irak','Noruega'], flags: ['fr','sn','iq','no'],
-    matches: [{jor:6,fec:'16-Jun',hor:'2PM',l:0,v:1,city:'Nueva York'},{jor:6,fec:'16-Jun',hor:'5PM',l:2,v:3,city:'Boston'},{jor:12,fec:'22-Jun',hor:'4PM',l:0,v:2,city:'Filadelfia'},{jor:12,fec:'22-Jun',hor:'7PM',l:3,v:1,city:'Nueva York'},{jor:16,fec:'26-Jun',hor:'6PM',l:3,v:0,city:'Boston'},{jor:16,fec:'26-Jun',hor:'9PM',l:1,v:2,city:'Toronto'}]},
+    matches: [{jor:6,fec:'16-Jun',hor:'12PM',l:0,v:1,city:'Nueva York'},{jor:6,fec:'16-Jun',hor:'6PM',l:2,v:3,city:'Boston'},{jor:12,fec:'22-Jun',hor:'12PM',l:0,v:2,city:'Filadelfia'},{jor:12,fec:'22-Jun',hor:'6PM',l:3,v:1,city:'Nueva York'},{jor:16,fec:'26-Jun',hor:'6PM',l:3,v:0,city:'Boston'},{jor:16,fec:'26-Jun',hor:'11PM',l:1,v:2,city:'Toronto'}]},
   'J': { teams: ['Argentina','Argelia','Austria','Jordania'], flags: ['ar','dz','at','jo'],
-    matches: [{jor:6,fec:'16-Jun',hor:'3PM',l:0,v:1,city:'San Francisco'},{jor:6,fec:'16-Jun',hor:'6PM',l:2,v:3,city:'Kansas City'},{jor:12,fec:'22-Jun',hor:'5PM',l:2,v:0,city:'Dallas'},{jor:12,fec:'22-Jun',hor:'8PM',l:1,v:3,city:'San Francisco'},{jor:17,fec:'27-Jun',hor:'6PM',l:3,v:0,city:'Kansas City'},{jor:17,fec:'27-Jun',hor:'9PM',l:1,v:2,city:'Dallas'}]},
+    matches: [{jor:6,fec:'16-Jun',hor:'3PM',l:0,v:1,city:'San Francisco'},{jor:6,fec:'16-Jun',hor:'9PM',l:2,v:3,city:'Kansas City'},{jor:12,fec:'22-Jun',hor:'3PM',l:2,v:0,city:'Dallas'},{jor:12,fec:'22-Jun',hor:'9PM',l:1,v:3,city:'San Francisco'},{jor:17,fec:'27-Jun',hor:'12PM',l:3,v:0,city:'Kansas City'},{jor:17,fec:'27-Jun',hor:'9PM',l:1,v:2,city:'Dallas'}]},
   'K': { teams: ['Portugal','Colombia','Uzbekistan','RD Congo'], flags: ['pt','co','uz','cd'],
-    matches: [{jor:7,fec:'17-Jun',hor:'2PM',l:0,v:1,city:'Houston'},{jor:7,fec:'17-Jun',hor:'5PM',l:2,v:3,city:'CDMX'},{jor:13,fec:'23-Jun',hor:'4PM',l:0,v:2,city:'Houston'},{jor:13,fec:'23-Jun',hor:'7PM',l:3,v:1,city:'Guadalajara'},{jor:17,fec:'27-Jun',hor:'6PM',l:3,v:0,city:'Miami'},{jor:17,fec:'27-Jun',hor:'9PM',l:1,v:2,city:'Atlanta'}]},
+    matches: [{jor:7,fec:'17-Jun',hor:'12PM',l:0,v:1,city:'Houston'},{jor:7,fec:'17-Jun',hor:'6PM',l:2,v:3,city:'CDMX'},{jor:13,fec:'23-Jun',hor:'12PM',l:0,v:2,city:'Houston'},{jor:13,fec:'23-Jun',hor:'6PM',l:3,v:1,city:'Guadalajara'},{jor:17,fec:'27-Jun',hor:'3PM',l:3,v:0,city:'Miami'},{jor:17,fec:'27-Jun',hor:'11PM',l:1,v:2,city:'Atlanta'}]},
   'L': { teams: ['Inglaterra','Croacia','Ghana','Panama'], flags: ['gb-eng','hr','gh','pa'],
-    matches: [{jor:7,fec:'17-Jun',hor:'3PM',l:0,v:1,city:'Dallas'},{jor:7,fec:'17-Jun',hor:'6PM',l:2,v:3,city:'Toronto'},{jor:13,fec:'23-Jun',hor:'5PM',l:0,v:2,city:'Boston'},{jor:13,fec:'23-Jun',hor:'8PM',l:3,v:1,city:'Toronto'},{jor:17,fec:'27-Jun',hor:'6PM',l:3,v:0,city:'Nueva York'},{jor:17,fec:'27-Jun',hor:'9PM',l:1,v:2,city:'Filadelfia'}]}
+    matches: [{jor:7,fec:'17-Jun',hor:'3PM',l:0,v:1,city:'Dallas'},{jor:7,fec:'17-Jun',hor:'9PM',l:2,v:3,city:'Toronto'},{jor:13,fec:'23-Jun',hor:'3PM',l:0,v:2,city:'Boston'},{jor:13,fec:'23-Jun',hor:'9PM',l:3,v:1,city:'Toronto'},{jor:17,fec:'27-Jun',hor:'6PM',l:3,v:0,city:'Nueva York'},{jor:17,fec:'27-Jun',hor:'11PM',l:1,v:2,city:'Filadelfia'}]}
 };
 var LLAVES_16 = [
   {n:73,dia:18,fec:'28 Jun',hor:'2PM',l:'2A',v:'2B',lf:'',vf:'',city:'Los Angeles'},
@@ -2895,7 +2907,7 @@ function _cierreJornada(jn){
   var arr=data.jor[jn]||[];
   if(!arr.length) return Infinity;
   var primer=Math.min.apply(null,arr.map(function(m){return m.ts;}));
-  return primer - 2*3600*1000; // 2 horas antes del primer partido
+  return primer - 30*60*1000; // 30 minutos antes del primer partido
 }
 function calcularJornadaActiva(){
   var data=_getCal();
@@ -3671,7 +3683,7 @@ function renderizarRanking(){
     var peColor = j.penales>0 ? '#00ff99' : (j.penales<0 ? '#ff6666' : '#ddd');
     return '<tr class="'+cls+'">' +
       '<td>'+(medalias[i]||i+1)+'</td>' +
-      '<td style="text-align:left;font-weight:900;">'+j.nombre+'</td>' +
+      '<td class="col-user" title="'+j.nombre+'" style="text-align:left;font-weight:900;">'+j.nombre+'</td>' +
       '<td>'+j.exacto+'</td><td>'+j.ganador+'</td><td>'+j.empate+'</td>' +
       '<td>'+j.tarjetas+'</td><td style="color:'+trColor+';">'+(j.tr>0?'+':'')+fmtN(j.tr)+'</td>' +
       '<td style="color:'+exColor+';">'+(j.extra>0?'+':'')+fmtN(j.extra)+'</td>' +
