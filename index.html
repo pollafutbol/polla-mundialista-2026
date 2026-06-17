@@ -3461,6 +3461,78 @@ function calcularClasificados() {
   return clasificados;
 }
 
+// ============================================================
+// CLASIFICADOS A PARTIR DE RESULTADOS OFICIALES (no del simulador local)
+// Pieza base para cablear las eliminatorias a la HOJA DE PRONOSTICOS.
+// Recibe el objeto 'resultados' leido de Firebase (resultados/jN/pM con golL/golV)
+// y devuelve un objeto compatible con resolverNombre(): {'1A':{name,flag}, '2A':..., '3_74':...}
+// NOTA: aun NO esta conectada a la pantalla. La apertura progresiva de fases en la
+// hoja de pronosticos debe construirse sobre ESTA funcion y sobre el bracket ya corregido.
+// ============================================================
+function calcularClasificadosOficiales(resultados) {
+  resultados = resultados || {};
+  var cal = _getCal().cal;
+  // Indexar resultados oficiales por numero de partido global
+  var resPorNum = {};
+  Object.keys(resultados).forEach(function(jk){
+    var pj = resultados[jk] || {};
+    Object.keys(pj).forEach(function(pk){
+      var r = pj[pk];
+      var num = (r && r.num) ? r.num : parseInt(String(pk).replace('p',''),10);
+      if (num) resPorNum[num] = r;
+    });
+  });
+  // Mapear cada partido de grupo a su numero global usando el calendario
+  var numDe = {};
+  cal.forEach(function(c){ numDe[c.grupo+'|'+c.jor+'|'+c.local+'|'+c.visita] = c.num; });
+
+  var clasificados = {};
+  var todosTerceros = [];
+  ['A','B','C','D','E','F','G','H','I','J','K','L'].forEach(function(letra){
+    var g = CONFIG_GRUPOS[letra];
+    var st = g.teams.map(function(name,i){
+      return {id:i, name:name, flag:g.flags[i], grp:letra, pts:0, pj:0, gf:0, gc:0, dg:0};
+    });
+    var todosIngresados = true;
+    g.matches.forEach(function(m){
+      var num = numDe[letra+'|'+m.jor+'|'+g.teams[m.l]+'|'+g.teams[m.v]];
+      var r = num ? resPorNum[num] : null;
+      if (!r) { todosIngresados = false; return; }
+      var gl = parseInt(r.golL)||0, gv = parseInt(r.golV)||0;
+      var L = st[m.l], V = st[m.v];
+      L.pj++; V.pj++; L.gf+=gl; L.gc+=gv; V.gf+=gv; V.gc+=gl;
+      if (gl>gv){ L.pts+=3; } else if (gl<gv){ V.pts+=3; } else { L.pts++; V.pts++; }
+    });
+    st.forEach(function(s){ s.dg = s.gf - s.gc; });
+    st.sort(function(a,b){ return (b.pts-a.pts)||(b.dg-a.dg)||(b.gf-a.gf); });
+    if (todosIngresados) {
+      clasificados['1'+letra] = { name: st[0].name, flag: st[0].flag };
+      clasificados['2'+letra] = { name: st[1].name, flag: st[1].flag };
+      todosTerceros.push(st[2]);
+    }
+  });
+
+  // Asignar los 8 mejores terceros a sus slots con la tabla FIFA de 495 combinaciones
+  todosTerceros.sort(function(a,b){ return (b.pts-a.pts)||(b.dg-a.dg)||(b.gf-a.gf); });
+  var top8 = todosTerceros.slice(0,8);
+  var SLOTS_TERCEROS = [74,77,79,80,81,82,85,87];
+  if (top8.length === 8) {
+    var combinacion = top8.map(function(t){ return t.grp; }).join('');
+    var matchC = Object.entries(COMBINACIONES_FIFA).find(function(e){
+      return e[1].split('').sort().join('') === combinacion.split('').sort().join('');
+    });
+    if (matchC) {
+      matchC[1].split('').forEach(function(letra,i){
+        var t = todosTerceros.find(function(x){ return x.grp===letra; });
+        if (t && SLOTS_TERCEROS[i]!==undefined) clasificados['3_'+SLOTS_TERCEROS[i]] = { name:t.name, flag:t.flag };
+      });
+    } else {
+      top8.forEach(function(t,i){ if (SLOTS_TERCEROS[i]!==undefined) clasificados['3_'+SLOTS_TERCEROS[i]] = { name:t.name, flag:t.flag }; });
+    }
+  }
+  return clasificados;
+}
+
 // Resuelve el nombre real de un slot (ej: '1E', '3A/B/D/F/G', 'Gana P.73')
 function resolverNombre(codigo, clasificados, partidoNum) {
   if (!codigo) return { name: codigo, flag: '', indefinido: true };
