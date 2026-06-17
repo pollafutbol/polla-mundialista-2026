@@ -135,6 +135,10 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
 .tabla-juego-wrap{width:95%;max-width:1100px;margin:0 auto;overflow-x:auto;}
 .tabla-juego{width:100%;border-collapse:collapse;background:#e8eaf0;color:#000;border:2px solid #000;min-width:700px;table-layout:fixed;}
 .tj-subhead th{background:#c8d0dc;font-size:0.65rem;font-weight:700;border:1px solid #999;padding:4px;text-transform:uppercase;color:#333;}
+.tj-castigo-row td{padding:0;border:none;}
+.tj-castigo-empty{background:#0d1221;}
+.tj-castigo-band{background:#0d1221!important;color:#ff4d4d;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.72rem;letter-spacing:1px;text-transform:uppercase;padding:6px 8px!important;border:2px solid #ff4d4d!important;text-align:center;line-height:1.3;}
+.tj-castigo-fecha{display:block;color:#ff9a9a;font-weight:600;font-size:0.62rem;letter-spacing:0.5px;margin-top:2px;text-transform:none;}
 .tabla-juego td{border:1px solid #aaa;padding:8px 5px;text-align:center;vertical-align:middle;font-weight:700;}
 .in-gol{width:48px;height:36px;font-size:1.3rem;text-align:center;font-weight:900;border:2px solid #555;background:#fff;}
 .btn-si{width:46px;height:36px;border:2px solid #555;background:#fff;cursor:pointer;font-weight:900;font-size:0.75rem;display:inline-flex;align-items:center;justify-content:center;user-select:none;transition:0.15s;}
@@ -869,17 +873,6 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
         <button onclick="resJornadaSiguiente()" id="btnResSiguiente" class="btn-action" style="background:#222;color:#fff;">Siguiente &#9654;</button>
       </div>
       <div id="resultadosContainer"></div>
-    </div>
-    <div class="form-card" style="border-color:var(--accent);">
-      <h3 style="color:var(--accent);">Pronostico Manual (respaldo admin)</h3>
-      <p style="font-size:0.8rem;color:#aaa;margin-bottom:12px;">Para meter el pronostico de un jugador a mano (casos puntuales). Elige el jugador, la jornada, escribe su marcador, su apuesta de +2.5 tarjetas (SI/NO) y tarjeta roja, y guarda. Luego dale a <strong style="color:var(--gold);">Ejecutar Escrutinio Global</strong>.</p>
-      <div class="pm-field"><label>Jugador</label><select class="pm-select" id="man-jugador" onchange="seleccionarJugadorManual(this.value)"><option value="">Elegir jugador...</option></select></div>
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin:14px 0;">
-        <button onclick="manualJornadaAnterior()" id="btnManAnterior" class="btn-action" style="background:#222;color:#fff;">&#9664; Anterior</button>
-        <div id="manJornadaTitulo" style="font-family:'Bebas Neue',sans-serif;color:var(--gold);font-size:1.2rem;letter-spacing:2px;text-align:center;flex:1;">JORNADA</div>
-        <button onclick="manualJornadaSiguiente()" id="btnManSiguiente" class="btn-action" style="background:#222;color:#fff;">Siguiente &#9654;</button>
-      </div>
-      <div id="manualContainer"></div>
     </div>
     <div class="form-card" style="border-color:var(--accent);">
       <h3 style="color:var(--accent);">Pronostico Manual del Jugador</h3>
@@ -2957,13 +2950,26 @@ function renderPronosticos(){
         '<div id="timerJornada" style="font-family:\'Bebas Neue\',sans-serif;font-size:2rem;letter-spacing:3px;color:'+(cerrada?'var(--red-alert)':'var(--accent)')+';">'+(cerrada?'CERRADA':'--:--:--')+'</div>'+
         '</div>';
   partidos.forEach(function(m){
+    // En esta hoja (fase de grupos) las apuestas de riesgo activas son +2.5 T. y T. ROJA;
+    // Tiempo Extra y Penales van bloqueados. nCastigo = cuantas columnas de riesgo van activas
+    // (de izquierda a derecha: tarjetas, roja, extra, penales). La franja se estira sola.
+    var extraLock=true, penLock=true;
+    var nCastigo = 2 + (extraLock?0:1) + (penLock?0:1);
     html+='<div class="partido-block">'+
       '<div class="partido-header">'+
         '<span>PARTIDO '+m.num+' &middot; Grupo '+m.grupo+'</span>'+
         '<span class="partido-fecha">'+m.fec+' 2026 &middot; '+ajustarHora(m.hor)+'</span>'+
       '</div>'+
       '<div class="tabla-juego-wrap"><table class="tabla-juego">'+
-        '<thead><tr class="tj-subhead"><td>SELECCION LOCAL</td><td>VS</td><td>SELECCION VISITANTE</td><td>+2.5 T.</td><td>T. ROJA</td><td>EXTRA T.</td><td>PENALES</td></tr></thead>'+
+        '<thead>'+
+          '<tr class="tj-castigo-row">'+
+            '<td colspan="3" class="tj-castigo-empty"></td>'+
+            '<td colspan="'+nCastigo+'" class="tj-castigo-band">&#9888; Apuesta con castigo'+
+              '<span class="tj-castigo-fecha">'+m.fec+' 2026 &middot; '+ajustarHora(m.hor)+'</span></td>'+
+            (nCastigo<4 ? '<td colspan="'+(4-nCastigo)+'" class="tj-castigo-empty"></td>' : '')+
+          '</tr>'+
+          '<tr class="tj-subhead"><td>SELECCION LOCAL</td><td>VS</td><td>SELECCION VISITANTE</td><td>+2.5 T.</td><td>T. ROJA</td><td>EXTRA T.</td><td>PENALES</td></tr>'+
+        '</thead>'+
         '<tbody><tr>'+
           '<td>'+String(m.local).toUpperCase()+'<br><input type="number" class="in-gol" placeholder="0" min="0"'+(cerrada?' disabled':'')+'></td>'+
           '<td><span style="background:#000;color:#fff;padding:5px 8px;font-weight:900;">VS</span></td>'+
