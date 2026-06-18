@@ -527,6 +527,7 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
       <div id="jornadaTitulo" style="font-family:'Bebas Neue',sans-serif;color:var(--gold);font-size:1.3rem;letter-spacing:2px;text-align:center;flex:1;line-height:1.1;">JORNADA</div>
       <button id="btnJorSiguiente" onclick="jornadaSiguiente()" style="background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:8px 14px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;">Siguiente &#9654;</button>
     </div>
+    <div id="jornadaSaltos" style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:16px;"></div>
     <div id="pronosticosContainer"></div>
   </div>
 </div>
@@ -886,6 +887,7 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
         <div id="manualJornadaTitulo" style="font-family:'Bebas Neue',sans-serif;color:var(--gold);font-size:1.2rem;letter-spacing:2px;text-align:center;flex:1;">JORNADA</div>
         <button onclick="manualJornadaSiguiente()" id="btnManualSiguiente" class="btn-action" style="background:#222;color:#fff;">Siguiente &#9654;</button>
       </div>
+      <button onclick="cerrarManualJugador()" style="width:100%;background:#3a1f1f;color:#ff8a8a;border:1px solid #7a3a3a;border-radius:6px;padding:8px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;margin-bottom:10px;">&#10005; CERRAR / LIMPIAR JUGADOR</button>
       <div id="manualContainer"></div>
     </div>
     <div class="form-card" style="border-color:var(--gold);">
@@ -895,6 +897,13 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
         <input type="text" id="ver-buscar" autocomplete="off" oninput="filtrarJugadoresVer()" onfocus="this.value='';filtrarJugadoresVer()" onblur="setTimeout(function(){var b=document.getElementById('ver-resultados'); if(b) b.style.display='none';},200)" placeholder="Escribe nombre o codigo..." class="pm-select" style="width:100%;">
         <div id="ver-resultados" style="display:none;position:absolute;left:0;right:0;top:100%;z-index:50;background:#0d1b2a;border:1px solid var(--border);border-radius:0 0 8px 8px;max-height:240px;overflow-y:auto;"></div>
       </div>
+      <button onclick="cerrarVerJugador()" style="width:100%;background:#3a1f1f;color:#ff8a8a;border:1px solid #7a3a3a;border-radius:6px;padding:8px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;margin:10px 0;">&#10005; CERRAR / LIMPIAR JUGADOR</button>
+      <div id="verNav" style="display:none;align-items:center;justify-content:space-between;gap:10px;margin:6px 0;">
+        <button onclick="verJornadaAnterior()" id="btnVerAnterior" class="btn-action" style="background:#222;color:#fff;">&#9664; Anterior</button>
+        <div id="verJornadaTitulo" style="font-family:'Bebas Neue',sans-serif;color:var(--gold);font-size:1.2rem;letter-spacing:2px;text-align:center;flex:1;">JORNADA</div>
+        <button onclick="verJornadaSiguiente()" id="btnVerSiguiente" class="btn-action" style="background:#222;color:#fff;">Siguiente &#9654;</button>
+      </div>
+      <div id="verSaltos" style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:10px;"></div>
       <div id="verPronosticosContainer" style="margin-top:12px;"></div>
     </div>
     <div class="form-card" style="border-color:var(--gold);">
@@ -902,8 +911,6 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
       <p style="font-size:0.8rem;color:#aaa;margin-bottom:15px;">Al ejecutar, el sistema compara los resultados oficiales contra los pronosticos de todos y reparte los puntos. Puedes ejecutarlo cuantas veces quieras.</p>
       <button class="btn-action btn-gold" onclick="sincronizarFIFA()" style="width:100%;padding:15px;font-size:1rem;">EJECUTAR ESCRUTINIO GLOBAL</button>
       <div id="statusFIFA" class="status-box">&gt; Listo para ejecutar.<br><span id="statusLog" style="color:var(--accent);">Esperando...</span></div>
-      <button class="btn-action" onclick="cargarPronosticosPendientes()" style="width:100%;padding:11px;margin-top:12px;background:#1a3a2a;color:var(--green-ok);border:1px solid var(--green-ok);">Cargar 3 pronosticos pendientes (Partido 1)</button>
-      <button class="btn-action" onclick="otorgarPuntosPartido2()" style="width:100%;padding:11px;margin-top:10px;background:#3a2a0a;color:var(--gold);border:1px solid var(--gold);">Otorgar 3 puntos a todos (error Partido 2)</button>
     </div>
     <div class="form-card" style="border-color:var(--gold2);">
       <h3 style="color:var(--gold2);">Resultados Oficiales Pre-Mundial</h3>
@@ -1159,67 +1166,72 @@ var DATA_JUGADORES = {
 };
 var CONFIG_GRUPOS = {
   'A': { teams: ['Mexico','Sudafrica','Corea del Sur','R.Checa'], flags: ['mx','za','kr','cz'],
-    matches: [{jor:1,fec:'11-Jun',hor:'12PM',l:0,v:1,city:'CDMX'},{jor:1,fec:'11-Jun',hor:'3PM',l:2,v:3,city:'Guadalajara'},{jor:8,fec:'18-Jun',hor:'12PM',l:3,v:1,city:'Atlanta'},{jor:8,fec:'18-Jun',hor:'6PM',l:0,v:2,city:'Guadalajara'},{jor:14,fec:'24-Jun',hor:'12PM',l:3,v:0,city:'CDMX'},{jor:14,fec:'24-Jun',hor:'9PM',l:1,v:2,city:'Monterrey'}]},
+    matches: [{jor:1,fec:'11-Jun',hor:'2PM',l:0,v:1,city:'CDMX'},{jor:1,fec:'11-Jun',hor:'8PM',l:2,v:3,city:'Guadalajara'},{jor:8,fec:'18-Jun',hor:'11AM',l:3,v:1,city:'Atlanta'},{jor:8,fec:'18-Jun',hor:'8PM',l:0,v:2,city:'Guadalajara'},{jor:14,fec:'24-Jun',hor:'8PM',l:3,v:0,city:'CDMX'},{jor:14,fec:'24-Jun',hor:'8PM',l:1,v:2,city:'Monterrey'}]},
   'B': { teams: ['Canada','Bosnia','Qatar','Suiza'], flags: ['ca','ba','qa','ch'],
-    matches: [{jor:2,fec:'12-Jun',hor:'12PM',l:0,v:1,city:'Toronto'},{jor:3,fec:'13-Jun',hor:'6PM',l:2,v:3,city:'San Francisco'},{jor:8,fec:'18-Jun',hor:'3PM',l:3,v:1,city:'Los Angeles'},{jor:8,fec:'18-Jun',hor:'9PM',l:0,v:2,city:'Vancouver'},{jor:14,fec:'24-Jun',hor:'3PM',l:3,v:0,city:'Vancouver'},{jor:14,fec:'24-Jun',hor:'11PM',l:1,v:2,city:'Seattle'}]},
+    matches: [{jor:2,fec:'12-Jun',hor:'2PM',l:0,v:1,city:'Toronto'},{jor:3,fec:'13-Jun',hor:'2PM',l:2,v:3,city:'San Francisco'},{jor:8,fec:'18-Jun',hor:'2PM',l:3,v:1,city:'Los Angeles'},{jor:8,fec:'18-Jun',hor:'8PM',l:0,v:2,city:'Vancouver'},{jor:14,fec:'24-Jun',hor:'2PM',l:1,v:2,city:'Seattle'},{jor:14,fec:'24-Jun',hor:'8PM',l:3,v:0,city:'Vancouver'}]},
   'C': { teams: ['Brasil','Marruecos','Haiti','Escocia'], flags: ['br','ma','ht','gb-sct'],
-    matches: [{jor:3,fec:'13-Jun',hor:'12PM',l:0,v:1,city:'Nueva York'},{jor:3,fec:'13-Jun',hor:'3PM',l:2,v:3,city:'Filadelfia'},{jor:9,fec:'19-Jun',hor:'12PM',l:3,v:1,city:'Boston'},{jor:9,fec:'19-Jun',hor:'6PM',l:0,v:2,city:'Filadelfia'},{jor:14,fec:'24-Jun',hor:'6PM',l:3,v:0,city:'Miami'},{jor:14,fec:'24-Jun',hor:'11PM',l:1,v:2,city:'Atlanta'}]},
+    matches: [{jor:3,fec:'13-Jun',hor:'5PM',l:0,v:1,city:'Nueva York'},{jor:3,fec:'13-Jun',hor:'8PM',l:2,v:3,city:'Boston'},{jor:9,fec:'19-Jun',hor:'5PM',l:3,v:1,city:'Boston'},{jor:9,fec:'19-Jun',hor:'8PM',l:0,v:2,city:'Filadelfia'},{jor:14,fec:'24-Jun',hor:'5PM',l:3,v:0,city:'Miami'},{jor:14,fec:'24-Jun',hor:'5PM',l:1,v:2,city:'Atlanta'}]},
   'D': { teams: ['USA','Paraguay','Australia','Turquia'], flags: ['us','py','au','tr'],
-    matches: [{jor:2,fec:'12-Jun',hor:'3PM',l:0,v:1,city:'Los Angeles'},{jor:3,fec:'13-Jun',hor:'9PM',l:2,v:3,city:'Vancouver'},{jor:9,fec:'19-Jun',hor:'3PM',l:3,v:1,city:'San Francisco'},{jor:9,fec:'19-Jun',hor:'9PM',l:0,v:2,city:'Seattle'},{jor:15,fec:'25-Jun',hor:'12PM',l:3,v:0,city:'Los Angeles'},{jor:15,fec:'25-Jun',hor:'9PM',l:1,v:2,city:'San Francisco'}]},
+    matches: [{jor:2,fec:'12-Jun',hor:'8PM',l:0,v:1,city:'Los Angeles'},{jor:2,fec:'12-Jun',hor:'11PM',l:2,v:3,city:'Vancouver'},{jor:9,fec:'19-Jun',hor:'2PM',l:0,v:2,city:'Seattle'},{jor:9,fec:'19-Jun',hor:'8PM',l:3,v:1,city:'San Francisco'},{jor:15,fec:'25-Jun',hor:'9PM',l:3,v:0,city:'Los Angeles'},{jor:15,fec:'25-Jun',hor:'9PM',l:1,v:2,city:'San Francisco'}]},
   'E': { teams: ['Alemania','Curazao','Costa de Marfil','Ecuador'], flags: ['de','cw','ci','ec'],
-    matches: [{jor:4,fec:'14-Jun',hor:'12PM',l:0,v:1,city:'Houston'},{jor:4,fec:'14-Jun',hor:'6PM',l:2,v:3,city:'Filadelfia'},{jor:10,fec:'20-Jun',hor:'12PM',l:0,v:2,city:'Toronto'},{jor:10,fec:'20-Jun',hor:'6PM',l:3,v:1,city:'Kansas City'},{jor:15,fec:'25-Jun',hor:'3PM',l:3,v:0,city:'Nueva York'},{jor:15,fec:'25-Jun',hor:'11PM',l:1,v:2,city:'Filadelfia'}]},
+    matches: [{jor:4,fec:'14-Jun',hor:'12PM',l:0,v:1,city:'Houston'},{jor:4,fec:'14-Jun',hor:'6PM',l:2,v:3,city:'Filadelfia'},{jor:10,fec:'20-Jun',hor:'3PM',l:0,v:2,city:'Toronto'},{jor:10,fec:'20-Jun',hor:'7PM',l:3,v:1,city:'Kansas City'},{jor:15,fec:'25-Jun',hor:'3PM',l:3,v:0,city:'Nueva York'},{jor:15,fec:'25-Jun',hor:'3PM',l:1,v:2,city:'Filadelfia'}]},
   'F': { teams: ['Paises Bajos','Japon','Suecia','Tunez'], flags: ['nl','jp','se','tn'],
-    matches: [{jor:4,fec:'14-Jun',hor:'3PM',l:0,v:1,city:'Dallas'},{jor:4,fec:'14-Jun',hor:'9PM',l:2,v:3,city:'Monterrey'},{jor:10,fec:'20-Jun',hor:'3PM',l:3,v:1,city:'Monterrey'},{jor:10,fec:'20-Jun',hor:'9PM',l:0,v:2,city:'Houston'},{jor:15,fec:'25-Jun',hor:'6PM',l:1,v:2,city:'Dallas'},{jor:15,fec:'25-Jun',hor:'11PM',l:3,v:0,city:'Kansas City'}]},
+    matches: [{jor:4,fec:'14-Jun',hor:'3PM',l:0,v:1,city:'Dallas'},{jor:4,fec:'14-Jun',hor:'8PM',l:2,v:3,city:'Monterrey'},{jor:10,fec:'20-Jun',hor:'12PM',l:0,v:2,city:'Houston'},{jor:10,fec:'20-Jun',hor:'11PM',l:3,v:1,city:'Monterrey'},{jor:15,fec:'25-Jun',hor:'6PM',l:1,v:2,city:'Dallas'},{jor:15,fec:'25-Jun',hor:'6PM',l:3,v:0,city:'Kansas City'}]},
   'G': { teams: ['Belgica','Egipto','Iran','N.Zelanda'], flags: ['be','eg','ir','nz'],
-    matches: [{jor:5,fec:'15-Jun',hor:'12PM',l:0,v:1,city:'Seattle'},{jor:5,fec:'15-Jun',hor:'6PM',l:2,v:3,city:'Los Angeles'},{jor:11,fec:'21-Jun',hor:'12PM',l:0,v:2,city:'Los Angeles'},{jor:11,fec:'21-Jun',hor:'6PM',l:3,v:1,city:'Vancouver'},{jor:16,fec:'26-Jun',hor:'12PM',l:1,v:2,city:'Seattle'},{jor:16,fec:'26-Jun',hor:'9PM',l:3,v:0,city:'Vancouver'}]},
+    matches: [{jor:5,fec:'15-Jun',hor:'2PM',l:0,v:1,city:'Seattle'},{jor:5,fec:'15-Jun',hor:'8PM',l:2,v:3,city:'Los Angeles'},{jor:11,fec:'21-Jun',hor:'2PM',l:0,v:2,city:'Los Angeles'},{jor:11,fec:'21-Jun',hor:'8PM',l:3,v:1,city:'Vancouver'},{jor:16,fec:'26-Jun',hor:'10PM',l:1,v:2,city:'Seattle'},{jor:16,fec:'26-Jun',hor:'10PM',l:3,v:0,city:'Vancouver'}]},
   'H': { teams: ['Espana','Cabo Verde','A.Saudita','Uruguay'], flags: ['es','cv','sa','uy'],
-    matches: [{jor:5,fec:'15-Jun',hor:'3PM',l:0,v:1,city:'Atlanta'},{jor:5,fec:'15-Jun',hor:'9PM',l:2,v:3,city:'Miami'},{jor:11,fec:'21-Jun',hor:'3PM',l:0,v:2,city:'Atlanta'},{jor:11,fec:'21-Jun',hor:'9PM',l:3,v:1,city:'Miami'},{jor:16,fec:'26-Jun',hor:'3PM',l:1,v:2,city:'Houston'},{jor:16,fec:'26-Jun',hor:'11PM',l:3,v:0,city:'Guadalajara'}]},
+    matches: [{jor:5,fec:'15-Jun',hor:'11AM',l:0,v:1,city:'Atlanta'},{jor:5,fec:'15-Jun',hor:'5PM',l:2,v:3,city:'Miami'},{jor:11,fec:'21-Jun',hor:'11AM',l:0,v:2,city:'Atlanta'},{jor:11,fec:'21-Jun',hor:'5PM',l:3,v:1,city:'Miami'},{jor:16,fec:'26-Jun',hor:'7PM',l:1,v:2,city:'Houston'},{jor:16,fec:'26-Jun',hor:'7PM',l:3,v:0,city:'Guadalajara'}]},
   'I': { teams: ['Francia','Senegal','Irak','Noruega'], flags: ['fr','sn','iq','no'],
-    matches: [{jor:6,fec:'16-Jun',hor:'12PM',l:0,v:1,city:'Nueva York'},{jor:6,fec:'16-Jun',hor:'6PM',l:2,v:3,city:'Boston'},{jor:12,fec:'22-Jun',hor:'12PM',l:0,v:2,city:'Filadelfia'},{jor:12,fec:'22-Jun',hor:'6PM',l:3,v:1,city:'Nueva York'},{jor:16,fec:'26-Jun',hor:'6PM',l:3,v:0,city:'Boston'},{jor:16,fec:'26-Jun',hor:'11PM',l:1,v:2,city:'Toronto'}]},
+    matches: [{jor:6,fec:'16-Jun',hor:'2PM',l:0,v:1,city:'Nueva York'},{jor:6,fec:'16-Jun',hor:'5PM',l:2,v:3,city:'Boston'},{jor:12,fec:'22-Jun',hor:'4PM',l:0,v:2,city:'Filadelfia'},{jor:12,fec:'22-Jun',hor:'7PM',l:3,v:1,city:'Nueva York'},{jor:16,fec:'26-Jun',hor:'2PM',l:3,v:0,city:'Boston'},{jor:16,fec:'26-Jun',hor:'2PM',l:1,v:2,city:'Toronto'}]},
   'J': { teams: ['Argentina','Argelia','Austria','Jordania'], flags: ['ar','dz','at','jo'],
-    matches: [{jor:6,fec:'16-Jun',hor:'3PM',l:0,v:1,city:'San Francisco'},{jor:6,fec:'16-Jun',hor:'9PM',l:2,v:3,city:'Kansas City'},{jor:12,fec:'22-Jun',hor:'3PM',l:2,v:0,city:'Dallas'},{jor:12,fec:'22-Jun',hor:'9PM',l:1,v:3,city:'San Francisco'},{jor:17,fec:'27-Jun',hor:'12PM',l:3,v:0,city:'Kansas City'},{jor:17,fec:'27-Jun',hor:'9PM',l:1,v:2,city:'Dallas'}]},
+    matches: [{jor:6,fec:'16-Jun',hor:'8PM',l:0,v:1,city:'Kansas City'},{jor:6,fec:'16-Jun',hor:'11PM',l:2,v:3,city:'San Francisco'},{jor:12,fec:'22-Jun',hor:'12PM',l:0,v:2,city:'Dallas'},{jor:12,fec:'22-Jun',hor:'10PM',l:3,v:1,city:'San Francisco'},{jor:17,fec:'27-Jun',hor:'9PM',l:1,v:2,city:'Kansas City'},{jor:17,fec:'27-Jun',hor:'9PM',l:3,v:0,city:'Dallas'}]},
   'K': { teams: ['Portugal','Colombia','Uzbekistan','RD Congo'], flags: ['pt','co','uz','cd'],
-    matches: [{jor:7,fec:'17-Jun',hor:'12PM',l:0,v:1,city:'Houston'},{jor:7,fec:'17-Jun',hor:'6PM',l:2,v:3,city:'CDMX'},{jor:13,fec:'23-Jun',hor:'12PM',l:0,v:2,city:'Houston'},{jor:13,fec:'23-Jun',hor:'6PM',l:3,v:1,city:'Guadalajara'},{jor:17,fec:'27-Jun',hor:'3PM',l:3,v:0,city:'Miami'},{jor:17,fec:'27-Jun',hor:'11PM',l:1,v:2,city:'Atlanta'}]},
+    matches: [{jor:7,fec:'17-Jun',hor:'12PM',l:0,v:3,city:'Houston'},{jor:7,fec:'17-Jun',hor:'9PM',l:2,v:1,city:'CDMX'},{jor:13,fec:'23-Jun',hor:'12PM',l:0,v:2,city:'Houston'},{jor:13,fec:'23-Jun',hor:'9PM',l:1,v:3,city:'Guadalajara'},{jor:17,fec:'27-Jun',hor:'6PM',l:1,v:0,city:'Miami'},{jor:17,fec:'27-Jun',hor:'6PM',l:3,v:2,city:'Atlanta'}]},
   'L': { teams: ['Inglaterra','Croacia','Ghana','Panama'], flags: ['gb-eng','hr','gh','pa'],
-    matches: [{jor:7,fec:'17-Jun',hor:'3PM',l:0,v:1,city:'Dallas'},{jor:7,fec:'17-Jun',hor:'9PM',l:2,v:3,city:'Toronto'},{jor:13,fec:'23-Jun',hor:'3PM',l:0,v:2,city:'Boston'},{jor:13,fec:'23-Jun',hor:'9PM',l:3,v:1,city:'Toronto'},{jor:17,fec:'27-Jun',hor:'6PM',l:3,v:0,city:'Nueva York'},{jor:17,fec:'27-Jun',hor:'11PM',l:1,v:2,city:'Filadelfia'}]}
+    matches: [{jor:7,fec:'17-Jun',hor:'3PM',l:0,v:1,city:'Dallas'},{jor:7,fec:'17-Jun',hor:'6PM',l:2,v:3,city:'Toronto'},{jor:13,fec:'23-Jun',hor:'3PM',l:0,v:2,city:'Boston'},{jor:13,fec:'23-Jun',hor:'6PM',l:3,v:1,city:'Toronto'},{jor:17,fec:'27-Jun',hor:'4PM',l:3,v:0,city:'Nueva York'},{jor:17,fec:'27-Jun',hor:'4PM',l:1,v:2,city:'Filadelfia'}]}
 };
 var LLAVES_16 = [
   {n:73,dia:18,fec:'28 Jun',hor:'2PM',l:'2A',v:'2B',lf:'',vf:'',city:'Los Angeles'},
-  {n:74,dia:18,fec:'29 Jun',hor:'3PM',l:'1E',v:'3A/B/D/F/G',lf:'',vf:'',city:'Boston'},
+  {n:74,dia:19,fec:'29 Jun',hor:'3PM',l:'1E',v:'3A/B/C/D/F',lf:'',vf:'',city:'Boston'},
   {n:75,dia:19,fec:'29 Jun',hor:'8PM',l:'1F',v:'2C',lf:'',vf:'',city:'Monterrey'},
   {n:76,dia:19,fec:'29 Jun',hor:'12PM',l:'1C',v:'2F',lf:'',vf:'',city:'Houston'},
   {n:77,dia:20,fec:'30 Jun',hor:'4PM',l:'1I',v:'3C/D/F/G/H',lf:'',vf:'',city:'Nueva York'},
   {n:78,dia:20,fec:'30 Jun',hor:'12PM',l:'2E',v:'2I',lf:'',vf:'',city:'Dallas'},
-  {n:79,dia:20,fec:'30 Jun',hor:'8PM',l:'1A',v:'3C/E/F/H/I',lf:'',vf:'',city:'Ciudad de Mexico'},
+  {n:79,dia:20,fec:'30 Jun',hor:'8PM',l:'1A',v:'3C/E/F/H/I',lf:'',vf:'',city:'CDMX'},
   {n:80,dia:21,fec:'01 Jul',hor:'11AM',l:'1L',v:'3E/H/I/J/K',lf:'',vf:'',city:'Atlanta'},
-  {n:81,dia:21,fec:'01 Jul',hor:'7PM',l:'1D',v:'3G/I/J/K/L',lf:'',vf:'',city:'San Francisco'},
-  {n:82,dia:21,fec:'01 Jul',hor:'2PM',l:'1G',v:'3A/B/C/E/F',lf:'',vf:'',city:'Seattle'},
-  {n:83,dia:22,fec:'02 Jul',l:'2K',v:'2L',lf:'',vf:'',city:'Toronto'},
-  {n:84,dia:22,fec:'02 Jul',l:'1H',v:'2J',lf:'',vf:'',city:'Los Angeles'},
-  {n:85,dia:22,fec:'02 Jul',hor:'12AM',l:'1B',v:'3A/B/D/G/H',lf:'',vf:'',city:'Vancouver'},
+  {n:81,dia:21,fec:'01 Jul',hor:'7PM',l:'1D',v:'3B/E/F/I/J',lf:'',vf:'',city:'San Francisco'},
+  {n:82,dia:21,fec:'01 Jul',hor:'3PM',l:'1G',v:'3A/E/H/I/J',lf:'',vf:'',city:'Seattle'},
+  {n:83,dia:22,fec:'02 Jul',hor:'6PM',l:'2K',v:'2L',lf:'',vf:'',city:'Toronto'},
+  {n:84,dia:22,fec:'02 Jul',hor:'2PM',l:'1H',v:'2J',lf:'',vf:'',city:'Los Angeles'},
+  {n:85,dia:22,fec:'02 Jul',hor:'8PM',l:'1B',v:'3E/F/G/I/J',lf:'',vf:'',city:'Vancouver'},
   {n:86,dia:23,fec:'03 Jul',hor:'5PM',l:'1J',v:'2H',lf:'',vf:'',city:'Miami'},
-  {n:87,dia:23,fec:'03 Jul',hor:'8PM',l:'1K',v:'3B/D/E/I/J',lf:'',vf:'',city:'Kansas City'},
+  {n:87,dia:23,fec:'03 Jul',hor:'8PM',l:'1K',v:'3D/E/I/J/L',lf:'',vf:'',city:'Kansas City'},
   {n:88,dia:23,fec:'03 Jul',hor:'1PM',l:'2D',v:'2G',lf:'',vf:'',city:'Dallas'}
 ];
 var LLAVES_8 = [
-  {n:89,dia:24,fec:'04 Jul',l:'Gana P.74',v:'Gana P.77',city:'Filadelfia'},{n:90,dia:24,fec:'04 Jul',l:'Gana P.73',v:'Gana P.75',city:'Houston'},
-  {n:91,dia:25,fec:'05 Jul',l:'Gana P.76',v:'Gana P.78',city:'Nueva York'},{n:92,dia:25,fec:'05 Jul',l:'Gana P.79',v:'Gana P.80',city:'CDMX'},
-  {n:93,dia:26,fec:'06 Jul',l:'Gana P.83',v:'Gana P.84',city:'Dallas'},{n:94,dia:26,fec:'06 Jul',l:'Gana P.81',v:'Gana P.82',city:'Seattle'},
-  {n:95,dia:27,fec:'07 Jul',l:'Gana P.86',v:'Gana P.88',city:'Atlanta'},{n:96,dia:27,fec:'07 Jul',l:'Gana P.85',v:'Gana P.87',city:'Vancouver'}
+  {n:89,dia:24,fec:'04 Jul',hor:'4PM',l:'Gana P.74',v:'Gana P.77',lf:'',vf:'',city:'Filadelfia'},
+  {n:90,dia:24,fec:'04 Jul',hor:'12PM',l:'Gana P.73',v:'Gana P.75',lf:'',vf:'',city:'Houston'},
+  {n:91,dia:25,fec:'05 Jul',hor:'3PM',l:'Gana P.76',v:'Gana P.78',lf:'',vf:'',city:'Nueva York'},
+  {n:92,dia:25,fec:'05 Jul',hor:'7PM',l:'Gana P.79',v:'Gana P.80',lf:'',vf:'',city:'CDMX'},
+  {n:93,dia:26,fec:'06 Jul',hor:'2PM',l:'Gana P.83',v:'Gana P.84',lf:'',vf:'',city:'Dallas'},
+  {n:94,dia:26,fec:'06 Jul',hor:'7PM',l:'Gana P.81',v:'Gana P.82',lf:'',vf:'',city:'Seattle'},
+  {n:95,dia:26,fec:'06 Jul',hor:'11AM',l:'Gana P.86',v:'Gana P.88',lf:'',vf:'',city:'Atlanta'},
+  {n:96,dia:27,fec:'07 Jul',hor:'3PM',l:'Gana P.85',v:'Gana P.87',lf:'',vf:'',city:'Vancouver'}
 ];
 var LLAVES_CUARTOS = [
-  {n:97,dia:28,fec:'09 Jul',l:'Gana P.89',v:'Gana P.90',city:'Boston'},{n:98,dia:29,fec:'10 Jul',l:'Gana P.93',v:'Gana P.94',city:'Los Angeles'},
-  {n:99,dia:30,fec:'11 Jul',l:'Gana P.91',v:'Gana P.92',city:'Miami'},{n:100,dia:30,fec:'11 Jul',l:'Gana P.95',v:'Gana P.96',city:'Kansas City'}
+  {n:97,dia:29,fec:'09 Jul',hor:'3PM',l:'Gana P.89',v:'Gana P.90',lf:'',vf:'',city:'Boston'},
+  {n:98,dia:30,fec:'10 Jul',hor:'2PM',l:'Gana P.93',v:'Gana P.94',lf:'',vf:'',city:'Los Angeles'},
+  {n:99,dia:31,fec:'11 Jul',hor:'4PM',l:'Gana P.91',v:'Gana P.92',lf:'',vf:'',city:'Miami'},
+  {n:100,dia:31,fec:'11 Jul',hor:'8PM',l:'Gana P.95',v:'Gana P.96',lf:'',vf:'',city:'Kansas City'}
 ];
 var LLAVES_SEMI = [
-  {n:101,dia:33,fec:'13 Jul',l:'Gana P.97',v:'Gana P.98',city:'Dallas'},
-  {n:102,dia:34,fec:'14 Jul',l:'Gana P.99',v:'Gana P.100',city:'Los Angeles'}
+  {n:101,dia:34,fec:'14 Jul',hor:'2PM',l:'Gana P.97',v:'Gana P.98',lf:'',vf:'',city:'Dallas'},
+  {n:102,dia:35,fec:'15 Jul',hor:'2PM',l:'Gana P.99',v:'Gana P.100',lf:'',vf:'',city:'Atlanta'}
 ];
 var LLAVES_FINAL = [
-  {n:103,dia:37,fec:'18 Jul',l:'Pierde P.101',v:'Pierde P.102',city:'Miami',tercero:true},
-  {n:104,dia:38,fec:'19 Jul',l:'Gana P.101',v:'Gana P.102',city:'Nueva York',esFinal:true}
+  {n:103,dia:38,fec:'18 Jul',hor:'4PM',l:'Pierde P.101',v:'Pierde P.102',lf:'',vf:'',city:'Miami',tercero:true},
+  {n:104,dia:39,fec:'19 Jul',hor:'2PM',l:'Gana P.101',v:'Gana P.102',lf:'',vf:'',city:'Nueva York',esFinal:true}
 ];
-
 var COMBINACIONES_FIFA = {
 1: "EJIFHGLK",
   2: "HGIDJFLK",
@@ -2463,24 +2475,6 @@ function sincronizarFIFA(){
 }
 
 // ---- BOTON: 3 puntos a todos por el error del Partido 2 (Bloque D) ----
-// Suma 1 acierto exacto (=3 pts) a TODOS como ajuste manual. Es idempotente.
-function otorgarPuntosPartido2(){
-  if(!confirm('Esto otorgara 3 puntos (1 marcador exacto) a TODOS los jugadores por el error del Partido 2. Es seguro repetirlo (no duplica). Continuar?')) return;
-  var jugadores = Object.keys(jugadoresCache);
-  if(jugadores.length===0){ alert('No hay jugadores cargados todavia.'); return; }
-  showLoading('Aplicando puntos a todos...');
-  var updates = {};
-  jugadores.forEach(function(cod){
-    updates['ajustes/'+cod+'/exacto'] = 1; // set, no incrementa -> idempotente
-  });
-  db.ref().update(updates, function(err){
-    hideLoading();
-    if(err){ alert('Hubo un problema. Revisa tu conexion.'); return; }
-    alert('Puntos aplicados. Ejecutando escrutinio para reflejarlos...');
-    sincronizarFIFA();
-  });
-}
-
 // ---- RESULTADOS OFICIALES PRE-MUNDIAL (se llenan al final del torneo) ----
 function guardarPremundialOficial(){
   function valSel(id){ var e=document.getElementById(id); if(!e) return ''; var v=e.value||''; if(v.indexOf('...')!==-1||v==='Elegir Seleccion...'||v==='Seleccionar...') return ''; return v; }
@@ -2558,20 +2552,45 @@ function _puntosPremundial(pred, ofi){
   return p;
 }
 var resJornadaVista = null;
+var _resNums = null;
 var _resPartidos = [];
 function renderResultadosAdmin(){
+  // Bootstrap: cargar resultados oficiales para resolver participantes de eliminatoria
+  if(_resultadosCache===null && !_resLoading && typeof db!=='undefined'){
+    _resLoading=true;
+    db.ref('resultados').once('value',function(snap){
+      _resultadosCache=snap.val()||{};
+      try{ _partElim=_participantesElim(_resultadosCache); }catch(e){ _partElim={}; }
+      _resLoading=false; renderResultadosAdmin();
+    },function(){ _resultadosCache={}; _resLoading=false; renderResultadosAdmin(); });
+    return;
+  }
   var data = _getCal();
   if(!data.nums.length) return;
+  // Jornadas de eliminatoria con equipos ya definidos (para poder cargar resultados)
+  var elimBy=_elimPorJornada();
+  var elimVis=Object.keys(elimBy).map(Number).filter(function(j){
+    return elimBy[j].some(function(m){ var p=_partElim[m.n]; return p&&p.l.def&&p.v.def; });
+  }).sort(function(a,b){return a-b;});
+  _resNums=data.nums.concat(elimVis);
   if(resJornadaVista===null) resJornadaVista = calcularJornadaActiva();
-  if(data.nums.indexOf(resJornadaVista)===-1) resJornadaVista = data.nums[0];
-  var partidos = (data.jor[resJornadaVista]||[]).slice().sort(function(a,b){return a.ts-b.ts;});
+  if(_resNums.indexOf(resJornadaVista)===-1) resJornadaVista = _resNums[0];
+  var esElim=(!!elimBy[resJornadaVista] && data.nums.indexOf(resJornadaVista)===-1);
+  var partidos;
+  if(esElim){
+    partidos=elimBy[resJornadaVista].filter(function(m){ var p=_partElim[m.n]; return p&&p.l.def&&p.v.def; })
+      .map(function(m){ var p=_partElim[m.n]; m.local=p.l.name; m.visita=p.v.name; return m; })
+      .sort(function(a,b){return a.ts-b.ts;});
+  } else {
+    partidos = (data.jor[resJornadaVista]||[]).slice().sort(function(a,b){return a.ts-b.ts;});
+  }
   _resPartidos = partidos;
+  var titTxt = esElim&&partidos.length ? _faseNombre(partidos[0].n).toUpperCase() : ('JORNADA '+resJornadaVista);
   var tit = document.getElementById('resJornadaTitulo');
-  if(tit) tit.innerHTML = 'JORNADA '+resJornadaVista+(partidos.length?(' <span style="color:var(--muted);font-size:0.8rem;">'+partidos[0].fec+' 2026</span>'):'');
+  if(tit) tit.innerHTML = titTxt+(partidos.length?(' <span style="color:var(--muted);font-size:0.8rem;">'+partidos[0].fec+' 2026</span>'):'');
   var cont = document.getElementById('resultadosContainer');
   if(!cont) return;
   cont.innerHTML = '<p style="color:#888;font-size:0.8rem;">Cargando resultados guardados...</p>';
-  // Leer resultados ya guardados de esta jornada
   db.ref('resultados/j'+resJornadaVista).once('value', function(snap){
     var guardados = snap.val() || {};
     var html = '';
@@ -2581,25 +2600,73 @@ function renderResultadosAdmin(){
       var golV = (g.golV!==undefined && g.golV!==null) ? g.golV : '';
       var tNum = (g.tarjetas!==undefined && g.tarjetas!==null && !isNaN(parseInt(g.tarjetas,10))) ? parseInt(g.tarjetas,10) : '';
       var rSi = (g.roja==='SI');
-      html += '<div class="partido-block" data-num="'+m.num+'" style="margin-bottom:14px;">'+
-        '<div class="partido-header"><span>PARTIDO '+m.num+' &middot; Grupo '+m.grupo+'</span>'+
+      var etiqueta = m.elim ? _faseNombre(m.n) : ('Grupo '+m.grupo);
+      html += '<div class="partido-block" data-num="'+m.num+'"'+(m.elim?' data-elim="1" data-local="'+String(m.local).toUpperCase()+'" data-visita="'+String(m.visita).toUpperCase()+'"':'')+' style="margin-bottom:14px;">'+
+        '<div class="partido-header"><span>PARTIDO '+m.num+' &middot; '+etiqueta+'</span>'+
         '<span class="partido-fecha">'+String(m.local).toUpperCase()+' vs '+String(m.visita).toUpperCase()+'</span></div>'+
         '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px;background:#0a1422;border:1px solid var(--border);border-radius:0 0 8px 8px;">'+
           '<div style="text-align:center;"><div style="font-size:0.7rem;color:var(--muted);">'+String(m.local).toUpperCase()+'</div>'+
-            '<input type="number" class="res-golL" min="0" value="'+golL+'" placeholder="0" style="width:60px;padding:8px;text-align:center;font-size:1.1rem;background:#0d1b2a;color:#fff;border:1px solid var(--border);border-radius:5px;"></div>'+
+            '<input type="number" class="res-golL" min="0" value="'+golL+'" placeholder="0" oninput="calcGanadorRes('+m.num+')" style="width:56px;padding:8px;text-align:center;font-size:1.1rem;background:#0d1b2a;color:#fff;border:1px solid var(--border);border-radius:5px;"></div>'+
           '<span style="font-weight:900;color:#666;">-</span>'+
           '<div style="text-align:center;"><div style="font-size:0.7rem;color:var(--muted);">'+String(m.visita).toUpperCase()+'</div>'+
-            '<input type="number" class="res-golV" min="0" value="'+golV+'" placeholder="0" style="width:60px;padding:8px;text-align:center;font-size:1.1rem;background:#0d1b2a;color:#fff;border:1px solid var(--border);border-radius:5px;"></div>'+
-          '<div style="margin-left:auto;text-align:center;"><div style="font-size:0.7rem;color:var(--muted);margin-bottom:4px;">N&ordm; TARJETAS</div>'+
-            '<input type="number" class="res-tarj" min="0" value="'+tNum+'" placeholder="0" style="width:60px;padding:8px;text-align:center;font-size:1.1rem;background:#0d1b2a;color:#fff;border:1px solid var(--border);border-radius:5px;"></div>'+
+            '<input type="number" class="res-golV" min="0" value="'+golV+'" placeholder="0" oninput="calcGanadorRes('+m.num+')" style="width:56px;padding:8px;text-align:center;font-size:1.1rem;background:#0d1b2a;color:#fff;border:1px solid var(--border);border-radius:5px;"></div>'+
+          '<div style="margin-left:8px;text-align:center;"><div style="font-size:0.7rem;color:var(--muted);margin-bottom:4px;">N&ordm; TARJETAS</div>'+
+            '<input type="number" class="res-tarj" min="0" value="'+tNum+'" placeholder="0" style="width:56px;padding:8px;text-align:center;font-size:1.1rem;background:#0d1b2a;color:#fff;border:1px solid var(--border);border-radius:5px;"></div>'+
           '<div style="text-align:center;"><div style="font-size:0.7rem;color:#ff6666;margin-bottom:4px;font-weight:700;">T. ROJA</div>'+
             '<div class="res-roja '+(rSi?'on':'')+'" onclick="toggleResTarjeta(this)" style="cursor:pointer;padding:8px 16px;border-radius:6px;font-weight:700;background:'+(rSi?'#c0392b':'#333')+';color:'+(rSi?'#fff':'#aaa')+';min-width:50px;">'+(rSi?'SI':'NO')+'</div></div>'+
+          (m.elim ? _bloqueElimResultado(m,g) : '')+
         '</div></div>';
     });
     html += '<button class="btn-action btn-green" onclick="guardarResultadosJornada()" style="width:100%;padding:12px;margin-top:6px;">GUARDAR RESULTADOS DE ESTA JORNADA</button>';
     cont.innerHTML = html;
+    if(esElim) partidos.forEach(function(m){ calcGanadorRes(m.num); });
   });
 }
+// Bloque extra de eliminatoria: tiempo extra + penales + Gana/Pierde automatico
+function _bloqueElimResultado(m,g){
+  var exL=(g.exL!==undefined&&g.exL!==null)?g.exL:'';
+  var exV=(g.exV!==undefined&&g.exV!==null)?g.exV:'';
+  var peL=(g.peL!==undefined&&g.peL!==null)?g.peL:'';
+  var peV=(g.peV!==undefined&&g.peV!==null)?g.peV:'';
+  function inp(cls,val){ return '<input type="number" class="'+cls+'" min="0" value="'+val+'" placeholder="-" oninput="calcGanadorRes('+m.num+')" style="width:44px;padding:6px;text-align:center;background:#0d1b2a;color:#fff;border:1px solid var(--border);border-radius:5px;">'; }
+  return '<div style="display:flex;align-items:center;gap:10px;padding:4px 10px;border-left:2px solid var(--border);margin-left:6px;">'+
+      '<div style="text-align:center;"><div style="font-size:0.62rem;color:var(--muted);margin-bottom:3px;letter-spacing:1px;">TIEMPO EXTRA</div>'+
+        '<span style="display:inline-flex;gap:4px;align-items:center;">'+inp('res-exL',exL)+'<span style="color:#666;">-</span>'+inp('res-exV',exV)+'</span></div>'+
+      '<div style="text-align:center;"><div style="font-size:0.62rem;color:#e08a3c;margin-bottom:3px;letter-spacing:1px;font-weight:700;">PENALES</div>'+
+        '<span style="display:inline-flex;gap:4px;align-items:center;">'+inp('res-peL',peL)+'<span style="color:#666;">-</span>'+inp('res-peV',peV)+'</span></div>'+
+    '</div>'+
+    '<div style="margin-left:auto;text-align:center;min-width:140px;border:1px solid var(--border);border-radius:6px;padding:6px 8px;background:#0d1b2a;">'+
+      '<div style="font-size:0.72rem;font-weight:800;color:var(--green-ok);">GANA: <span class="res-gana" style="color:#fff;">-</span></div>'+
+      '<div style="font-size:0.72rem;font-weight:800;color:var(--red-alert);margin-top:3px;">PIERDE: <span class="res-pierde" style="color:#fff;">-</span></div>'+
+    '</div>';
+}
+// Decide ganador en cascada: penales -> tiempo extra -> goles. Devuelve 'L','V' o null.
+function _ganadorDeMarcadores(gl,gv,exL,exV,peL,peV){
+  function n(x){ return (x===''||x===undefined||x===null||isNaN(parseInt(x,10)))?null:parseInt(x,10); }
+  var pL=n(peL),pV=n(peV);
+  if(pL!==null&&pV!==null&&pL!==pV) return pL>pV?'L':'V';
+  var eL=n(exL),eV=n(exV);
+  if(eL!==null&&eV!==null&&eL!==eV) return eL>eV?'L':'V';
+  var rL=n(gl),rV=n(gv);
+  if(rL!==null&&rV!==null&&rL!==rV) return rL>rV?'L':'V';
+  return null;
+}
+// Actualiza el Gana/Pierde en vivo segun lo que el admin escribe
+function calcGanadorRes(num){
+  var b=document.querySelector('.partido-block[data-num="'+num+'"]');
+  if(!b) return;
+  var ganaEl=b.querySelector('.res-gana'), pierdeEl=b.querySelector('.res-pierde');
+  if(!ganaEl||!pierdeEl) return;
+  var gl=b.querySelector('.res-golL'), gv=b.querySelector('.res-golV');
+  var exL=b.querySelector('.res-exL'), exV=b.querySelector('.res-exV');
+  var peL=b.querySelector('.res-peL'), peV=b.querySelector('.res-peV');
+  var nomL=b.getAttribute('data-local')||'Local', nomV=b.getAttribute('data-visita')||'Visitante';
+  var w=_ganadorDeMarcadores(gl?gl.value:'',gv?gv.value:'',exL?exL.value:'',exV?exV.value:'',peL?peL.value:'',peV?peV.value:'');
+  if(w==='L'){ ganaEl.textContent=nomL; pierdeEl.textContent=nomV; }
+  else if(w==='V'){ ganaEl.textContent=nomV; pierdeEl.textContent=nomL; }
+  else { ganaEl.textContent='-'; pierdeEl.textContent='-'; }
+}
+
 function toggleResTarjeta(el){
   var on = el.classList.toggle('on');
   el.innerText = on ? 'SI' : 'NO';
@@ -2727,12 +2794,12 @@ function guardarPronosticoManual(){
   });
 }
 function resJornadaAnterior(){
-  var data=_getCal(); var idx=data.nums.indexOf(resJornadaVista);
-  if(idx>0){ resJornadaVista=data.nums[idx-1]; renderResultadosAdmin(); }
+  var nums=_resNums||_getCal().nums; var idx=nums.indexOf(resJornadaVista);
+  if(idx>0){ resJornadaVista=nums[idx-1]; renderResultadosAdmin(); }
 }
 function resJornadaSiguiente(){
-  var data=_getCal(); var idx=data.nums.indexOf(resJornadaVista);
-  if(idx<data.nums.length-1){ resJornadaVista=data.nums[idx+1]; renderResultadosAdmin(); }
+  var nums=_resNums||_getCal().nums; var idx=nums.indexOf(resJornadaVista);
+  if(idx<nums.length-1){ resJornadaVista=nums[idx+1]; renderResultadosAdmin(); }
 }
 function guardarResultadosJornada(){
   var cont = document.getElementById('resultadosContainer');
@@ -2741,12 +2808,13 @@ function guardarResultadosJornada(){
   var datos = {};
   bloques.forEach(function(b){
     var num = b.getAttribute('data-num');
+    var elim = b.getAttribute('data-elim')==='1';
     var gl = b.querySelector('.res-golL');
     var gv = b.querySelector('.res-golV');
     var tj = b.querySelector('.res-tarj');
     var rj = b.querySelector('.res-roja');
-    if(gl.value==='' || gv.value===''){ return; } // sin marcador completo, no guardar ese partido
-    datos['p'+num] = {
+    if(!gl||!gv||gl.value==='' || gv.value===''){ return; } // sin marcador completo, no guardar ese partido
+    var d = {
       num: parseInt(num,10),
       golL: parseInt(gl.value,10)||0,
       golV: parseInt(gv.value,10)||0,
@@ -2754,42 +2822,28 @@ function guardarResultadosJornada(){
       roja: (rj && rj.classList.contains('on')) ? 'SI' : 'NO',
       extra: 'NA', penales: 'NA'
     };
+    if(elim){
+      var exL=b.querySelector('.res-exL'), exV=b.querySelector('.res-exV');
+      var peL=b.querySelector('.res-peL'), peV=b.querySelector('.res-peV');
+      var exLv=(exL&&exL.value!=='')?(parseInt(exL.value,10)||0):'';
+      var exVv=(exV&&exV.value!=='')?(parseInt(exV.value,10)||0):'';
+      var peLv=(peL&&peL.value!=='')?(parseInt(peL.value,10)||0):'';
+      var peVv=(peV&&peV.value!=='')?(parseInt(peV.value,10)||0):'';
+      d.exL=exLv; d.exV=exVv; d.peL=peLv; d.peV=peVv;
+      // Derivar SI/NO para calificar las apuestas de castigo
+      d.extra = (exLv!==''&&exVv!=='') ? 'SI' : 'NO';
+      d.penales = (peLv!==''&&peVv!=='') ? 'SI' : 'NO';
+    }
+    datos['p'+num] = d;
   });
   if(Object.keys(datos).length===0){ alert('Escribe el marcador (los dos goles) de al menos un partido.'); return; }
   showLoading('Guardando resultados...');
   db.ref('resultados/j'+resJornadaVista).update(datos, function(err){
     hideLoading();
     if(err){ alert('Hubo un problema guardando. Revisa tu conexion.'); return; }
+    _resultadosCache=null; _partElim={}; // refrescar para propagar el ganador a la siguiente fase
     alert('Resultados guardados. Ahora dale a "Ejecutar Escrutinio Global" para repartir los puntos.');
-  });
-}
-
-// ---- BOTON: cargar los 3 pronosticos pendientes del Partido 1 (Jornada 1) ----
-// Tambien guarda el resultado oficial Mexico 2-0 (con tarjetas) y ejecuta el escrutinio.
-function cargarPronosticosPendientes(){
-  if(!confirm('Esto cargara los 3 pronosticos del Partido 1 (Mexico-Sudafrica), guardara el resultado oficial 2-0 con tarjetas, y repartira los puntos. Es seguro repetirlo. Continuar?')) return;
-  var P1 = {num:1, local:'Mexico', visita:'Sudafrica'};
-  var pendientes = {
-    'W564': {golL:2, golV:0, tarjetas:'NO'},  // Pablo Valencia -> marcador exacto
-    'W291': {golL:1, golV:0, tarjetas:'SI'},  // Hector Fabio Castro -> ganador + tarjetas
-    'W731': {golL:2, golV:1, tarjetas:'SI'}   // Freddy Loaiza -> ganador + tarjetas
-  };
-  showLoading('Cargando pronosticos y resultado...');
-  var updates = {};
-  Object.keys(pendientes).forEach(function(cod){
-    var p = pendientes[cod];
-    updates['pronosticos/'+cod+'/j1/p1'] = {num:1, local:P1.local, visita:P1.visita,
-      golL:p.golL, golV:p.golV, tarjetas:p.tarjetas, extra:'NA', penales:'NA'};
-  });
-  // Resultado oficial del Partido 1: Mexico 2 - 0 Sudafrica.
-  // OJO: tarjetas ahora es un NUMERO. Pongo 3 como valor de prueba (>=3 => ganan los que apostaron SI).
-  // Si el numero real fue otro, cambialo en "Control de Resultados" y vuelve a correr el escrutinio.
-  updates['resultados/j1/p1'] = {num:1, golL:2, golV:0, tarjetas:3, extra:'NA', penales:'NA'};
-  db.ref().update(updates, function(err){
-    hideLoading();
-    if(err){ alert('Hubo un problema. Revisa tu conexion.'); return; }
-    alert('Listo: pronosticos y resultado cargados. Ejecutando escrutinio...');
-    sincronizarFIFA();
+    renderResultadosAdmin();
   });
 }
 
@@ -2920,44 +2974,128 @@ function calcularJornadaActiva(){
 var jornadaVista=null;
 var _partidosVista=[];
 var _timerJorIV=null;
+// ===== BLOQUE C: cableado de eliminatorias en la hoja de pronosticos =====
+var _resultadosCache=null;   // cache de resultados oficiales (Firebase)
+var _partElim={};            // participantes resueltos por numero de partido de eliminatoria
+var _pronNums=null;          // jornadas visibles en pronosticos (grupos + eliminatorias abiertas)
+var _resLoading=false;
+function _faseNombre(n){
+  if(n>=73&&n<=88) return '16avos';
+  if(n>=89&&n<=96) return '8vos';
+  if(n>=97&&n<=100) return 'Cuartos';
+  if(n>=101&&n<=102) return 'Semifinal';
+  if(n===103) return '3er Puesto';
+  if(n===104) return 'Final';
+  return 'Eliminatoria';
+}
+// Resuelve los participantes de cada partido de eliminatoria a partir de resultados oficiales.
+// 16avos salen de los clasificados de grupos. Octavos+ se propagan SOLO con resultados decisivos
+// (si un partido quedo empatado/penales no se sabe quien paso -> la siguiente fase queda oculta).
+function _participantesElim(resultados){
+  resultados = resultados || {};
+  var clas = calcularClasificadosOficiales(resultados);
+  var resPorNum = {};
+  Object.keys(resultados).forEach(function(jk){
+    var pj=resultados[jk]||{};
+    Object.keys(pj).forEach(function(pk){
+      var r=pj[pk]; var num=(r&&r.num)?r.num:parseInt(String(pk).replace('p',''),10);
+      if(num) resPorNum[num]=r;
+    });
+  });
+  var part={};
+  function resolveSlot(slot, n){
+    var gp=/^(Gana|Pierde) P\.(\d+)$/.exec(String(slot));
+    if(gp){
+      var srcN=parseInt(gp[2],10), tipo=gp[1], src=part[srcN], r=resPorNum[srcN];
+      if(!src||!src.l.def||!src.v.def||!r) return {name:slot,flag:'',def:false};
+      var w=_ganadorDeMarcadores(r.golL,r.golV,r.exL,r.exV,r.peL,r.peV);
+      if(!w) return {name:slot,flag:'',def:false}; // sin ganador aun (empate sin penales)
+      var chosen=(tipo==='Gana')?(w==='L'?src.l:src.v):(w==='L'?src.v:src.l);
+      return {name:chosen.name, flag:chosen.flag, def:true};
+    }
+    var res=resolverNombre(slot, clas, n);
+    return {name:res.name, flag:res.flag||'', def:!res.indefinido};
+  }
+  [].concat(LLAVES_16,LLAVES_8,LLAVES_CUARTOS,LLAVES_SEMI,LLAVES_FINAL).forEach(function(m){
+    part[m.n]={ l:resolveSlot(m.l,m.n), v:resolveSlot(m.v,m.n) };
+  });
+  return part;
+}
+// Agrupa los partidos de eliminatoria por su dia (jornada). Devuelve {dia:[partidos...]}
+function _elimPorJornada(){
+  var by={};
+  [].concat(LLAVES_16,LLAVES_8,LLAVES_CUARTOS,LLAVES_SEMI,LLAVES_FINAL).forEach(function(m){
+    var fecNorm=String(m.fec).replace(' ','-');
+    var e={elim:true,n:m.n,num:m.n,slotL:m.l,slotV:m.v,jor:m.dia,fec:m.fec,hor:m.hor,city:m.city,
+           ts:_fechaPartidoCol(fecNorm,m.hor).getTime()};
+    (by[m.dia]=by[m.dia]||[]).push(e);
+  });
+  return by;
+}
 function renderPronosticos(){
+  // Bootstrap: cargar resultados oficiales una vez para poder resolver eliminatorias
+  if(_resultadosCache===null && !_resLoading && typeof db!=='undefined'){
+    _resLoading=true;
+    db.ref('resultados').once('value',function(snap){
+      _resultadosCache=snap.val()||{};
+      try{ _partElim=_participantesElim(_resultadosCache); }catch(e){ _partElim={}; }
+      _resLoading=false;
+      renderPronosticos();
+    },function(){ _resultadosCache={}; _resLoading=false; renderPronosticos(); });
+    return;
+  }
   var data=_getCal();
   if(!data.nums.length) return;
+  // Jornadas de eliminatoria visibles (con al menos un partido de equipos ya definidos)
+  var elimBy=_elimPorJornada();
+  var elimVis=Object.keys(elimBy).map(Number).filter(function(j){
+    return elimBy[j].some(function(m){ var p=_partElim[m.n]; return p&&p.l.def&&p.v.def; });
+  }).sort(function(a,b){return a-b;});
+  _pronNums=data.nums.concat(elimVis);
   if(jornadaVista===null) jornadaVista=calcularJornadaActiva();
-  if(data.nums.indexOf(jornadaVista)===-1) jornadaVista=data.nums[0];
-  var partidos=(data.jor[jornadaVista]||[]).slice().sort(function(a,b){return a.ts-b.ts;});
+  if(_pronNums.indexOf(jornadaVista)===-1) jornadaVista=_pronNums[0];
+  var esElimJor=(!!elimBy[jornadaVista] && data.nums.indexOf(jornadaVista)===-1);
+  var partidos, cierre;
+  if(esElimJor){
+    partidos=elimBy[jornadaVista].filter(function(m){ var p=_partElim[m.n]; return p&&p.l.def&&p.v.def; })
+      .map(function(m){ var p=_partElim[m.n]; m.local=p.l.name; m.visita=p.v.name; m.localFlag=p.l.flag; m.visitaFlag=p.v.flag; return m; })
+      .sort(function(a,b){return a.ts-b.ts;});
+    var _tss=partidos.map(function(m){return m.ts;});
+    cierre=_tss.length?Math.min.apply(null,_tss)-30*60000:Infinity;
+  } else {
+    partidos=(data.jor[jornadaVista]||[]).slice().sort(function(a,b){return a.ts-b.ts;});
+    cierre=_cierreJornada(jornadaVista);
+  }
   _partidosVista=partidos;
-  var cierre=_cierreJornada(jornadaVista);
   var cerrada=Date.now()>=cierre;
   // titulo
   var fechaTxt=partidos.length?(partidos[0].fec+' 2026'):'';
+  var tituloJor=esElimJor&&partidos.length?_faseNombre(partidos[0].n).toUpperCase():('JORNADA '+jornadaVista);
   var tit=document.getElementById('jornadaTitulo');
-  if(tit) tit.innerHTML='JORNADA '+jornadaVista+'<br><span style="font-size:0.85rem;color:var(--muted);letter-spacing:1px;">'+fechaTxt+'</span>';
-  // botones nav
-  var idx=data.nums.indexOf(jornadaVista);
+  if(tit) tit.innerHTML=tituloJor+'<br><span style="font-size:0.85rem;color:var(--muted);letter-spacing:1px;">'+fechaTxt+'</span>';
+  // botones nav (usando la lista combinada grupos+eliminatorias)
+  var idx=_pronNums.indexOf(jornadaVista);
   var bA=document.getElementById('btnJorAnterior'), bS=document.getElementById('btnJorSiguiente');
   if(bA){ bA.disabled=idx<=0; bA.style.opacity=idx<=0?'0.4':'1'; bA.style.cursor=idx<=0?'not-allowed':'pointer'; }
-  if(bS){ bS.disabled=idx>=data.nums.length-1; bS.style.opacity=idx>=data.nums.length-1?'0.4':'1'; bS.style.cursor=idx>=data.nums.length-1?'not-allowed':'pointer'; }
+  if(bS){ bS.disabled=idx>=_pronNums.length-1; bS.style.opacity=idx>=_pronNums.length-1?'0.4':'1'; bS.style.cursor=idx>=_pronNums.length-1?'not-allowed':'pointer'; }
+  // barra de salto rapido de jornadas
+  _pintarSaltosJornada('jornadaSaltos', _pronNums, jornadaVista, 'irAJornada');
   // construir HTML
   var html='';
-  if(jornadaVista===1){
-    html+='<div style="background:rgba(255,221,0,0.08);border:1px solid var(--gold);border-left:4px solid var(--gold);border-radius:8px;padding:12px 16px;margin-bottom:16px;color:#e8d98a;font-size:0.86rem;line-height:1.5;">'+
-          '<strong style="color:var(--gold);">AVISO:</strong> Por un error digital, el Partido 2 de esta jornada (Corea del Sur vs R.Checa) no se pudo enviar a tiempo. Para no perjudicar a nadie, la administracion otorga <strong style="color:var(--gold);">3 puntos a todos los jugadores</strong> en ese partido.'+
-          '</div>';
-  }
   html+='<div style="text-align:center;margin-bottom:16px;">'+
         '<div style="font-family:\'Barlow Condensed\',sans-serif;color:var(--muted);font-size:0.8rem;letter-spacing:2px;">'+(cerrada?'ESTADO':'CIERRA EN')+'</div>'+
         '<div id="timerJornada" style="font-family:\'Bebas Neue\',sans-serif;font-size:2rem;letter-spacing:3px;color:'+(cerrada?'var(--red-alert)':'var(--accent)')+';">'+(cerrada?'CERRADA':'--:--:--')+'</div>'+
         '</div>';
   partidos.forEach(function(m){
-    // En esta hoja (fase de grupos) las apuestas de riesgo activas son +2.5 T. y T. ROJA;
-    // Tiempo Extra y Penales van bloqueados. nCastigo = cuantas columnas de riesgo van activas
-    // (de izquierda a derecha: tarjetas, roja, extra, penales). La franja se estira sola.
-    var extraLock=true, penLock=true;
+    // Riesgo activo: en grupos solo +2.5 T. y T. ROJA; en eliminatorias tambien Extra T. y Penales.
+    // nCastigo = cuantas columnas de riesgo van activas (tarjetas, roja, extra, penales). La franja se estira sola.
+    var esElimM=!!m.elim;
+    var extraLock=!esElimM, penLock=!esElimM;
     var nCastigo = 2 + (extraLock?0:1) + (penLock?0:1);
+    var etiqueta = esElimM ? _faseNombre(m.n) : ('Grupo '+m.grupo);
     html+='<div class="partido-block">'+
       '<div class="partido-header">'+
-        '<span>PARTIDO '+m.num+' &middot; Grupo '+m.grupo+'</span>'+
+        '<span>PARTIDO '+m.num+' &middot; '+etiqueta+'</span>'+
         '<span class="partido-fecha">'+m.fec+' 2026 &middot; '+ajustarHora(m.hor)+'</span>'+
       '</div>'+
       '<div class="tabla-juego-wrap"><table class="tabla-juego">'+
@@ -2976,8 +3114,8 @@ function renderPronosticos(){
           '<td>'+String(m.visita).toUpperCase()+'<br><input type="number" class="in-gol" placeholder="0" min="0"'+(cerrada?' disabled':'')+'></td>'+
           '<td><div class="btn-si'+(cerrada?' locked':'')+'" onclick="toggleSi(this)">-</div></td>'+
           '<td><div class="btn-si btn-roja'+(cerrada?' locked':'')+'" onclick="toggleSi(this)">-</div></td>'+
-          '<td><div class="btn-si locked">-</div></td>'+
-          '<td><div class="btn-si locked">-</div></td>'+
+          '<td><div class="btn-si'+((cerrada||extraLock)?' locked':'')+'" onclick="toggleSi(this)">-</div></td>'+
+          '<td><div class="btn-si'+((cerrada||penLock)?' locked':'')+'" onclick="toggleSi(this)">-</div></td>'+
         '</tr></tbody>'+
       '</table></div>'+
     '</div>';
@@ -2993,6 +3131,7 @@ function renderPronosticos(){
   if(cont) cont.innerHTML=html;
   iniciarTimerJornada(cierre, cerrada);
   verificarEnvioJornada();
+  if(cerrada && typeof usuarioActual!=='undefined' && usuarioActual){ mostrarPuntosJornada(jornadaVista); }
 }
 function iniciarTimerJornada(cierre, cerrada){
   if(_timerJorIV){ clearInterval(_timerJorIV); _timerJorIV=null; }
@@ -3024,15 +3163,89 @@ function verificarEnvioJornada(){
   });
 }
 function jornadaAnterior(){
-  var data=_getCal(); var idx=data.nums.indexOf(jornadaVista);
-  if(idx>0){ jornadaVista=data.nums[idx-1]; renderPronosticos(); }
+  var nums=_pronNums||_getCal().nums; var idx=nums.indexOf(jornadaVista);
+  if(idx>0){ jornadaVista=nums[idx-1]; renderPronosticos(); }
 }
 function jornadaSiguiente(){
-  var data=_getCal(); var idx=data.nums.indexOf(jornadaVista);
-  if(idx<data.nums.length-1){ jornadaVista=data.nums[idx+1]; renderPronosticos(); }
+  var nums=_pronNums||_getCal().nums; var idx=nums.indexOf(jornadaVista);
+  if(idx<nums.length-1){ jornadaVista=nums[idx+1]; renderPronosticos(); }
+}
+// Helper: pinta una barra de numeros de jornada clicables. fnName = funcion global a llamar.
+function _pintarSaltosJornada(contId, nums, actual, fnName){
+  var box=document.getElementById(contId);
+  if(!box) return;
+  var html='';
+  nums.forEach(function(n){
+    var on=(n===actual);
+    html+='<button onclick="'+fnName+'('+n+')" title="Ir a la jornada '+n+'" style="min-width:34px;padding:5px 9px;border-radius:6px;cursor:pointer;font-family:\'Barlow Condensed\',sans-serif;font-weight:700;font-size:0.82rem;border:1px solid '+(on?'var(--gold)':'var(--border)')+';background:'+(on?'var(--gold)':'var(--card)')+';color:'+(on?'#0a0e1a':'var(--text)')+';">'+n+'</button>';
+  });
+  box.innerHTML=html;
+}
+function irAJornada(n){
+  var nums=_pronNums||_getCal().nums;
+  if(nums.indexOf(n)===-1) return;
+  jornadaVista=n; renderPronosticos();
+  var sec=document.getElementById('sec-pronosticos');
+  if(sec){ var nav=sec.querySelector('.jornada-nav'); if(nav&&nav.scrollIntoView) nav.scrollIntoView({behavior:'smooth',block:'start'}); }
+}
+// ---- Punto 3: desglose de puntos ganados/perdidos por partido (solo jornadas cerradas) ----
+function _filaPuntos(pron, res){
+  if(!res){ return '<span style="color:#777;">Sin resultado oficial aun</span>'; }
+  if(!pron){ return '<span style="color:#777;">No enviaste pronostico</span>'; }
+  var c=_puntuarPartido(pron, res);
+  var partes=[];
+  // Marcador
+  if(c.exacto) partes.push('<span style="color:var(--green-ok);">Marcador exacto +3</span>');
+  else if(c.ganador) partes.push('<span style="color:var(--green-ok);">Acerto ganador +2</span>');
+  else if(c.empate) partes.push('<span style="color:var(--green-ok);">Acerto empate +1</span>');
+  else partes.push('<span style="color:#888;">Marcador 0</span>');
+  // +2.5 Tarjetas
+  if(c.tarjetasOk) partes.push('<span style="color:var(--green-ok);">+2.5 Tarj. +3</span>');
+  else if(c.tarjetasMal) partes.push('<span style="color:var(--red-alert);">+2.5 Tarj. -1</span>');
+  // T. Roja
+  if(c.rojaOk) partes.push('<span style="color:var(--green-ok);">T. Roja +4</span>');
+  else if(c.rojaMal) partes.push('<span style="color:var(--red-alert);">T. Roja -1</span>');
+  // Tiempo extra
+  if(c.extraOk) partes.push('<span style="color:var(--green-ok);">Extra T. +3</span>');
+  else if(c.extraMal) partes.push('<span style="color:var(--red-alert);">Extra T. -1.5</span>');
+  // Penales
+  if(c.penalesOk) partes.push('<span style="color:var(--green-ok);">Penales +3</span>');
+  else if(c.penalesMal) partes.push('<span style="color:var(--red-alert);">Penales -1</span>');
+  // Total neto del partido
+  var tot = c.exacto*3 + c.ganador*2 + c.empate + c.tarjetasOk*3 - c.tarjetasMal*1 + c.rojaOk*4 - c.rojaMal*1 + c.extraOk*3 - c.extraMal*1.5 + c.penalesOk*3 - c.penalesMal*1;
+  var totTxt = (Number.isInteger(tot)?tot:tot.toFixed(1));
+  var totCol = tot>0?'var(--green-ok)':(tot<0?'var(--red-alert)':'#999');
+  partes.push('<span style="color:'+totCol+';font-weight:700;">Total: '+(tot>0?'+':'')+totTxt+' pts</span>');
+  return partes.join('<span style="color:#444;"> &nbsp;|&nbsp; </span>');
+}
+function mostrarPuntosJornada(jN){
+  var cod=usuarioActual.codigo;
+  Promise.all([
+    db.ref('resultados/j'+jN).once('value'),
+    db.ref('pronosticos/'+cod+'/j'+jN).once('value')
+  ]).then(function(snaps){
+    var res=snaps[0].val()||{};
+    var pron=snaps[1].val()||{};
+    var bloques=document.querySelectorAll('#pronosticosContainer .partido-block');
+    bloques.forEach(function(bloque, i){
+      var m=_partidosVista[i];
+      if(!m) return;
+      var num=m.num;
+      var r=res['p'+num]||null;
+      var pr=pron['p'+num]||null;
+      var old=bloque.querySelector('.fila-puntos');
+      if(old) old.parentNode.removeChild(old);
+      var div=document.createElement('div');
+      div.className='fila-puntos';
+      div.style.cssText='background:#0d1221;border-top:2px solid var(--border);padding:8px 12px;font-size:0.78rem;font-family:\'Barlow Condensed\',sans-serif;letter-spacing:0.5px;text-align:center;';
+      div.innerHTML='<strong style="color:var(--muted);">PUNTOS:</strong> '+_filaPuntos(pr, r);
+      bloque.appendChild(div);
+    });
+  }).catch(function(){});
 }
 window.renderPronosticos=renderPronosticos;
 window.jornadaAnterior=jornadaAnterior;
+window.irAJornada=irAJornada;
 window.jornadaSiguiente=jornadaSiguiente;
 
 // ============================================================
@@ -3047,11 +3260,12 @@ function _fmtFechaCol(ms){
 }
 function _siNo(v){ return v==='SI' ? 'SI' : (v==='NO' ? 'NO' : '-'); }
 // Construye el HTML de solo lectura de TODAS las jornadas pronosticadas por un jugador.
-function _htmlPronosticosDe(data){
+function _htmlPronosticosDe(data, soloJornada){
   if(!data){ return '<p style="color:#888;text-align:center;padding:24px;">Aun no hay pronosticos enviados.</p>'; }
   var jornadas=Object.keys(data).filter(function(k){return /^j\d+$/.test(k);})
     .sort(function(a,b){return parseInt(a.slice(1),10)-parseInt(b.slice(1),10);});
-  if(jornadas.length===0){ return '<p style="color:#888;text-align:center;padding:24px;">Aun no hay pronosticos enviados.</p>'; }
+  if(soloJornada){ jornadas=jornadas.filter(function(k){ return k==='j'+soloJornada; }); }
+  if(jornadas.length===0){ return '<p style="color:#888;text-align:center;padding:24px;">Sin pronosticos en esta jornada.</p>'; }
   var html='';
   jornadas.forEach(function(jk){
     var jd=data[jk]||{};
@@ -3108,18 +3322,64 @@ function filtrarJugadoresVer(){
   box.innerHTML = html || '<div style="padding:10px 12px;color:#888;">Sin coincidencias.</div>';
   box.style.display='block';
 }
+var _verData=null, _verNums=[], _verJornada=null, _verCod=null;
 function verPronosticosDe(cod){
   var j=jugadoresCache[cod]||{};
   var inp=document.getElementById('ver-buscar'); if(inp) inp.value=(j.nombre||'')+' ('+cod+')';
   var box=document.getElementById('ver-resultados'); if(box) box.style.display='none';
   var cont=document.getElementById('verPronosticosContainer');
   if(!cont) return;
+  _verCod=cod;
   cont.innerHTML='<p style="color:#888;padding:14px;">Cargando...</p>';
   db.ref('pronosticos/'+cod).once('value',function(snap){
-    cont.innerHTML=_htmlPronosticosDe(snap.val());
+    _verData=snap.val();
+    _verNums=_verData ? Object.keys(_verData).filter(function(k){return /^j\d+$/.test(k);}).map(function(k){return parseInt(k.slice(1),10);}).sort(function(a,b){return a-b;}) : [];
+    _verJornada=_verNums.length?_verNums[0]:null;
+    renderVerJornada();
   },function(){ cont.innerHTML='<p style="color:var(--red-alert);padding:14px;">No se pudo leer. Revisa tu conexion.</p>'; });
 }
+function renderVerJornada(){
+  var cont=document.getElementById('verPronosticosContainer');
+  var nav=document.getElementById('verNav');
+  var tit=document.getElementById('verJornadaTitulo');
+  if(!cont) return;
+  if(!_verData || !_verNums.length){
+    if(nav) nav.style.display='none';
+    _pintarSaltosJornada('verSaltos', [], null, 'irAVerJornada');
+    cont.innerHTML=_htmlPronosticosDe(_verData);
+    return;
+  }
+  if(_verNums.indexOf(_verJornada)===-1) _verJornada=_verNums[0];
+  if(nav) nav.style.display='flex';
+  if(tit) tit.textContent='JORNADA '+_verJornada;
+  var idx=_verNums.indexOf(_verJornada);
+  var bA=document.getElementById('btnVerAnterior'), bS=document.getElementById('btnVerSiguiente');
+  if(bA){ bA.disabled=idx<=0; bA.style.opacity=idx<=0?'0.4':'1'; bA.style.cursor=idx<=0?'not-allowed':'pointer'; }
+  if(bS){ bS.disabled=idx>=_verNums.length-1; bS.style.opacity=idx>=_verNums.length-1?'0.4':'1'; bS.style.cursor=idx>=_verNums.length-1?'not-allowed':'pointer'; }
+  _pintarSaltosJornada('verSaltos', _verNums, _verJornada, 'irAVerJornada');
+  cont.innerHTML=_htmlPronosticosDe(_verData, _verJornada);
+}
+function irAVerJornada(n){ if(_verNums.indexOf(n)===-1) return; _verJornada=n; renderVerJornada(); }
+function verJornadaAnterior(){ var i=_verNums.indexOf(_verJornada); if(i>0){ _verJornada=_verNums[i-1]; renderVerJornada(); } }
+function verJornadaSiguiente(){ var i=_verNums.indexOf(_verJornada); if(i<_verNums.length-1){ _verJornada=_verNums[i+1]; renderVerJornada(); } }
+function cerrarVerJugador(){
+  _verData=null; _verNums=[]; _verJornada=null; _verCod=null;
+  var inp=document.getElementById('ver-buscar'); if(inp) inp.value='';
+  var nav=document.getElementById('verNav'); if(nav) nav.style.display='none';
+  _pintarSaltosJornada('verSaltos', [], null, 'irAVerJornada');
+  var cont=document.getElementById('verPronosticosContainer'); if(cont) cont.innerHTML='';
+}
+function cerrarManualJugador(){
+  if(typeof manualJugadorCod!=='undefined') manualJugadorCod=null;
+  var inp=document.getElementById('manual-buscar'); if(inp) inp.value='';
+  var cont=document.getElementById('manualContainer'); if(cont) cont.innerHTML='<p style="color:#888;font-size:0.85rem;">Busca y elige un jugador arriba para ingresar su pronostico.</p>';
+}
 window.filtrarJugadoresVer=filtrarJugadoresVer;
+window.irAVerJornada=irAVerJornada;
+window.verJornadaAnterior=verJornadaAnterior;
+window.verJornadaSiguiente=verJornadaSiguiente;
+window.cerrarVerJugador=cerrarVerJugador;
+window.cerrarManualJugador=cerrarManualJugador;
 window.verPronosticosDe=verPronosticosDe;
 
 // ============================================================
@@ -3533,7 +3793,7 @@ function calcularClasificadosOficiales(resultados) {
   return clasificados;
 }
 
-// Resuelve el nombre real de un slot (ej: '1E', '3A/B/D/F/G', 'Gana P.73')
+// Resuelve el nombre real de un slot (ej: '1E', '3A/B/C/D/F', 'Gana P.73')
 function resolverNombre(codigo, clasificados, partidoNum) {
   if (!codigo) return { name: codigo, flag: '', indefinido: true };
 
@@ -3548,7 +3808,7 @@ function resolverNombre(codigo, clasificados, partidoNum) {
     return { name: codigo, flag: '', indefinido: true };
   }
 
-  // Slot de tercero con barra: '3A/B/D/F/G' etc.
+  // Slot de tercero con barra: '3A/B/C/D/F' etc.
   if (codigo.charAt(0)==='3' && codigo.indexOf('/')>=0) {
     var clave = '3_'+partidoNum;
     var c3 = clasificados[clave];
@@ -4039,8 +4299,6 @@ window.resJornadaAnterior = resJornadaAnterior;
 window.resJornadaSiguiente = resJornadaSiguiente;
 window.toggleResTarjeta = toggleResTarjeta;
 window.guardarResultadosJornada = guardarResultadosJornada;
-window.cargarPronosticosPendientes = cargarPronosticosPendientes;
-window.otorgarPuntosPartido2 = otorgarPuntosPartido2;
 window.guardarPremundialOficial = guardarPremundialOficial;
 window.cargarPremundialOficial = cargarPremundialOficial;
 window.renderPronosticoManual = renderPronosticoManual;
