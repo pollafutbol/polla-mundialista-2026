@@ -909,7 +909,7 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
     </div>
     <div class="form-card" style="border-color:#7a2a2a;background:rgba(122,42,42,0.06);">
       <h3 style="color:#ff7a7a;">&#9888; Zona de peligro &middot; Reiniciar polla</h3>
-      <p style="font-size:0.8rem;color:#d8a3a3;margin-bottom:12px;">Borra de la nube TODO lo del juego para empezar de cero: predicciones de partidos, predicciones pre-mundial, resultados oficiales, el numero del chontico, ajustes, marcas de envio y todos los puntos del ranking. <strong>NO borra las cuentas de los jugadores ni sus claves.</strong> Esto NO se puede deshacer.</p>
+      <p style="font-size:0.8rem;color:#d8a3a3;margin-bottom:12px;">Borra de la nube: predicciones de partidos de los jugadores, resultados oficiales, ajustes, marcas de envio y todos los puntos del ranking. <strong>CONSERVA las predicciones pre-mundial, el numero del chontico y las cuentas de los jugadores (con sus claves).</strong> Esto NO se puede deshacer.</p>
       <button class="btn-action" onclick="reiniciarPolla()" style="width:100%;padding:13px;background:#3a1414;color:#ff8a8a;border:1px solid #7a2a2a;font-weight:700;letter-spacing:1px;">REINICIAR POLLA (DEJA EL RANKING EN CERO)</button>
     </div>
     <div class="form-card" style="border-color:var(--gold2);">
@@ -4291,23 +4291,21 @@ window.guardarResultadosJornada = guardarResultadosJornada;
 window.guardarPremundialOficial = guardarPremundialOficial;
 // Reinicia la polla: borra de la nube todo lo del juego, conservando las cuentas de los jugadores.
 function reiniciarPolla(){
-  if(!confirm('REINICIAR LA POLLA\n\nEsto BORRA de forma DEFINITIVA:\n - Todas las predicciones de los jugadores\n - Las predicciones pre-mundial\n - Todos los resultados oficiales\n - El numero del chontico\n - Los ajustes y las marcas de envio\n - Todos los puntos del ranking\n\nNO borra las cuentas de los jugadores ni sus claves.\n\nEsto NO se puede deshacer. Continuar?')) return;
+  if(!confirm('REINICIAR LA POLLA\n\nEsto BORRA de forma DEFINITIVA:\n - Todas las predicciones de partidos de los jugadores\n - Todos los resultados oficiales\n - Los ajustes y las marcas de envio\n - Todos los puntos del ranking\n\nCONSERVA:\n - Las predicciones pre-mundial\n - El numero del chontico\n - Las cuentas de los jugadores y sus claves\n\nEsto NO se puede deshacer. Continuar?')) return;
   var palabra = prompt('Para confirmar, escribe REINICIAR (en mayusculas):');
   if(palabra !== 'REINICIAR'){ alert('Cancelado. No se borro nada.'); return; }
   if(typeof showLoading==='function') showLoading('Reiniciando la polla...');
   var updates = {
     'pronosticos': null,
-    'premundial': null,
     'resultados': null,
-    'chonticoResultado': null,
-    'envios': null,
-    'ajustes': null
+    'ajustes': null,
+    'envios': null
   };
   Object.keys(jugadoresCache||{}).forEach(function(cod){ updates['jugadores/'+cod+'/pts'] = null; });
   db.ref().update(updates, function(err){
     if(typeof hideLoading==='function') hideLoading();
     if(err){ alert('Hubo un problema y NO se completo el reinicio. Revisa tu conexion e intenta de nuevo.'); return; }
-    alert('Polla reiniciada. El ranking quedo en cero y la nube quedo limpia.\n\nAhora puedes cargar las predicciones (Pronostico Manual) y los resultados de nuevo. Recarga la pagina.');
+    alert('Polla reiniciada. El ranking quedo en cero. Se conservaron las predicciones pre-mundial y el chontico.\n\nAhora puedes cargar las predicciones de partidos (Pronostico Manual) y los resultados de nuevo. Recarga la pagina.');
     location.reload();
   });
 }
