@@ -868,6 +868,7 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
         <div id="resJornadaTitulo" style="font-family:'Bebas Neue',sans-serif;color:var(--gold);font-size:1.2rem;letter-spacing:2px;text-align:center;flex:1;">JORNADA</div>
         <button onclick="resJornadaSiguiente()" id="btnResSiguiente" class="btn-action" style="background:#222;color:#fff;">Siguiente &#9654;</button>
       </div>
+      <div id="resSaltos" style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:12px;"></div>
       <div id="resultadosContainer"></div>
     </div>
     <div class="form-card" style="border-color:var(--accent);">
@@ -882,6 +883,7 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
         <div id="manualJornadaTitulo" style="font-family:'Bebas Neue',sans-serif;color:var(--gold);font-size:1.2rem;letter-spacing:2px;text-align:center;flex:1;">JORNADA</div>
         <button onclick="manualJornadaSiguiente()" id="btnManualSiguiente" class="btn-action" style="background:#222;color:#fff;">Siguiente &#9654;</button>
       </div>
+      <div id="manualSaltos" style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:0 0 10px;"></div>
       <button onclick="cerrarManualJugador()" style="width:100%;background:#3a1f1f;color:#ff8a8a;border:1px solid #7a3a3a;border-radius:6px;padding:8px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;margin-bottom:10px;">&#10005; CERRAR / LIMPIAR JUGADOR</button>
       <div id="manualContainer"></div>
     </div>
@@ -2588,6 +2590,7 @@ function renderResultadosAdmin(){
   var titTxt = esElim&&partidos.length ? _faseNombre(partidos[0].n).toUpperCase() : ('JORNADA '+resJornadaVista);
   var tit = document.getElementById('resJornadaTitulo');
   if(tit) tit.innerHTML = titTxt+(partidos.length?(' <span style="color:var(--muted);font-size:0.8rem;">'+partidos[0].fec+' 2026</span>'):'');
+  _pintarSaltosJornada('resSaltos', _resNums, resJornadaVista, 'irAResJornada');
   var cont = document.getElementById('resultadosContainer');
   if(!cont) return;
   cont.innerHTML = '<p style="color:#888;font-size:0.8rem;">Cargando resultados guardados...</p>';
@@ -2720,6 +2723,7 @@ function renderPronosticoManual(){
   var primer=partidos.length?partidos[0]:null;
   var tit=document.getElementById('manualJornadaTitulo');
   if(tit) tit.innerHTML='JORNADA '+manualJornadaVista+(primer?(' <span style="color:var(--muted);font-size:0.8rem;">'+primer.fec+' 2026</span>'):'');
+  _pintarSaltosJornada('manualSaltos', data.nums, manualJornadaVista, 'irAManualJornada');
   var cont=document.getElementById('manualContainer');
   if(!cont) return;
   var cod=manualJugadorCod;
@@ -2762,6 +2766,11 @@ function manualJornadaSiguiente(){
   var data=_getCal(); var idx=data.nums.indexOf(manualJornadaVista);
   if(idx<data.nums.length-1){ manualJornadaVista=data.nums[idx+1]; renderPronosticoManual(); }
 }
+function irAManualJornada(n){
+  var data=_getCal();
+  if(data.nums.indexOf(n)===-1) return;
+  manualJornadaVista=n; renderPronosticoManual();
+}
 function guardarPronosticoManual(){
   var cod=manualJugadorCod;
   if(!cod){ alert('Busca y elige un jugador primero.'); return; }
@@ -2800,6 +2809,11 @@ function resJornadaAnterior(){
 function resJornadaSiguiente(){
   var nums=_resNums||_getCal().nums; var idx=nums.indexOf(resJornadaVista);
   if(idx<nums.length-1){ resJornadaVista=nums[idx+1]; renderResultadosAdmin(); }
+}
+function irAResJornada(n){
+  var nums=_resNums||_getCal().nums;
+  if(nums.indexOf(n)===-1) return;
+  resJornadaVista=n; renderResultadosAdmin();
 }
 function guardarResultadosJornada(){
   var cont = document.getElementById('resultadosContainer');
@@ -4285,6 +4299,7 @@ window.eliminarJugador = eliminarJugador;
 window.sincronizarFIFA = sincronizarFIFA;
 window.renderResultadosAdmin = renderResultadosAdmin;
 window.resJornadaAnterior = resJornadaAnterior;
+window.irAResJornada = irAResJornada;
 window.resJornadaSiguiente = resJornadaSiguiente;
 window.toggleResTarjeta = toggleResTarjeta;
 window.guardarResultadosJornada = guardarResultadosJornada;
@@ -4314,6 +4329,7 @@ window.cargarPremundialOficial = cargarPremundialOficial;
 window.renderPronosticoManual = renderPronosticoManual;
 window.cambiarJugadorManual = cambiarJugadorManual;
 window.manualJornadaAnterior = manualJornadaAnterior;
+window.irAManualJornada = irAManualJornada;
 window.manualJornadaSiguiente = manualJornadaSiguiente;
 window.guardarPronosticoManual = guardarPronosticoManual;
 window.filtrarJugadoresManual = filtrarJugadoresManual;
