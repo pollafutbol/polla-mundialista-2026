@@ -255,9 +255,6 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
 .loading-spinner{width:50px;height:50px;border:4px solid #1f3550;border-top:4px solid var(--gold);border-radius:50%;animation:spin 0.8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 .loading-text{font-family:'Barlow Condensed',sans-serif;color:var(--gold);font-size:1rem;letter-spacing:2px;text-transform:uppercase;}
-/* RESET */
-.btn-reset-test{background:#007bff;color:#fff;border:none;padding:4px 8px;cursor:pointer;font-size:9px;position:fixed;bottom:8px;right:8px;z-index:10000;border-radius:4px;opacity:0.2;}
-.btn-reset-test:hover{opacity:1;}
 @media(max-width:768px){
   .banner{height:62px;}.banner h1{font-size:1.5rem;}
   .premundial-grid,.grid-3,.grid-2{grid-template-columns:1fr;}
@@ -266,8 +263,6 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
 </style>
 </head>
 <body>
-
-<button class="btn-reset-test" onclick="resetSistema()">RESET</button>
 
 <!-- LOADING -->
 <div class="loading-overlay" id="loadingOverlay">
@@ -911,6 +906,11 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
       <p style="font-size:0.8rem;color:#aaa;margin-bottom:15px;">Al ejecutar, el sistema compara los resultados oficiales contra los pronosticos de todos y reparte los puntos. Puedes ejecutarlo cuantas veces quieras.</p>
       <button class="btn-action btn-gold" onclick="sincronizarFIFA()" style="width:100%;padding:15px;font-size:1rem;">EJECUTAR ESCRUTINIO GLOBAL</button>
       <div id="statusFIFA" class="status-box">&gt; Listo para ejecutar.<br><span id="statusLog" style="color:var(--accent);">Esperando...</span></div>
+    </div>
+    <div class="form-card" style="border-color:#7a2a2a;background:rgba(122,42,42,0.06);">
+      <h3 style="color:#ff7a7a;">&#9888; Zona de peligro &middot; Reiniciar polla</h3>
+      <p style="font-size:0.8rem;color:#d8a3a3;margin-bottom:12px;">Borra de la nube TODO lo del juego para empezar de cero: predicciones de partidos, predicciones pre-mundial, resultados oficiales, el numero del chontico, ajustes, marcas de envio y todos los puntos del ranking. <strong>NO borra las cuentas de los jugadores ni sus claves.</strong> Esto NO se puede deshacer.</p>
+      <button class="btn-action" onclick="reiniciarPolla()" style="width:100%;padding:13px;background:#3a1414;color:#ff8a8a;border:1px solid #7a2a2a;font-weight:700;letter-spacing:1px;">REINICIAR POLLA (DEJA EL RANKING EN CERO)</button>
     </div>
     <div class="form-card" style="border-color:var(--gold2);">
       <h3 style="color:var(--gold2);">Resultados Oficiales Pre-Mundial</h3>
@@ -4061,16 +4061,6 @@ function guardarNuevaClave(){
 }
 
 // ============================================================
-// RESET
-// ============================================================
-function resetSistema(){
-  if(!confirm('Borrar todos los datos del simulador (localStorage)?'))return;
-  localStorage.removeItem('POLLA2026_SIM');
-  localStorage.removeItem('POLLA_TZ');
-  sessionStorage.removeItem('pollaUser');
-  alert('Reset completado. Recarga la pagina.');
-  location.reload();
-}
 
 // ============================================================
 // INICIO
@@ -4124,7 +4114,6 @@ window.cerrarSesion = cerrarSesion;
 window.irA = irA;
 window.cambiarGrupo = cambiarGrupo;
 window.limpiarGrupo = limpiarGrupo;
-window.resetSistema = resetSistema;
 window.recuperarClave = recuperarClave;
 window.toggleSi = toggleSi;
 window.abrirModalEnvio = abrirModalEnvio;
@@ -4300,6 +4289,29 @@ window.resJornadaSiguiente = resJornadaSiguiente;
 window.toggleResTarjeta = toggleResTarjeta;
 window.guardarResultadosJornada = guardarResultadosJornada;
 window.guardarPremundialOficial = guardarPremundialOficial;
+// Reinicia la polla: borra de la nube todo lo del juego, conservando las cuentas de los jugadores.
+function reiniciarPolla(){
+  if(!confirm('REINICIAR LA POLLA\n\nEsto BORRA de forma DEFINITIVA:\n - Todas las predicciones de los jugadores\n - Las predicciones pre-mundial\n - Todos los resultados oficiales\n - El numero del chontico\n - Los ajustes y las marcas de envio\n - Todos los puntos del ranking\n\nNO borra las cuentas de los jugadores ni sus claves.\n\nEsto NO se puede deshacer. Continuar?')) return;
+  var palabra = prompt('Para confirmar, escribe REINICIAR (en mayusculas):');
+  if(palabra !== 'REINICIAR'){ alert('Cancelado. No se borro nada.'); return; }
+  if(typeof showLoading==='function') showLoading('Reiniciando la polla...');
+  var updates = {
+    'pronosticos': null,
+    'premundial': null,
+    'resultados': null,
+    'chonticoResultado': null,
+    'envios': null,
+    'ajustes': null
+  };
+  Object.keys(jugadoresCache||{}).forEach(function(cod){ updates['jugadores/'+cod+'/pts'] = null; });
+  db.ref().update(updates, function(err){
+    if(typeof hideLoading==='function') hideLoading();
+    if(err){ alert('Hubo un problema y NO se completo el reinicio. Revisa tu conexion e intenta de nuevo.'); return; }
+    alert('Polla reiniciada. El ranking quedo en cero y la nube quedo limpia.\n\nAhora puedes cargar las predicciones (Pronostico Manual) y los resultados de nuevo. Recarga la pagina.');
+    location.reload();
+  });
+}
+window.reiniciarPolla = reiniciarPolla;
 window.cargarPremundialOficial = cargarPremundialOficial;
 window.renderPronosticoManual = renderPronosticoManual;
 window.cambiarJugadorManual = cambiarJugadorManual;
