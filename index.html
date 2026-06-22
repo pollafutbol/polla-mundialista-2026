@@ -1,4 +1,32 @@
 <!DOCTYPE html>
+<!--
+  ============================================================
+  POLLA MUNDIALISTA 2026
+  RESUMEN DE ESTE INDEX
+  Generado: 22/06/2026 - 11:07 AM (hora Colombia)
+  ------------------------------------------------------------
+  Cambios incluidos en esta version:
+  1. Crear Administrador: boton para poner/quitar control absoluto a un admin
+     ya creado, y se muestra la fecha y hora de creacion de cada uno.
+  2. Hoja de pronosticos YA ENVIADA: se rellena con el pronostico real del
+     jugador (marcador + SI/NO de cada apuesta con castigo); aviso con fecha y
+     hora de envio y, si un admin lo modifico, "Modificado por la administracion
+     (codigo) el (fecha y hora)". Fila verde "Oficial" bajo cada partido con el
+     resultado real (o "Oficial: pendiente" si aun no se ha cargado).
+  3. Ranking en celular plegable: top 3 completos; del 4to en adelante solo
+     nombre + puntaje, con clic para desplegar/cerrar el detalle.
+  4. Proteccion de H175: el administrador principal H175 NO se puede eliminar
+     ni se le puede quitar el control absoluto (intocable para todos). Los
+     admins absolutos si pueden crear, ascender/degradar y borrar a OTROS admins.
+
+  PENDIENTE / FUTURO:
+  - Firebase Authentication (login propio de Google; las claves nunca tocan la
+    pagina). Es el salto de seguridad real; implica rediseñar el flujo
+    "codigo + clave por WhatsApp". Para un index futuro.
+  - Reglas de seguridad de Firebase (ajuste en la consola, sin tocar codigo)
+    para apretar quien puede leer la base. Se puede hacer cuando se quiera.
+  ============================================================
+-->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -150,6 +178,11 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
 /* HOJA ENVIADA: solo lectura, atenuada (tipo marca de agua) */
 .hoja-enviada{position:relative;opacity:0.55;filter:saturate(0.65);transition:opacity 0.3s;}
 .hoja-enviada::before{content:"\2705 PRONOSTICO ENVIADO";position:sticky;top:0;display:block;width:100%;text-align:center;background:rgba(0,200,120,0.16);color:var(--green-ok,#00c878);font-family:'Bebas Neue',sans-serif;letter-spacing:3px;font-size:1rem;padding:8px 0;border:1px dashed rgba(0,200,120,0.5);border-radius:8px;margin-bottom:10px;z-index:5;}
+/* Aviso de fecha/hora de envio (y edicion por admin) sobre la hoja enviada */
+.aviso-enviado{background:rgba(0,200,120,0.10);border:1px solid rgba(0,200,120,0.35);border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:0.85rem;color:#cfe9d8;text-align:center;line-height:1.5;}
+/* Fila verde "Oficial" bajo cada partido en la hoja enviada */
+tr.fila-oficial td{background:rgba(0,180,100,0.12)!important;color:#00e08a!important;font-size:0.82rem;border-top:2px solid rgba(0,200,120,0.5);padding:6px 4px;text-align:center;}
+tr.fila-oficial-pend td{color:#9aa7b8!important;background:rgba(120,130,150,0.08)!important;}
 /* RESULTADOS — TA amarillo TR rojo */
 .resultados-wrap{padding:20px;max-width:1200px;margin:0 auto;}
 .res-jornada{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:20px;}
@@ -252,6 +285,12 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
 .rc-gana{color:#00ff99;}
 .rc-pierde{color:#ff6666;}
 .rc-pts{color:#00ff99;font-weight:800;}
+/* Tarjetas plegables (4to lugar en adelante) */
+.rc-plegable{cursor:pointer;}
+.rc-flecha{font-size:0.7rem;color:var(--muted);margin-left:4px;transition:transform 0.2s;}
+.rc-plegable .rank-card-grid{overflow:hidden;transition:max-height 0.25s ease;max-height:600px;}
+.rc-plegable.rc-cerrada .rank-card-grid{max-height:0;margin:0;}
+.rc-plegable.rc-cerrada .rc-flecha{transform:rotate(-90deg);}
 @media (max-width:720px){
   .ranking-table-wrap{display:none;}
   .ranking-mobile{display:block;}
@@ -2531,6 +2570,7 @@ window.crearAdminNuevo=crearAdminNuevo;
 
 function eliminarAdmin(cod){
   if(!(usuarioActual && usuarioActual.adminTotal===true)){ alert('Solo control absoluto puede eliminar administradores.'); return; }
+  if(cod==='H175'){ alert('H175 es el administrador principal y no se puede eliminar.'); return; }
   if(!confirm('¿Eliminar al administrador '+cod+'? Ya no podra ingresar.')) return;
   db.ref('admins/'+cod).remove(function(err){
     if(err){ alert('No se pudo eliminar. Revisa tu conexion.'); return; }
@@ -2539,18 +2579,47 @@ function eliminarAdmin(cod){
 }
 window.eliminarAdmin=eliminarAdmin;
 
+// Poner o quitar control absoluto a un admin YA creado (H175 es intocable)
+function toggleAbsolutoAdmin(cod){
+  if(!(usuarioActual && usuarioActual.adminTotal===true)){ alert('Solo control absoluto puede cambiar el tipo de un administrador.'); return; }
+  if(cod==='H175'){ alert('H175 es el administrador principal y siempre tiene control absoluto.'); return; }
+  var a=adminsCache[cod]; if(!a){ alert('Administrador no encontrado.'); return; }
+  var nuevo = !(a.total===true);
+  var txt = nuevo ? 'DARLE control absoluto' : 'DEJARLO en control parcial';
+  if(!confirm('¿Seguro que quieres '+txt+' a '+cod+' ('+(a.nombre||'')+')?')) return;
+  db.ref('admins/'+cod+'/total').set(nuevo, function(err){
+    if(err){ alert('No se pudo cambiar. Revisa tu conexion.'); return; }
+    renderListaAdmins();
+  });
+}
+window.toggleAbsolutoAdmin=toggleAbsolutoAdmin;
+
 function renderListaAdmins(){
   var cont=document.getElementById('ca-lista');
   if(!cont) return;
   var cods=Object.keys(adminsCache||{});
   if(cods.length===0){ cont.innerHTML='<p style="font-size:0.78rem;color:#666;">Aun no has creado administradores.</p>'; return; }
   var html='<div style="font-size:0.75rem;color:#aaa;letter-spacing:1px;margin:6px 0;">ADMINISTRADORES CREADOS</div>';
+  // H175 siempre primero, como administrador principal (no editable / no borrable)
+  html+='<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px;border-bottom:1px solid #16263a;background:rgba(200,168,106,0.06);">'+
+    '<div style="color:#ddd;font-size:0.85rem;"><strong>H175</strong> &middot; Admin H175 &middot; Cali &middot; <span style="color:var(--gold);">👑 Absoluto</span> <span style="color:#7fd1ff;">(principal)</span></div>'+
+    '<span style="color:#666;font-size:0.72rem;">protegido</span>'+
+    '</div>';
   cods.sort().forEach(function(cod){
+    if(cod==='H175') return; // por si existiera en la nube, no se duplica ni se toca
     var a=adminsCache[cod]||{};
-    var tipo=(a.total===true)?'<span style="color:var(--gold);">👑 Absoluto</span>':'<span style="color:#ff8a8a;">🔒 Parcial</span>';
-    html+='<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px;border-bottom:1px solid #16263a;">'+
-      '<div style="color:#ddd;font-size:0.85rem;"><strong>'+cod+'</strong> &middot; '+(a.nombre||'?')+(a.ciudad?(' &middot; '+a.ciudad):'')+' &middot; '+tipo+'</div>'+
-      '<button onclick="eliminarAdmin(\''+cod+'\')" style="background:#3a1f1f;color:#ff8a8a;border:1px solid #7a3a3a;border-radius:5px;padding:5px 10px;cursor:pointer;font-size:0.75rem;">Eliminar</button>'+
+    var esAbs=(a.total===true);
+    var tipo=esAbs?'<span style="color:var(--gold);">👑 Absoluto</span>':'<span style="color:#ff8a8a;">🔒 Parcial</span>';
+    var fecha=a.cuando?_fmtFechaCol(a.cuando):'';
+    var btnAbsTxt=esAbs?'Quitar absoluto':'Dar absoluto';
+    var btnAbsStyle=esAbs?'background:#3a1f1f;color:#ff8a8a;border:1px solid #7a3a3a;':'background:#2a2410;color:var(--gold);border:1px solid var(--gold);';
+    html+='<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px;border-bottom:1px solid #16263a;flex-wrap:wrap;">'+
+      '<div style="color:#ddd;font-size:0.85rem;min-width:0;"><strong>'+cod+'</strong> &middot; '+(a.nombre||'?')+(a.ciudad?(' &middot; '+a.ciudad):'')+' &middot; '+tipo+
+        (fecha?('<br><span style="color:#7c8aa0;font-size:0.72rem;">Creado: '+fecha+'</span>'):'')+'</div>'+
+      '<div style="display:flex;gap:6px;">'+
+        '<button onclick="toggleAbsolutoAdmin(\''+cod+'\')" style="'+btnAbsStyle+'border-radius:5px;padding:5px 10px;cursor:pointer;font-size:0.75rem;">'+btnAbsTxt+'</button>'+
+        '<button onclick="eliminarAdmin(\''+cod+'\')" style="background:#3a1f1f;color:#ff8a8a;border:1px solid #7a3a3a;border-radius:5px;padding:5px 10px;cursor:pointer;font-size:0.75rem;">Eliminar</button>'+
+      '</div>'+
       '</div>';
   });
   cont.innerHTML=html;
@@ -3133,7 +3202,7 @@ function procesarEnvio() {
     if (err) { alert('Hubo un problema guardando. Revisa tu conexion e intenta de nuevo.'); return; }
     var btn = document.querySelector('.btn-enviar');
     if (btn) { btn.disabled=true; btn.style.background='#555'; btn.style.cursor='not-allowed'; btn.innerText='\u2705 PRONOSTICOS YA ENVIADOS'; btn.onclick=null; }
-    bloquearHojaPronostico();  // dejar la hoja en solo lectura y atenuada (modo "enviado")
+    cargarPronosticoEnviado(cod, jN);  // mostrar la hoja con lo enviado + fila oficial + aviso, y bloquearla
     alert('Pronosticos guardados correctamente en la nube.');
   });
 }
@@ -3405,14 +3474,90 @@ function iniciarTimerJornada(cierre, cerrada){
 }
 function verificarEnvioJornada(){
   if(typeof usuarioActual==='undefined' || !usuarioActual) return;
-  db.ref('envios/'+usuarioActual.codigo+'/j'+jornadaVista).once('value',function(snap){
+  var cod=usuarioActual.codigo, jN=jornadaVista;
+  db.ref('envios/'+cod+'/j'+jN).once('value',function(snap){
     if(snap.val()){
       var btn=document.querySelector('.btn-enviar');
       if(btn){ btn.disabled=true; btn.style.background='#555'; btn.style.cursor='not-allowed'; btn.innerText='\u2705 YA ENVIADA'; btn.onclick=null; }
-      bloquearHojaPronostico();  // hoja en solo lectura y atenuada (ya fue enviada)
+      cargarPronosticoEnviado(cod, jN);  // llenar con lo que se envio + fila oficial + aviso
     }
   });
 }
+
+// Rellena la hoja YA ENVIADA con el pronostico real del jugador, agrega la fila
+// verde "Oficial" bajo cada partido (o "Oficial: pendiente"), muestra fecha/hora
+// de envio (y si un admin lo modifico) y deja la hoja en solo lectura/atenuada.
+function cargarPronosticoEnviado(cod, jN){
+  function setSi(el, val){ if(!el) return; if(val==='SI'){ el.innerText='SI'; el.classList.add('active'); } else { el.innerText='-'; el.classList.remove('active'); } }
+  Promise.all([
+    db.ref('pronosticos/'+cod+'/j'+jN).once('value'),
+    db.ref('resultados/j'+jN).once('value')
+  ]).then(function(snaps){
+    var datos = snaps[0].val() || {};
+    var resJ  = snaps[1].val() || {};
+    var bloques = document.querySelectorAll('#pronosticosContainer .partido-block');
+    bloques.forEach(function(bloque, idx){
+      var m = (_partidosVista && _partidosVista[idx]) ? _partidosVista[idx] : null;
+      if(!m) return;
+      var num = m.num;
+      var pred = datos['p'+num];
+      var goles = bloque.querySelectorAll('.in-gol');
+      var btnsSI = bloque.querySelectorAll('.btn-si:not(.btn-roja)'); // [tarjetas, extra, penales]
+      var rojaEl = bloque.querySelector('.btn-roja');
+      // 1) Rellenar con lo que envio el jugador
+      if(pred){
+        if(goles[0]) goles[0].value = (pred.golL!=null?pred.golL:'');
+        if(goles[1]) goles[1].value = (pred.golV!=null?pred.golV:'');
+        setSi(btnsSI[0], pred.tarjetas);
+        setSi(rojaEl, pred.roja);
+        if(pred.extra && pred.extra!=='NA') setSi(btnsSI[1], pred.extra);
+        if(pred.penales && pred.penales!=='NA') setSi(btnsSI[2], pred.penales);
+      }
+      // 2) Fila verde "Oficial" (o "Oficial: pendiente")
+      var res = resJ['p'+num] || null;
+      var esElimM = !!m.elim;
+      var tbody = bloque.querySelector('table.tabla-juego tbody');
+      if(tbody){
+        var filaHTML;
+        if(res){
+          var nt = parseInt(res.tarjetas,10);
+          var tarjTxt = isNaN(nt) ? '-' : (nt + ' tarj.' + (nt>=3?' (SI +2.5)':''));
+          var rojaTxt = (res.roja==='SI')?'SI':'NO';
+          var extraTxt = esElimM ? ((res.extra==='SI')?'SI':(res.extra==='NO'?'NO':'-')) : '-';
+          var penTxt   = esElimM ? ((res.penales==='SI')?'SI':(res.penales==='NO'?'NO':'-')) : '-';
+          filaHTML = '<tr class="fila-oficial">'+
+            '<td style="text-align:center;font-weight:800;">'+(res.golL!=null?res.golL:'-')+'</td>'+
+            '<td style="font-weight:800;letter-spacing:1px;">OFICIAL</td>'+
+            '<td style="text-align:center;font-weight:800;">'+(res.golV!=null?res.golV:'-')+'</td>'+
+            '<td>'+tarjTxt+'</td>'+
+            '<td>'+rojaTxt+'</td>'+
+            '<td>'+extraTxt+'</td>'+
+            '<td>'+penTxt+'</td>'+
+          '</tr>';
+        }else{
+          filaHTML = '<tr class="fila-oficial fila-oficial-pend">'+
+            '<td colspan="7" style="text-align:center;font-style:italic;color:#9aa7b8;">Oficial: pendiente</td>'+
+          '</tr>';
+        }
+        tbody.insertAdjacentHTML('beforeend', filaHTML);
+      }
+    });
+    // 3) Aviso de fecha/hora de envio y edicion por admin
+    var cont = document.getElementById('pronosticosContainer');
+    if(cont){
+      var enviadoTxt = datos._enviado ? _fmtFechaCol(datos._enviado) : null;
+      var edit = datos._editadoAdmin || null;
+      var aviso = '<div class="aviso-enviado">';
+      if(enviadoTxt) aviso += '<div>\uD83D\uDCE4 Enviado el <strong>'+enviadoTxt+'</strong></div>';
+      if(edit) aviso += '<div style="color:#ffb84d;">\u270E Modificado por la administracion ('+(edit.por||'admin')+') el <strong>'+_fmtFechaCol(edit.cuando)+'</strong></div>';
+      aviso += '</div>';
+      var prev = cont.querySelector('.aviso-enviado'); if(prev) prev.remove();
+      cont.insertAdjacentHTML('afterbegin', aviso);
+    }
+    bloquearHojaPronostico();  // solo lectura + atenuada
+  }).catch(function(e){ console.warn('No se pudo cargar el pronostico enviado.', e); bloquearHojaPronostico(); });
+}
+window.cargarPronosticoEnviado = cargarPronosticoEnviado;
 function jornadaAnterior(){
   var nums=_pronNums||_getCal().nums; var idx=nums.indexOf(jornadaVista);
   if(idx>0){ jornadaVista=nums[idx-1]; renderPronosticos(); }
@@ -4325,11 +4470,16 @@ function renderizarRanking(){
     mob.innerHTML=jugadores.map(function(j,i){
       var rcls=i===0?'r1':i===1?'r2':i===2?'r3':'';
       var pos=medalias[i]||(i+1);
-      return '<div class="rank-card '+rcls+'">'+
+      var plegable = i>=3; // del 4to en adelante: plegable (arranca cerrado)
+      var clsCard = 'rank-card '+rcls+(plegable?' rc-plegable rc-cerrada':'');
+      var onclick = plegable ? ' onclick="toggleRankCard(this)"' : '';
+      var flecha = plegable ? '<span class="rc-flecha">\u25BC</span>' : '';
+      return '<div class="'+clsCard+'"'+onclick+'>'+
         '<div class="rank-card-top">'+
           '<div style="display:flex;align-items:center;gap:8px;min-width:0;">'+
             '<span class="rank-card-pos">'+pos+'</span>'+
             '<span class="rank-card-name">'+j.nombre+'</span>'+
+            flecha+
           '</div>'+
           '<div class="rank-card-total">'+fmtN(j.total)+'<small>TOTAL</small></div>'+
         '</div>'+
@@ -4350,6 +4500,9 @@ function renderizarRanking(){
   document.getElementById('podio2Nombre').innerText=jugadores[1]?jugadores[1].nombre:'-';
   document.getElementById('podio3Nombre').innerText=jugadores[2]?jugadores[2].nombre:'-';
 }
+// Plegar/desplegar una tarjeta del ranking en celular (4to en adelante)
+function toggleRankCard(el){ if(el) el.classList.toggle('rc-cerrada'); }
+window.toggleRankCard = toggleRankCard;
 
 // ============================================================
 // CAMBIO DE CLAVE
