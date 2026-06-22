@@ -147,6 +147,9 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
 .footer-envio{text-align:center;padding:30px;}
 .btn-enviar{background:var(--green-ok);color:#000;padding:14px 40px;font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:3px;border:3px solid #000;border-radius:50px;cursor:pointer;transition:0.2s;}
 .btn-enviar:hover{transform:scale(1.03);}
+/* HOJA ENVIADA: solo lectura, atenuada (tipo marca de agua) */
+.hoja-enviada{position:relative;opacity:0.55;filter:saturate(0.65);transition:opacity 0.3s;}
+.hoja-enviada::before{content:"\2705 PRONOSTICO ENVIADO";position:sticky;top:0;display:block;width:100%;text-align:center;background:rgba(0,200,120,0.16);color:var(--green-ok,#00c878);font-family:'Bebas Neue',sans-serif;letter-spacing:3px;font-size:1rem;padding:8px 0;border:1px dashed rgba(0,200,120,0.5);border-radius:8px;margin-bottom:10px;z-index:5;}
 /* RESULTADOS — TA amarillo TR rojo */
 .resultados-wrap{padding:20px;max-width:1200px;margin:0 auto;}
 .res-jornada{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:20px;}
@@ -231,6 +234,28 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
 .col-total{color:#fff!important;font-size:1.1rem!important;font-weight:900!important;background:#002868!important;}
 .tabla-ranking .col-user{max-width:120px;width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .tabla-ranking th.th-group{background:#13283d;color:var(--gold2);font-size:0.72rem;letter-spacing:1px;border-bottom:2px solid var(--gold);}
+/* RANKING — vista celular (tarjetas). Oculta en PC, visible en pantallas angostas */
+.ranking-mobile{display:none;width:100%;max-width:560px;margin:0 auto;}
+.rank-card{background:var(--card);border:1px solid var(--border);border-left:5px solid var(--gold);border-radius:10px;padding:12px 14px;margin-bottom:12px;}
+.rank-card.r1{border-left-color:#ffd34d;}
+.rank-card.r2{border-left-color:#c0c0c0;}
+.rank-card.r3{border-left-color:#cd7f32;}
+.rank-card-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;}
+.rank-card-name{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.05rem;color:#fff;letter-spacing:0.5px;}
+.rank-card-pos{font-size:1.1rem;min-width:34px;text-align:center;}
+.rank-card-total{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:var(--gold);letter-spacing:1px;}
+.rank-card-total small{display:block;font-size:0.6rem;color:var(--muted);letter-spacing:2px;text-align:right;}
+.rank-card-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;font-size:0.82rem;}
+.rank-card-grid .rc-row{display:flex;justify-content:space-between;border-bottom:1px solid #16263a;padding:3px 0;}
+.rank-card-grid .rc-lbl{color:#aaa;}
+.rank-card-grid .rc-val{font-weight:700;color:#ddd;}
+.rc-gana{color:#00ff99;}
+.rc-pierde{color:#ff6666;}
+.rc-pts{color:#00ff99;font-weight:800;}
+@media (max-width:720px){
+  .ranking-table-wrap{display:none;}
+  .ranking-mobile{display:block;}
+}
 /* REGLAMENTO */
 .reglamento-wrap{padding:30px 20px;max-width:900px;margin:0 auto;}
 .reg-section{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:25px;margin-bottom:20px;}
@@ -650,7 +675,9 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
         <thead>
           <tr>
             <th rowspan="3">POS</th><th rowspan="3" class="col-user">USUARIO</th>
-            <th rowspan="3">Exacto</th><th rowspan="3">Ganador</th><th rowspan="3">Empate</th>
+            <th rowspan="3">Exacto</th><th rowspan="3" style="color:#00ff99;">PTS</th>
+            <th rowspan="3">Ganador</th><th rowspan="3" style="color:#00ff99;">PTS</th>
+            <th rowspan="3">Empate</th><th rowspan="3" style="color:#00ff99;">PTS</th>
             <th colspan="8" class="th-group">APUESTAS CON CASTIGO</th>
             <th rowspan="3">Pre-M.</th><th rowspan="3" class="col-total">TOTAL</th>
           </tr>
@@ -667,6 +694,7 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
         <tbody id="rankingBody"></tbody>
       </table>
     </div>
+    <div class="ranking-mobile" id="rankingMobile"></div>
   </div>
 </div>
 
@@ -864,6 +892,7 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
     <div class="form-card">
       <h3>Buscar y Editar Jugador</h3>
       <input type="text" class="busca-input" id="buscadorInput" placeholder="Buscar por codigo o nombre..." oninput="buscarJugador(this.value)">
+      <button onclick="cerrarBuscarEditar()" style="width:100%;background:#3a1f1f;color:#ff8a8a;border:1px solid #7a3a3a;border-radius:6px;padding:8px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;margin-top:10px;">&#10005; CERRAR / LIMPIAR JUGADOR</button>
       <div id="resultadoBusqueda" style="display:none;margin-top:12px;"></div>
     </div>
     <div class="form-card" style="border-color:var(--accent);">
@@ -893,6 +922,23 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
       <button onclick="cerrarManualJugador()" style="width:100%;background:#3a1f1f;color:#ff8a8a;border:1px solid #7a3a3a;border-radius:6px;padding:8px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;margin-bottom:10px;">&#10005; CERRAR / LIMPIAR JUGADOR</button>
       <div id="manualContainer"></div>
     </div>
+    <div class="form-card" style="border-color:var(--gold);">
+
+      <h3 style="color:var(--gold);">Ver Pronosticos del Jugador (solo lectura)</h3>
+      <p style="font-size:0.8rem;color:#aaa;margin-bottom:12px;">Para revisar lo que envio un jugador <strong>sin riesgo de editar nada</strong>. Escribe el nombre o codigo y elige al jugador.</p>
+      <div class="pm-field" style="position:relative;"><label>Jugador (escribe nombre o codigo)</label>
+        <input type="text" id="ver-buscar" autocomplete="off" oninput="filtrarJugadoresVer()" onfocus="this.value='';filtrarJugadoresVer()" onblur="setTimeout(function(){var b=document.getElementById('ver-resultados'); if(b) b.style.display='none';},200)" placeholder="Escribe nombre o codigo..." class="pm-select" style="width:100%;">
+        <div id="ver-resultados" style="display:none;position:absolute;left:0;right:0;top:100%;z-index:50;background:#0d1b2a;border:1px solid var(--border);border-radius:0 0 8px 8px;max-height:240px;overflow-y:auto;"></div>
+      </div>
+      <button onclick="cerrarVerJugador()" style="width:100%;background:#3a1f1f;color:#ff8a8a;border:1px solid #7a3a3a;border-radius:6px;padding:8px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;margin:10px 0;">&#10005; CERRAR / LIMPIAR JUGADOR</button>
+      <div id="verNav" style="display:none;align-items:center;justify-content:space-between;gap:10px;margin:6px 0;">
+        <button onclick="verJornadaAnterior()" id="btnVerAnterior" class="btn-action" style="background:#222;color:#fff;">&#9664; Anterior</button>
+        <div id="verJornadaTitulo" style="font-family:'Bebas Neue',sans-serif;color:var(--gold);font-size:1.2rem;letter-spacing:2px;text-align:center;flex:1;">JORNADA</div>
+        <button onclick="verJornadaSiguiente()" id="btnVerSiguiente" class="btn-action" style="background:#222;color:#fff;">Siguiente &#9654;</button>
+      </div>
+      <div id="verSaltos" style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:10px;"></div>
+      <div id="verPronosticosContainer" style="margin-top:12px;"></div>
+    </div>
     <div class="form-card" id="cardCrearAdmin" style="border-color:var(--gold);">
       <h3 style="color:var(--gold);">Crear Administrador</h3>
       <p style="font-size:0.8rem;color:#aaa;margin-bottom:12px;">Solo para administradores con <strong>control absoluto</strong>. Crea un nuevo administrador con su usuario y clave. Elige si tendra <strong>control absoluto</strong> (ve todo) o <strong>control parcial</strong> (ve todo MENOS Pronostico Manual y Crear Administrador).</p>
@@ -921,23 +967,6 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
         </div>
       </div>
       <div id="ca-lista" style="margin-top:6px;"></div>
-    </div>
-    <div class="form-card" style="border-color:var(--gold);">
-
-      <h3 style="color:var(--gold);">Ver Pronosticos del Jugador (solo lectura)</h3>
-      <p style="font-size:0.8rem;color:#aaa;margin-bottom:12px;">Para revisar lo que envio un jugador <strong>sin riesgo de editar nada</strong>. Escribe el nombre o codigo y elige al jugador.</p>
-      <div class="pm-field" style="position:relative;"><label>Jugador (escribe nombre o codigo)</label>
-        <input type="text" id="ver-buscar" autocomplete="off" oninput="filtrarJugadoresVer()" onfocus="this.value='';filtrarJugadoresVer()" onblur="setTimeout(function(){var b=document.getElementById('ver-resultados'); if(b) b.style.display='none';},200)" placeholder="Escribe nombre o codigo..." class="pm-select" style="width:100%;">
-        <div id="ver-resultados" style="display:none;position:absolute;left:0;right:0;top:100%;z-index:50;background:#0d1b2a;border:1px solid var(--border);border-radius:0 0 8px 8px;max-height:240px;overflow-y:auto;"></div>
-      </div>
-      <button onclick="cerrarVerJugador()" style="width:100%;background:#3a1f1f;color:#ff8a8a;border:1px solid #7a3a3a;border-radius:6px;padding:8px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;margin:10px 0;">&#10005; CERRAR / LIMPIAR JUGADOR</button>
-      <div id="verNav" style="display:none;align-items:center;justify-content:space-between;gap:10px;margin:6px 0;">
-        <button onclick="verJornadaAnterior()" id="btnVerAnterior" class="btn-action" style="background:#222;color:#fff;">&#9664; Anterior</button>
-        <div id="verJornadaTitulo" style="font-family:'Bebas Neue',sans-serif;color:var(--gold);font-size:1.2rem;letter-spacing:2px;text-align:center;flex:1;">JORNADA</div>
-        <button onclick="verJornadaSiguiente()" id="btnVerSiguiente" class="btn-action" style="background:#222;color:#fff;">Siguiente &#9654;</button>
-      </div>
-      <div id="verSaltos" style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:10px;"></div>
-      <div id="verPronosticosContainer" style="margin-top:12px;"></div>
     </div>
     <div class="form-card" style="border-color:var(--gold);">
       <h3 style="color:var(--gold);">Escrutinio Global</h3>
@@ -3095,22 +3124,7 @@ function procesarEnvio() {
       return;
     }
   }
-  // CORREO (opcion A): preparar el correo del jugador hacia mipollafutbol@gmail.com
-  var _mailtoURL = '';
-  try {
-    var nombreJug = (usuarioActual && usuarioActual.nombre) ? usuarioActual.nombre : cod;
-    var asunto = 'Pronostico Polla Mundialista 2026 - ' + nombreJug + ' (' + cod + ') - Jornada ' + jN;
-    var lineas = ['POLLA MUNDIALISTA 2026', 'Jugador: ' + nombreJug + ' (' + cod + ')', 'Jornada: ' + jN, ''];
-    Object.keys(datos).sort(function(a,b){ return (datos[a].num||0)-(datos[b].num||0); }).forEach(function(k){
-      var d = datos[k];
-      var ln = (d.local||'Local') + ' ' + d.golL + ' - ' + d.golV + ' ' + (d.visita||'Visita') + '  | +2.5T:' + d.tarjetas + ' | Roja:' + d.roja;
-      if (d.extra && d.extra !== 'NA') ln += ' | Extra:' + d.extra;
-      if (d.penales && d.penales !== 'NA') ln += ' | Penales:' + d.penales;
-      lineas.push(ln);
-    });
-    var cuerpo = lineas.join('\n');
-    _mailtoURL = 'mailto:mipollafutbol@gmail.com?subject=' + encodeURIComponent(asunto) + '&body=' + encodeURIComponent(cuerpo);
-  } catch(e) { console.warn('No se pudo preparar el correo.', e); }
+  // (Correo automatico retirado: el registro oficial queda guardado en la nube/Firebase)
   showLoading('Guardando pronosticos...');
   datos['_enviado'] = Date.now();  // sello de tiempo del envio (ms)
   db.ref('pronosticos/'+cod+'/j'+jN).update(datos, function(err){
@@ -3119,11 +3133,26 @@ function procesarEnvio() {
     if (err) { alert('Hubo un problema guardando. Revisa tu conexion e intenta de nuevo.'); return; }
     var btn = document.querySelector('.btn-enviar');
     if (btn) { btn.disabled=true; btn.style.background='#555'; btn.style.cursor='not-allowed'; btn.innerText='\u2705 PRONOSTICOS YA ENVIADOS'; btn.onclick=null; }
+    bloquearHojaPronostico();  // dejar la hoja en solo lectura y atenuada (modo "enviado")
     alert('Pronosticos guardados correctamente en la nube.');
-    // Abrir el correo del jugador ya lleno (despues de guardar)
-    if (_mailtoURL) { try { window.location.href = _mailtoURL; } catch(e) { console.warn('No se pudo abrir el correo.', e); } }
   });
 }
+
+// Bloquea visualmente la hoja de pronosticos del jugador (solo lectura, atenuada tipo marca de agua)
+function bloquearHojaPronostico(){
+  var cont = document.getElementById('pronosticosContainer');
+  if(cont){
+    cont.classList.add('hoja-enviada');
+    // Desactivar todo lo que se pueda escribir o tocar dentro de la hoja
+    cont.querySelectorAll('input, select, textarea, button').forEach(function(el){
+      el.disabled = true;
+      el.style.pointerEvents = 'none';
+    });
+  }
+  var btn = document.querySelector('.btn-enviar');
+  if (btn) { btn.disabled=true; btn.style.background='#555'; btn.style.cursor='not-allowed'; btn.innerText='\u2705 PRONOSTICOS YA ENVIADOS'; btn.onclick=null; }
+}
+window.bloquearHojaPronostico = bloquearHojaPronostico;
 function startTimer(secs, el) {
   var t = secs;
   var iv = setInterval(function(){
@@ -3349,7 +3378,7 @@ function renderPronosticos(){
   }
   html+='</div>';
   var cont=document.getElementById('pronosticosContainer');
-  if(cont) cont.innerHTML=html;
+  if(cont){ cont.classList.remove('hoja-enviada'); cont.innerHTML=html; }
   iniciarTimerJornada(cierre, cerrada);
   verificarEnvioJornada();
   if(cerrada && typeof usuarioActual!=='undefined' && usuarioActual){ mostrarPuntosJornada(jornadaVista); }
@@ -3380,6 +3409,7 @@ function verificarEnvioJornada(){
     if(snap.val()){
       var btn=document.querySelector('.btn-enviar');
       if(btn){ btn.disabled=true; btn.style.background='#555'; btn.style.cursor='not-allowed'; btn.innerText='\u2705 YA ENVIADA'; btn.onclick=null; }
+      bloquearHojaPronostico();  // hoja en solo lectura y atenuada (ya fue enviada)
     }
   });
 }
@@ -4249,6 +4279,7 @@ function renderizarRanking(){
     var penalesPts  = penGana  - penPierde;      // neto penales
     var total = ex*3 + ga*2 + em + tarjetasPts + trPts + extraPts + penalesPts + pm;
     return {cod:cod,nombre:j.nombre||cod,exacto:ex,ganador:ga,empate:em,
+      exactoPts:ex*3, ganadorPts:ga*2, empatePts:em*1,
       tarjGana:tarjGana,tarjPierde:tarjPierde,trGana:trGana,trPierde:trPierde,
       extraGana:extraGana,extraPierde:extraPierde,penGana:penGana,penPierde:penPierde,
       tarjetas:tarjetasPts,tr:trPts,extra:extraPts,penales:penalesPts,premundial:pm,total:total};
@@ -4258,26 +4289,63 @@ function renderizarRanking(){
   if(!body)return;
   function fmtN(n){ return Number.isInteger(n) ? String(n) : n.toFixed(1); }
   if(jugadores.length===0){
-    body.innerHTML='<tr><td colspan="15" style="color:#555;padding:30px;text-align:center;">No hay jugadores registrados.</td></tr>';
+    body.innerHTML='<tr><td colspan="18" style="color:#555;padding:30px;text-align:center;">No hay jugadores registrados.</td></tr>';
+    var mobV=document.getElementById('rankingMobile'); if(mobV) mobV.innerHTML='<p style="color:#555;padding:24px;text-align:center;">No hay jugadores registrados.</p>';
     ['podio1Nombre','podio2Nombre','podio3Nombre'].forEach(function(id){document.getElementById(id).innerText='-';});
     return;
   }
   // Celda de "ganado" (verde) y de "perdido" (rojo). En 0 se muestra gris tenue.
   function celdaGana(v){ return v>0 ? '<td style="color:#00ff99;">+'+fmtN(v)+'</td>' : '<td style="color:#555;">0</td>'; }
   function celdaPierde(v){ return v>0 ? '<td style="color:#ff6666;">-'+fmtN(v)+'</td>' : '<td style="color:#555;">0</td>'; }
+  function celdaPts(v){ return v>0 ? '<td style="color:#00ff99;font-weight:700;">'+fmtN(v)+'</td>' : '<td style="color:#555;">0</td>'; }
   var medalias=['🥇','🥈','🥉'];
   body.innerHTML=jugadores.map(function(j,i){
     var cls=i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'';
     return '<tr class="'+cls+'">' +
       '<td>'+(medalias[i]||i+1)+'</td>' +
       '<td class="col-user" title="'+j.nombre+'" style="text-align:left;font-weight:900;">'+j.nombre+'</td>' +
-      '<td>'+j.exacto+'</td><td>'+j.ganador+'</td><td>'+j.empate+'</td>' +
+      '<td>'+j.exacto+'</td>'+celdaPts(j.exactoPts) +
+      '<td>'+j.ganador+'</td>'+celdaPts(j.ganadorPts) +
+      '<td>'+j.empate+'</td>'+celdaPts(j.empatePts) +
       celdaGana(j.tarjGana)+celdaPierde(j.tarjPierde) +
       celdaGana(j.trGana)+celdaPierde(j.trPierde) +
       celdaGana(j.extraGana)+celdaPierde(j.extraPierde) +
       celdaGana(j.penGana)+celdaPierde(j.penPierde) +
       '<td>'+j.premundial+'</td><td class="col-total">'+fmtN(j.total)+'</td></tr>';
   }).join('');
+  // ---- Vista CELULAR: una tarjeta por jugador (compacta) ----
+  var mob=document.getElementById('rankingMobile');
+  if(mob){
+    function gp(g,p){ // "ganado / perdido" coloreado para una apuesta de riesgo
+      var sg = g>0 ? '<span class="rc-gana">+'+fmtN(g)+'</span>' : '<span style="color:#555;">0</span>';
+      var sp = p>0 ? '<span class="rc-pierde">-'+fmtN(p)+'</span>' : '<span style="color:#555;">0</span>';
+      return sg+' / '+sp;
+    }
+    function pts(v){ return v>0 ? '<span class="rc-pts">'+fmtN(v)+'</span>' : '<span style="color:#555;">0</span>'; }
+    mob.innerHTML=jugadores.map(function(j,i){
+      var rcls=i===0?'r1':i===1?'r2':i===2?'r3':'';
+      var pos=medalias[i]||(i+1);
+      return '<div class="rank-card '+rcls+'">'+
+        '<div class="rank-card-top">'+
+          '<div style="display:flex;align-items:center;gap:8px;min-width:0;">'+
+            '<span class="rank-card-pos">'+pos+'</span>'+
+            '<span class="rank-card-name">'+j.nombre+'</span>'+
+          '</div>'+
+          '<div class="rank-card-total">'+fmtN(j.total)+'<small>TOTAL</small></div>'+
+        '</div>'+
+        '<div class="rank-card-grid">'+
+          '<div class="rc-row"><span class="rc-lbl">Exacto</span><span class="rc-val">'+j.exacto+' &middot; '+pts(j.exactoPts)+'</span></div>'+
+          '<div class="rc-row"><span class="rc-lbl">Ganador</span><span class="rc-val">'+j.ganador+' &middot; '+pts(j.ganadorPts)+'</span></div>'+
+          '<div class="rc-row"><span class="rc-lbl">Empate</span><span class="rc-val">'+j.empate+' &middot; '+pts(j.empatePts)+'</span></div>'+
+          '<div class="rc-row"><span class="rc-lbl">Pre-M.</span><span class="rc-val">'+j.premundial+'</span></div>'+
+          '<div class="rc-row"><span class="rc-lbl">+2.5 T.</span><span class="rc-val">'+gp(j.tarjGana,j.tarjPierde)+'</span></div>'+
+          '<div class="rc-row"><span class="rc-lbl">TR</span><span class="rc-val">'+gp(j.trGana,j.trPierde)+'</span></div>'+
+          '<div class="rc-row"><span class="rc-lbl">Extra T.</span><span class="rc-val">'+gp(j.extraGana,j.extraPierde)+'</span></div>'+
+          '<div class="rc-row"><span class="rc-lbl">Penales</span><span class="rc-val">'+gp(j.penGana,j.penPierde)+'</span></div>'+
+        '</div>'+
+      '</div>';
+    }).join('');
+  }
   document.getElementById('podio1Nombre').innerText=jugadores[0]?jugadores[0].nombre:'-';
   document.getElementById('podio2Nombre').innerText=jugadores[1]?jugadores[1].nombre:'-';
   document.getElementById('podio3Nombre').innerText=jugadores[2]?jugadores[2].nombre:'-';
@@ -4416,6 +4484,11 @@ document.addEventListener('input', function(e) {
 window.registrarJugador = registrarJugador;
 window.enviarWhatsApp = enviarWhatsApp;
 window.buscarJugador = buscarJugador;
+function cerrarBuscarEditar(){
+  var inp=document.getElementById('buscadorInput'); if(inp) inp.value='';
+  var res=document.getElementById('resultadoBusqueda'); if(res){ res.innerHTML=''; res.style.display='none'; }
+}
+window.cerrarBuscarEditar = cerrarBuscarEditar;
 window.guardarEdicionJugador = guardarEdicionJugador;
 window.filtrarJugadores = filtrarJugadores;
 
