@@ -3,9 +3,22 @@
   ============================================================
   POLLA MUNDIALISTA 2026
   RESUMEN DE ESTE INDEX
-  Generado: 22/06/2026 - hora Colombia (Entrega 1 de 2: Estadistica Oficial)
+  Generado: 23/06/2026 - hora Colombia (Estadistica Oficial + ajustes de menu)
   ------------------------------------------------------------
-  NUEVO EN ESTA VERSION:
+  NUEVO EN ESTA VERSION (sobre la entrega de Estadistica Oficial):
+  A. Tablas de grupo de Estadistica Oficial: ahora el 3er puesto se pinta de
+     AMARILLO cuando esta entre los 8 mejores terceros (verde 1-2, rojo fuera),
+     con su leyenda de colores debajo.
+  B. Nuevo boton "Mejores 3" dentro de Estadistica Oficial: ranking oficial de
+     los 12 terceros con los 8 que clasifican resaltados en amarillo. Provisional
+     hasta que terminen los grupos; se llena solo con resultados oficiales.
+  C. Menu: "Simulador Grupos" se renombro a "SIMULADOR PERSONAL" y ahora incluye
+     adentro las Eliminatorias (16avos, 8vos, Cuartos, Semi y Final).
+  D. Se quitaron del menu los botones "RESULTADOS" y "MIS PRONOSTICOS" (quedan
+     dormidos en el codigo, no se borraron). El "Control de Resultados" del panel
+     de administrador NO se toco: sigue siendo donde se cargan los oficiales.
+
+  ANTES (Estadistica Oficial - se conserva):
   0. ESTADISTICA OFICIAL: nuevo boton en la barra (junto a Ranking). Muestra,
      leyendo SOLO lo que la administracion carga en Control de Resultados:
        - Tabla de posiciones oficial de cada grupo A-L (Pts, PJ, PG, PE, PP,
@@ -243,6 +256,13 @@ tr.fila-oficial-pend td{color:#9aa7b8!important;background:rgba(120,130,150,0.08
 .eo-elim-team.visita{justify-content:flex-start;}
 .eo-elim-gana{color:var(--green-ok);font-weight:900;font-size:0.78rem;text-align:center;margin-top:3px;}
 .eo-elim-extras{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;color:#9fb0c5;font-size:0.78rem;margin-top:5px;}
+.row-tercero{background:rgba(255,221,0,0.13)!important;color:var(--gold)!important;}
+.eo-leyenda{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-top:10px;font-size:0.78rem;color:#9fb0c5;}
+.eo-leyenda span{display:flex;align-items:center;gap:6px;}
+.eo-sw{width:13px;height:13px;border-radius:3px;display:inline-block;border:0.5px solid #2a3a52;}
+.eo-sw-green{background:rgba(0,230,118,0.55);}
+.eo-sw-yellow{background:rgba(255,221,0,0.6);}
+.eo-sw-red{background:rgba(255,23,68,0.5);}
 .llave-box{position:absolute;top:15px;right:20px;background:#000;color:var(--gold);border:2px solid var(--gold);padding:5px 14px;border-radius:20px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.9rem;letter-spacing:1px;}
 .card-excel{background:#e0e0e0;color:#000;width:98%;max-width:1300px;margin:0 auto 20px;border-radius:4px;overflow:hidden;}
 .tabla-excel{width:100%;border-collapse:collapse;}
@@ -418,25 +438,18 @@ tr.fila-oficial-pend td{color:#9aa7b8!important;background:rgba(120,130,150,0.08
     </div>
   </div>
   <div class="dropdown">
-    <button class="btn-main">&#128202; SIMULADOR GRUPOS</button>
+    <button class="btn-main">&#128202; SIMULADOR PERSONAL</button>
     <div class="dropdown-content">
       <button class="btn-sub" onclick="irA('simulador');cambiarGrupo('A')">&#9917; Grupos A al L</button>
       <button class="btn-sub" onclick="irA('simulador');irATerceros()">&#127942; Mejores Terceros</button>
-    </div>
-  </div>
-  <div class="dropdown">
-    <button class="btn-main">&#127942; ELIMINATORIAS</button>
-    <div class="dropdown-content">
-      <button class="btn-sub" onclick="irA('eliminatorias');mostrarElimSub('dieciseisavos')">16 Avos</button>
-      <button class="btn-sub" onclick="irA('eliminatorias');mostrarElimSub('octavos')">8 Avos</button>
-      <button class="btn-sub" onclick="irA('eliminatorias');mostrarElimSub('cuartos')">Cuartos</button>
-      <button class="btn-sub" onclick="irA('eliminatorias');mostrarElimSub('semifinal')">Semi y Final</button>
+      <button class="btn-sub" onclick="irA('eliminatorias');mostrarElimSub('dieciseisavos')">&#127942; 16 Avos</button>
+      <button class="btn-sub" onclick="irA('eliminatorias');mostrarElimSub('octavos')">&#127942; 8 Avos</button>
+      <button class="btn-sub" onclick="irA('eliminatorias');mostrarElimSub('cuartos')">&#127942; Cuartos</button>
+      <button class="btn-sub" onclick="irA('eliminatorias');mostrarElimSub('semifinal')">&#127942; Semi y Final</button>
     </div>
   </div>
   <button class="btn-main" onclick="irA('ranking')">&#127894; RANKING</button>
   <button class="btn-main" onclick="irA('estadistica')">&#128200; ESTADISTICA OFICIAL</button>
-  <button class="btn-main" onclick="irA('resultados')">&#128203; RESULTADOS</button>
-  <button class="btn-main" onclick="irA('mis-pronosticos')">&#128221; MIS PRONOSTICOS</button>
   <button class="btn-main" onclick="irA('reglamento')">&#128220; REGLAMENTO</button>
   <button class="btn-main btn-admon-nav" id="btnAdmon" onclick="irA('admin')">&#9881; ADMON</button>
   <button class="btn-main btn-salir" onclick="cerrarSesion()">&#128274; SALIR</button>
@@ -749,6 +762,7 @@ tr.fila-oficial-pend td{color:#9aa7b8!important;background:rgba(120,130,150,0.08
       <button class="btn-grp" id="eo-btn-J" onclick="eoMostrarGrupo('J')">J</button>
       <button class="btn-grp" id="eo-btn-K" onclick="eoMostrarGrupo('K')">K</button>
       <button class="btn-grp" id="eo-btn-L" onclick="eoMostrarGrupo('L')">L</button>
+      <button class="btn-grp btn-grp-terceros" id="eo-btn-terceros" onclick="eoMostrarTerceros()">Mejores 3</button>
     </div>
     <div class="eo-subnav">
       <button class="btn-grp" id="eo-btn-dieciseisavos" onclick="eoMostrarElim('dieciseisavos')">16 Avos</button>
@@ -4831,11 +4845,13 @@ function _eoRefrescar(){
   if(!cont) return;
   if(_eoCache===null){ cont.innerHTML = '<p style="text-align:center;color:#8892b0;padding:34px;">Cargando estadistica oficial...</p>'; return; }
   if(_eoVista.tipo==='grupo') _renderEOGrupo(_eoVista.val);
+  else if(_eoVista.tipo==='terceros') _renderEOTerceros();
   else _renderEOElim(_eoVista.val);
 }
 
 function eoMostrarGrupo(letra){ _eoVista={tipo:'grupo',val:letra}; _eoActivarBtn('eo-btn-'+letra); _eoRefrescar(); }
 function eoMostrarElim(fase){ _eoVista={tipo:'elim',val:fase}; _eoActivarBtn('eo-btn-'+fase); _eoRefrescar(); }
+function eoMostrarTerceros(){ _eoVista={tipo:'terceros',val:''}; _eoActivarBtn('eo-btn-terceros'); _eoRefrescar(); }
 function _eoActivarBtn(id){
   document.querySelectorAll('#sec-estadistica .btn-grp').forEach(function(b){ b.classList.remove('active'); });
   var el=document.getElementById(id); if(el) el.classList.add('active');
@@ -4882,6 +4898,27 @@ function _eoTablaGrupo(letra, resPorNum){
 
 function _eoFlag(code){ return '<img src="https://flagcdn.com/w20/'+code+'.png" class="flag-img" onerror="this.style.display=\'none\'">'; }
 
+// Leyenda de colores reutilizable para las tablas de grupo.
+var _EO_LEYENDA='<div class="eo-leyenda">'+
+  '<span><i class="eo-sw eo-sw-green"></i>Clasifica (1&deg; y 2&deg;)</span>'+
+  '<span><i class="eo-sw eo-sw-yellow"></i>3&deg; entre los 8 mejores</span>'+
+  '<span><i class="eo-sw eo-sw-red"></i>Eliminado</span></div>';
+
+// Ranking de terceros desde resultados oficiales. Devuelve la lista ordenada
+// y un conjunto con los 8 mejores (que ya han jugado) para pintarlos de amarillo.
+function _eoTerceros(resPorNum){
+  var terceros=[];
+  ['A','B','C','D','E','F','G','H','I','J','K','L'].forEach(function(letra){
+    var t=_eoTablaGrupo(letra, resPorNum);
+    var s=t.stats[2];
+    terceros.push({grp:letra, name:s.name, flag:s.flag, pts:s.pts, pj:s.pj, pg:s.pg, pe:s.pe, pp:s.pp, gf:s.gf, gc:s.gc, dg:s.dg});
+  });
+  terceros.sort(function(a,b){ return (b.pts-a.pts)||(b.dg-a.dg)||(b.gf-a.gf); });
+  var set={};
+  terceros.forEach(function(s,i){ if(i<8 && s.pj>0) set[s.grp+'|'+s.name]=true; });
+  return { lista:terceros, set:set };
+}
+
 // Celda +2.5 Tarjetas y celda Roja a partir de un resultado oficial.
 function _eoCeldaTarjetas(r){
   if(!r) return '<span class="eo-pend">&mdash;</span>';
@@ -4898,15 +4935,20 @@ function _renderEOGrupo(letra){
   var res=_eoCache||{};
   var resPorNum=_eoResPorNum(res);
   var t=_eoTablaGrupo(letra, resPorNum);
+  var ter=_eoTerceros(resPorNum);
   var html='<div class="card-table"><h3>POSICIONES OFICIALES &mdash; GRUPO '+letra+'</h3>';
   html+='<table class="tabla-pos"><thead><tr><th>#</th><th style="text-align:left;">SELECCION</th><th class="pts-cell">PTS</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>GF</th><th>GC</th><th>DG</th></tr></thead><tbody>';
   t.stats.forEach(function(s,i){
-    html+='<tr class="'+(i<2?'row-pass':'row-elim')+'"><td>'+(i+1)+'</td>'+
+    var clase;
+    if(i<2) clase='row-pass';
+    else if(i===2 && ter.set[letra+'|'+s.name]) clase='row-tercero';
+    else clase='row-elim';
+    html+='<tr class="'+clase+'"><td>'+(i+1)+'</td>'+
       '<td align="left">'+_eoFlag(s.flag)+' '+s.name+'</td>'+
       '<td class="pts-cell">'+s.pts+'</td><td>'+s.pj+'</td><td>'+s.pg+'</td><td>'+s.pe+'</td><td>'+s.pp+'</td>'+
       '<td>'+s.gf+'</td><td>'+s.gc+'</td><td>'+s.dg+'</td></tr>';
   });
-  html+='</tbody></table></div>';
+  html+='</tbody></table>'+_EO_LEYENDA+'</div>';
 
   html+='<div class="card-table" style="margin-top:14px;"><h3>PARTIDO A PARTIDO &mdash; GRUPO '+letra+'</h3>';
   html+='<table class="tabla-pos"><thead><tr><th>JOR</th><th style="text-align:right;">LOCAL</th><th>RESULTADO</th><th style="text-align:left;">VISITANTE</th><th>+2.5 T.</th><th>ROJA</th></tr></thead><tbody>';
@@ -4920,7 +4962,29 @@ function _renderEOGrupo(letra){
       '<td>'+_eoCeldaTarjetas(r)+'</td><td>'+_eoCeldaRoja(r)+'</td></tr>';
   });
   html+='</tbody></table>';
-  html+='<p class="eo-nota">&#10003; = hubo 3 o m&aacute;s tarjetas (super&oacute; las 2.5). Verde clasifica, rojo eliminado. Todo se llena solo cuando la administraci&oacute;n carga el resultado oficial de cada partido.</p></div>';
+  html+='<p class="eo-nota">&#10003; = hubo 3 o m&aacute;s tarjetas (super&oacute; las 2.5). Todo se llena solo cuando la administraci&oacute;n carga el resultado oficial de cada partido.</p></div>';
+  document.getElementById('eoContenido').innerHTML=html;
+}
+
+function _renderEOTerceros(){
+  var res=_eoCache||{};
+  var resPorNum=_eoResPorNum(res);
+  var ter=_eoTerceros(resPorNum);
+  var html='<div class="card-table"><h3>RANKING OFICIAL DE TERCEROS</h3>';
+  html+='<table class="tabla-pos"><thead><tr><th>#</th><th>GRP</th><th style="text-align:left;">SELECCION</th><th class="pts-cell">PTS</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>GF</th><th>GC</th><th>DG</th><th>ESTADO</th></tr></thead><tbody>';
+  ter.lista.forEach(function(s,i){
+    var clasif = (i<8 && s.pj>0);
+    var clase = clasif ? 'row-tercero' : 'row-elim';
+    var estado = clasif ? 'CLASIFICA' : '&mdash;';
+    html+='<tr class="'+clase+'"><td>'+(i+1)+'</td><td><strong>'+s.grp+'</strong></td>'+
+      '<td align="left">'+_eoFlag(s.flag)+' '+s.name+'</td>'+
+      '<td class="pts-cell">'+s.pts+'</td><td>'+s.pj+'</td><td>'+s.pg+'</td><td>'+s.pe+'</td><td>'+s.pp+'</td>'+
+      '<td>'+s.gf+'</td><td>'+s.gc+'</td><td>'+s.dg+'</td>'+
+      '<td style="font-weight:900;font-size:0.72rem;">'+estado+'</td></tr>';
+  });
+  html+='</tbody></table>';
+  html+='<div class="eo-leyenda"><span><i class="eo-sw eo-sw-yellow"></i>Los 8 mejores terceros clasifican a la siguiente ronda</span></div>';
+  html+='<p class="eo-nota">Es provisional hasta que terminen todos los grupos: el orden y los clasificados se acomodan solos a medida que la administraci&oacute;n carga los resultados oficiales.</p></div>';
   document.getElementById('eoContenido').innerHTML=html;
 }
 
@@ -4975,6 +5039,7 @@ function _renderEOElim(fase){
 window.renderEstadisticaOficial = renderEstadisticaOficial;
 window.eoMostrarGrupo = eoMostrarGrupo;
 window.eoMostrarElim = eoMostrarElim;
+window.eoMostrarTerceros = eoMostrarTerceros;
 
 window.exportarExcel = exportarExcel;
 
