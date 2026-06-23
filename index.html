@@ -3,9 +3,23 @@
   ============================================================
   POLLA MUNDIALISTA 2026
   RESUMEN DE ESTE INDEX
-  Generado: 22/06/2026 - 11:07 AM (hora Colombia)
+  Generado: 22/06/2026 - hora Colombia (Entrega 1 de 2: Estadistica Oficial)
   ------------------------------------------------------------
-  Cambios incluidos en esta version:
+  NUEVO EN ESTA VERSION:
+  0. ESTADISTICA OFICIAL: nuevo boton en la barra (junto a Ranking). Muestra,
+     leyendo SOLO lo que la administracion carga en Control de Resultados:
+       - Tabla de posiciones oficial de cada grupo A-L (Pts, PJ, PG, PE, PP,
+         GF, GC, DG), ordenada sola, con los 2 primeros en verde (clasifican).
+       - Partido a partido de cada grupo con marcador, columna +2.5 Tarjetas
+         (marca si hubo 3 o mas) y columna Roja (Si/No).
+       - Eliminatorias completas hasta la Gran Final (16avos, 8vos, Cuartos,
+         Semifinal, 3er Puesto y Final), resolviendo cruces y los 8 mejores
+         terceros, con marcador, tiempo extra, penales, +2.5 Tarjetas y Roja.
+     Es SOLO LECTURA: no escribe nada, no toca el Ranking ni el login. Se
+     actualiza en vivo cuando se cargan resultados. El boton RESULTADOS se
+     mantiene tal cual (no se quita).
+
+  VERSIONES ANTERIORES (se conservan):
   1. Crear Administrador: boton para poner/quitar control absoluto a un admin
      ya creado, y se muestra la fecha y hora de creacion de cada uno.
   2. Hoja de pronosticos YA ENVIADA: se rellena con el pronostico real del
@@ -210,6 +224,25 @@ tr.fila-oficial-pend td{color:#9aa7b8!important;background:rgba(120,130,150,0.08
 .row-elim{background:rgba(255,23,68,0.07)!important;color:var(--red-alert)!important;}
 .pts-blue{background:#1a3a8a!important;color:#fff!important;font-weight:900;}
 .flag-img{width:22px;vertical-align:middle;margin:0 3px;border:0.5px solid #555;}
+/* ESTADISTICA OFICIAL */
+.eo-subnav{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin:0 auto 12px;max-width:760px;}
+.eo-si{color:var(--green-ok);font-weight:900;}
+.eo-no{color:var(--muted);}
+.eo-roja-si{color:var(--red-card);font-weight:900;}
+.eo-roja-no{color:var(--muted);}
+.eo-pend{color:#6b7a90;font-style:italic;}
+.eo-marcador{color:var(--gold);font-weight:900;font-size:1rem;}
+.eo-extra{color:var(--accent);font-size:0.72rem;display:block;}
+.eo-nota{color:#7a8aa0;font-size:0.78rem;margin-top:8px;line-height:1.4;}
+.eo-elim-card{background:#0a1524;border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:9px;}
+.eo-elim-top{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+.eo-elim-fase{color:var(--muted);font-size:0.7rem;text-transform:uppercase;letter-spacing:1px;font-family:'Barlow Condensed',sans-serif;}
+.eo-elim-row{display:flex;align-items:center;justify-content:center;gap:10px;margin:6px 0;flex-wrap:wrap;}
+.eo-elim-team{display:flex;align-items:center;gap:6px;font-weight:600;min-width:110px;}
+.eo-elim-team.local{justify-content:flex-end;}
+.eo-elim-team.visita{justify-content:flex-start;}
+.eo-elim-gana{color:var(--green-ok);font-weight:900;font-size:0.78rem;text-align:center;margin-top:3px;}
+.eo-elim-extras{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;color:#9fb0c5;font-size:0.78rem;margin-top:5px;}
 .llave-box{position:absolute;top:15px;right:20px;background:#000;color:var(--gold);border:2px solid var(--gold);padding:5px 14px;border-radius:20px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.9rem;letter-spacing:1px;}
 .card-excel{background:#e0e0e0;color:#000;width:98%;max-width:1300px;margin:0 auto 20px;border-radius:4px;overflow:hidden;}
 .tabla-excel{width:100%;border-collapse:collapse;}
@@ -401,6 +434,7 @@ tr.fila-oficial-pend td{color:#9aa7b8!important;background:rgba(120,130,150,0.08
     </div>
   </div>
   <button class="btn-main" onclick="irA('ranking')">&#127894; RANKING</button>
+  <button class="btn-main" onclick="irA('estadistica')">&#128200; ESTADISTICA OFICIAL</button>
   <button class="btn-main" onclick="irA('resultados')">&#128203; RESULTADOS</button>
   <button class="btn-main" onclick="irA('mis-pronosticos')">&#128221; MIS PRONOSTICOS</button>
   <button class="btn-main" onclick="irA('reglamento')">&#128220; REGLAMENTO</button>
@@ -696,6 +730,34 @@ tr.fila-oficial-pend td{color:#9aa7b8!important;background:rgba(120,130,150,0.08
     <div id="elim-cuartos" class="elim-seccion"><div class="elim-header-title">Cuartos de Final</div><div class="tabla-elim-wrap" id="tablaCuartos"></div></div>
     <div id="elim-semifinal" class="elim-seccion"><div class="elim-header-title">Semifinales</div><div class="tabla-elim-wrap" id="tablaSemifinal"></div></div>
     <div id="elim-final" class="elim-seccion"><div class="elim-header-title" style="background:var(--gold);color:#000;border-bottom:3px solid #000;">Gran Final - Nueva York - 19 Jul 2026</div><div class="tabla-elim-wrap" id="tablaFinal"></div></div>
+  </div>
+</div>
+
+<!-- ESTADISTICA OFICIAL -->
+<div id="sec-estadistica" class="seccion">
+  <div class="simulador-wrap">
+    <div class="eo-subnav">
+      <button class="btn-grp active" id="eo-btn-A" onclick="eoMostrarGrupo('A')">A</button>
+      <button class="btn-grp" id="eo-btn-B" onclick="eoMostrarGrupo('B')">B</button>
+      <button class="btn-grp" id="eo-btn-C" onclick="eoMostrarGrupo('C')">C</button>
+      <button class="btn-grp" id="eo-btn-D" onclick="eoMostrarGrupo('D')">D</button>
+      <button class="btn-grp" id="eo-btn-E" onclick="eoMostrarGrupo('E')">E</button>
+      <button class="btn-grp" id="eo-btn-F" onclick="eoMostrarGrupo('F')">F</button>
+      <button class="btn-grp" id="eo-btn-G" onclick="eoMostrarGrupo('G')">G</button>
+      <button class="btn-grp" id="eo-btn-H" onclick="eoMostrarGrupo('H')">H</button>
+      <button class="btn-grp" id="eo-btn-I" onclick="eoMostrarGrupo('I')">I</button>
+      <button class="btn-grp" id="eo-btn-J" onclick="eoMostrarGrupo('J')">J</button>
+      <button class="btn-grp" id="eo-btn-K" onclick="eoMostrarGrupo('K')">K</button>
+      <button class="btn-grp" id="eo-btn-L" onclick="eoMostrarGrupo('L')">L</button>
+    </div>
+    <div class="eo-subnav">
+      <button class="btn-grp" id="eo-btn-dieciseisavos" onclick="eoMostrarElim('dieciseisavos')">16 Avos</button>
+      <button class="btn-grp" id="eo-btn-octavos" onclick="eoMostrarElim('octavos')">8 Avos</button>
+      <button class="btn-grp" id="eo-btn-cuartos" onclick="eoMostrarElim('cuartos')">Cuartos</button>
+      <button class="btn-grp" id="eo-btn-semifinal" onclick="eoMostrarElim('semifinal')">Semifinal</button>
+      <button class="btn-grp" id="eo-btn-final" onclick="eoMostrarElim('final')">3er y Final</button>
+    </div>
+    <div id="eoContenido"></div>
   </div>
 </div>
 
@@ -2091,6 +2153,7 @@ function irA(seccion) {
   if (seccion === 'ranking') renderizarRanking();
   if (seccion === 'premundial') { inicializarPaises(); iniciarCuentaRegresivaPM(); verificarEnvioPM(); }
   if (seccion === 'simulador') cambiarGrupo(grupoActual);
+  if (seccion === 'estadistica') renderEstadisticaOficial();
 }
 
 // ============================================================
@@ -4742,6 +4805,177 @@ function exportarExcel() {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
+// ============================================================
+// ESTADISTICA OFICIAL — tablas de grupo y eliminatorias en vivo.
+// Solo LEE 'resultados' (lo que la administracion carga en Control
+// de Resultados) y lo muestra. No escribe nada ni toca el Ranking.
+// ============================================================
+var _eoCache = null;
+var _eoVista = { tipo:'grupo', val:'A' };
+var _eoListenerOn = false;
+
+function renderEstadisticaOficial(){
+  if(!_eoListenerOn && typeof db!=='undefined'){
+    _eoListenerOn = true;
+    db.ref('resultados').on('value', function(snap){
+      _eoCache = snap.val() || {};
+      _eoRefrescar();
+    });
+  } else {
+    _eoRefrescar();
+  }
+}
+
+function _eoRefrescar(){
+  var cont = document.getElementById('eoContenido');
+  if(!cont) return;
+  if(_eoCache===null){ cont.innerHTML = '<p style="text-align:center;color:#8892b0;padding:34px;">Cargando estadistica oficial...</p>'; return; }
+  if(_eoVista.tipo==='grupo') _renderEOGrupo(_eoVista.val);
+  else _renderEOElim(_eoVista.val);
+}
+
+function eoMostrarGrupo(letra){ _eoVista={tipo:'grupo',val:letra}; _eoActivarBtn('eo-btn-'+letra); _eoRefrescar(); }
+function eoMostrarElim(fase){ _eoVista={tipo:'elim',val:fase}; _eoActivarBtn('eo-btn-'+fase); _eoRefrescar(); }
+function _eoActivarBtn(id){
+  document.querySelectorAll('#sec-estadistica .btn-grp').forEach(function(b){ b.classList.remove('active'); });
+  var el=document.getElementById(id); if(el) el.classList.add('active');
+}
+
+// Indexa los resultados oficiales por numero global de partido.
+function _eoResPorNum(resultados){
+  var map={};
+  Object.keys(resultados||{}).forEach(function(jk){
+    var pj=resultados[jk]||{};
+    Object.keys(pj).forEach(function(pk){
+      var r=pj[pk]; var num=(r&&r.num)?r.num:parseInt(String(pk).replace('p',''),10);
+      if(num) map[num]=r;
+    });
+  });
+  return map;
+}
+
+// Tabla completa de un grupo + lista partido a partido, todo desde resultados oficiales.
+function _eoTablaGrupo(letra, resPorNum){
+  var cal=_getCal().cal;
+  var numDe={};
+  cal.forEach(function(c){ numDe[c.grupo+'|'+c.jor+'|'+c.local+'|'+c.visita]=c.num; });
+  var g=CONFIG_GRUPOS[letra];
+  var st=g.teams.map(function(name,i){ return {id:i,name:name,flag:g.flags[i],pts:0,pj:0,pg:0,pe:0,pp:0,gf:0,gc:0,dg:0}; });
+  var partidos=[];
+  g.matches.forEach(function(m){
+    var num=numDe[letra+'|'+m.jor+'|'+g.teams[m.l]+'|'+g.teams[m.v]];
+    var r=num?resPorNum[num]:null;
+    partidos.push({jor:m.jor,fec:m.fec,hor:m.hor,city:m.city,
+      lName:g.teams[m.l],lFlag:g.flags[m.l],vName:g.teams[m.v],vFlag:g.flags[m.v],r:r||null});
+    if(!r) return;
+    var gl=parseInt(r.golL)||0, gv=parseInt(r.golV)||0;
+    var L=st[m.l], V=st[m.v];
+    L.pj++;V.pj++;L.gf+=gl;L.gc+=gv;V.gf+=gv;V.gc+=gl;
+    if(gl>gv){L.pts+=3;L.pg++;V.pp++;}
+    else if(gl<gv){V.pts+=3;V.pg++;L.pp++;}
+    else{L.pts++;V.pts++;L.pe++;V.pe++;}
+  });
+  st.forEach(function(s){ s.dg=s.gf-s.gc; });
+  st.sort(function(a,b){ return (b.pts-a.pts)||(b.dg-a.dg)||(b.gf-a.gf); });
+  return {stats:st, partidos:partidos};
+}
+
+function _eoFlag(code){ return '<img src="https://flagcdn.com/w20/'+code+'.png" class="flag-img" onerror="this.style.display=\'none\'">'; }
+
+// Celda +2.5 Tarjetas y celda Roja a partir de un resultado oficial.
+function _eoCeldaTarjetas(r){
+  if(!r) return '<span class="eo-pend">&mdash;</span>';
+  var nt=parseInt(r.tarjetas,10);
+  if(r.tarjetas===''||r.tarjetas===undefined||isNaN(nt)) return '<span class="eo-pend">&mdash;</span>';
+  return (nt>=3) ? ('<span class="eo-si">'+nt+' &#10003;</span>') : ('<span class="eo-no">'+nt+' &#10007;</span>');
+}
+function _eoCeldaRoja(r){
+  if(!r) return '<span class="eo-pend">&mdash;</span>';
+  return (r.roja==='SI') ? '<span class="eo-roja-si">S&Iacute;</span>' : '<span class="eo-roja-no">No</span>';
+}
+
+function _renderEOGrupo(letra){
+  var res=_eoCache||{};
+  var resPorNum=_eoResPorNum(res);
+  var t=_eoTablaGrupo(letra, resPorNum);
+  var html='<div class="card-table"><h3>POSICIONES OFICIALES &mdash; GRUPO '+letra+'</h3>';
+  html+='<table class="tabla-pos"><thead><tr><th>#</th><th style="text-align:left;">SELECCION</th><th class="pts-cell">PTS</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>GF</th><th>GC</th><th>DG</th></tr></thead><tbody>';
+  t.stats.forEach(function(s,i){
+    html+='<tr class="'+(i<2?'row-pass':'row-elim')+'"><td>'+(i+1)+'</td>'+
+      '<td align="left">'+_eoFlag(s.flag)+' '+s.name+'</td>'+
+      '<td class="pts-cell">'+s.pts+'</td><td>'+s.pj+'</td><td>'+s.pg+'</td><td>'+s.pe+'</td><td>'+s.pp+'</td>'+
+      '<td>'+s.gf+'</td><td>'+s.gc+'</td><td>'+s.dg+'</td></tr>';
+  });
+  html+='</tbody></table></div>';
+
+  html+='<div class="card-table" style="margin-top:14px;"><h3>PARTIDO A PARTIDO &mdash; GRUPO '+letra+'</h3>';
+  html+='<table class="tabla-pos"><thead><tr><th>JOR</th><th style="text-align:right;">LOCAL</th><th>RESULTADO</th><th style="text-align:left;">VISITANTE</th><th>+2.5 T.</th><th>ROJA</th></tr></thead><tbody>';
+  t.partidos.forEach(function(p){
+    var r=p.r;
+    var marc = r ? ('<span class="eo-marcador">'+(parseInt(r.golL)||0)+' - '+(parseInt(r.golV)||0)+'</span>') : '<span class="eo-pend">pendiente</span>';
+    html+='<tr><td>'+p.jor+'</td>'+
+      '<td align="right">'+p.lName+' '+_eoFlag(p.lFlag)+'</td>'+
+      '<td>'+marc+'</td>'+
+      '<td align="left">'+_eoFlag(p.vFlag)+' '+p.vName+'</td>'+
+      '<td>'+_eoCeldaTarjetas(r)+'</td><td>'+_eoCeldaRoja(r)+'</td></tr>';
+  });
+  html+='</tbody></table>';
+  html+='<p class="eo-nota">&#10003; = hubo 3 o m&aacute;s tarjetas (super&oacute; las 2.5). Verde clasifica, rojo eliminado. Todo se llena solo cuando la administraci&oacute;n carga el resultado oficial de cada partido.</p></div>';
+  document.getElementById('eoContenido').innerHTML=html;
+}
+
+function _renderEOElim(fase){
+  var res=_eoCache||{};
+  var resPorNum=_eoResPorNum(res);
+  var part;
+  try{ part=_participantesElim(res); }catch(e){ part={}; }
+  var FASES={
+    'dieciseisavos':{t:'Dieciseisavos de Final', ll:LLAVES_16},
+    'octavos':{t:'Octavos de Final', ll:LLAVES_8},
+    'cuartos':{t:'Cuartos de Final', ll:LLAVES_CUARTOS},
+    'semifinal':{t:'Semifinales', ll:LLAVES_SEMI},
+    'final':{t:'Tercer Puesto y Gran Final', ll:LLAVES_FINAL}
+  };
+  var cfg=FASES[fase]; if(!cfg) return;
+  var html='<div class="card-table"><h3>'+cfg.t.toUpperCase()+'</h3>';
+  cfg.ll.forEach(function(m){
+    var pr=part[m.n]||{};
+    var lName=(pr.l&&pr.l.name)||m.l, lFlag=(pr.l&&pr.l.flag)||'';
+    var vName=(pr.v&&pr.v.name)||m.v, vFlag=(pr.v&&pr.v.flag)||'';
+    var r=resPorNum[m.n];
+    var etiqueta = m.esFinal ? 'GRAN FINAL' : (m.tercero ? '3ER PUESTO' : ('Partido '+m.n));
+    html+='<div class="eo-elim-card">';
+    html+='<div class="eo-elim-top"><span class="eo-elim-fase">'+etiqueta+'</span><span class="eo-elim-fase">'+m.fec+' &middot; '+m.hor+' &middot; '+m.city+'</span></div>';
+    var lFlagImg = lFlag ? _eoFlag(lFlag) : '';
+    var vFlagImg = vFlag ? _eoFlag(vFlag) : '';
+    if(r){
+      var marc='<span class="eo-marcador">'+(parseInt(r.golL)||0)+' - '+(parseInt(r.golV)||0)+'</span>';
+      var extras='';
+      if(r.exL!==''&&r.exL!==undefined&&r.exV!==''&&r.exV!==undefined){ extras+='<span class="eo-extra">T.Extra '+(parseInt(r.exL)||0)+' - '+(parseInt(r.exV)||0)+'</span>'; }
+      if(r.peL!==''&&r.peL!==undefined&&r.peV!==''&&r.peV!==undefined){ extras+='<span class="eo-extra">Penales '+(parseInt(r.peL)||0)+' - '+(parseInt(r.peV)||0)+'</span>'; }
+      html+='<div class="eo-elim-row"><span class="eo-elim-team local">'+lName+' '+lFlagImg+'</span>'+
+        '<span style="text-align:center;">'+marc+extras+'</span>'+
+        '<span class="eo-elim-team visita">'+vFlagImg+' '+vName+'</span></div>';
+      var w=_ganadorDeMarcadores(r.golL,r.golV,r.exL,r.exV,r.peL,r.peV);
+      var ganador = (w==='L')?lName:((w==='V')?vName:null);
+      if(ganador) html+='<div class="eo-elim-gana">&#10148; Avanza: '+ganador+'</div>';
+      html+='<div class="eo-elim-extras"><span>+2.5 Tarjetas: '+_eoCeldaTarjetas(r)+'</span><span>Roja: '+_eoCeldaRoja(r)+'</span></div>';
+    } else {
+      html+='<div class="eo-elim-row"><span class="eo-elim-team local">'+lName+' '+lFlagImg+'</span>'+
+        '<span class="eo-pend">vs</span>'+
+        '<span class="eo-elim-team visita">'+vFlagImg+' '+vName+'</span></div>'+
+        '<div class="eo-elim-gana" style="color:#6b7a90;font-weight:400;font-style:italic;">Resultado oficial pendiente</div>';
+    }
+    html+='</div>';
+  });
+  html+='<p class="eo-nota">Los cruces y marcadores se llenan solos a medida que la administraci&oacute;n carga los resultados oficiales. Incluye los 8 mejores terceros y avanza fase por fase hasta la Gran Final.</p></div>';
+  document.getElementById('eoContenido').innerHTML=html;
+}
+
+window.renderEstadisticaOficial = renderEstadisticaOficial;
+window.eoMostrarGrupo = eoMostrarGrupo;
+window.eoMostrarElim = eoMostrarElim;
+
 window.exportarExcel = exportarExcel;
 
 document.addEventListener('click', function(e){
