@@ -3,9 +3,48 @@
   ============================================================
   POLLA MUNDIALISTA 2026
   RESUMEN DE ESTE INDEX
-  Generado: 23/06/2026 - hora Colombia (Estadistica Oficial + ajustes de menu)
+  Generado: 24/06/2026 - hora Colombia (Tarjetas T.A / T.R por equipo)
   ------------------------------------------------------------
-  NUEVO EN ESTA VERSION (sobre la entrega de Estadistica Oficial):
+  NUEVO EN ESTA VERSION:
+  T. TARJETAS POR EQUIPO (amarillas T.A y rojas T.R):
+       - Control de Resultados Oficiales: se quitaron "N. Tarjetas" y "T. Roja"
+         y se pusieron 4 casillas por partido: T.A Local, T.A Visitante, T.R
+         Local, T.R Visitante.
+       - El ranking NO cambia: al guardar, el sistema deriva el total de
+         tarjetas (amarillas + rojas de ambos) para la apuesta "+2.5", y marca
+         roja=SI si hubo 1 o mas rojas. _puntuarPartido sigue igual.
+       - Estadistica Oficial: la tabla de posiciones de cada grupo gana columnas
+         T.A y T.R (acumuladas por equipo); el partido a partido muestra T.A y
+         T.R como Local - Visitante; la vista de eliminatorias tambien.
+       - Los partidos cargados con el formato viejo muestran "-" en T.A/T.R
+         hasta que se reescriban en Control de Resultados.
+       - La pantalla "Pronostico Manual del Jugador" NO se toco (ahi el jugador
+         pronostica SI/NO, que es lo correcto).
+
+  ANTES (Guardia de Google - se conserva):
+     Montado de forma ADITIVA y A PRUEBA DE FALLOS sobre el ingreso de siempre:
+       - El sistema de siempre sigue VALIDANDO el ingreso (codigo + clave, con
+         su hash y la recuperacion por WhatsApp). El guardia se monta encima.
+       - Tras validar, se establece una sesion del guardia con la clave del
+         jugador y un correo inventado CODIGO@mipolla.com (no existe, no recibe
+         correos). La primera vez crea la cuenta del guardia (migracion solita).
+       - TODO el guardia va envuelto en try/catch: si algo del guardia falla,
+         NUNCA bloquea el ingreso. Los jugadores entran igual que siempre.
+       - Aplica a los 3 caminos (admin de fabrica H175, admin de la nube y
+         jugador), a la activacion de cuenta y al cambio de clave. El cierre de
+         sesion tambien cierra el guardia.
+       - Requiere el SDK firebase-auth.js (agregado) y que en la consola de
+         Firebase este habilitado "Correo electronico/contrasena" (ya hecho).
+  H. Corregido el mensaje de confirmacion al enviar pronosticos: ya no apunta a
+     "Mis Pronosticos" (boton retirado); ahora dice "Pronosticos".
+
+  PENDIENTE A PROPOSITO (siguientes pasos):
+    - Apretar las reglas de Firebase (quitar el aviso rojo): DESPUES de confirmar
+      que el login con guardia funciona bien.
+    - Cambio de tarjetas T.A / T.R por equipo en Estadistica Oficial y en Control
+      de Resultados (siguiente entrega).
+
+  ANTES (se conserva):
   A. Tablas de grupo de Estadistica Oficial: ahora el 3er puesto se pinta de
      AMARILLO cuando esta entre los 8 mejores terceros (verde 1-2, rojo fuera),
      con su leyenda de colores debajo.
@@ -66,6 +105,7 @@
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 <style>
 :root{--bg:#050a14;--card:#0d1b2a;--text:#fff;--accent:#64ffda;--gold:#ffdd00;--gold2:#D4AF37;--canada:#BF0A30;--usa:#002868;--mexico:#006847;--white:#fff;--border:#1f3550;--muted:#8892b0;--green-ok:#00e676;--red-alert:#ff1744;--orange:#ff6600;--yellow-card:#ffff00;--red-card:#ff4d4d;}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -1012,7 +1052,7 @@ tr.fila-oficial-pend td{color:#9aa7b8!important;background:rgba(120,130,150,0.08
     </div>
     <div class="form-card" style="border-color:var(--accent);">
       <h3 style="color:var(--accent);">Control de Resultados Oficiales</h3>
-      <p style="font-size:0.8rem;color:#aaa;margin-bottom:14px;">Ingresa el marcador real de cada partido, el <strong>numero exacto de tarjetas</strong> que hubo y si hubo tarjeta roja. Guarda, y luego dale a <strong style="color:var(--gold);">Ejecutar Escrutinio Global</strong> para repartir los puntos.</p>
+      <p style="font-size:0.8rem;color:#aaa;margin-bottom:14px;">Ingresa el marcador real de cada partido y las tarjetas de cada equipo: <strong>T.A</strong> (amarillas) y <strong>T.R</strong> (rojas) del Local y del Visitante. El sistema suma solo (amarillas + rojas) para la apuesta "+2.5". Guarda, y luego dale a <strong style="color:var(--gold);">Ejecutar Escrutinio Global</strong> para repartir los puntos.</p>
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;">
         <button onclick="resJornadaAnterior()" id="btnResAnterior" class="btn-action" style="background:#222;color:#fff;">&#9664; Anterior</button>
         <div id="resJornadaTitulo" style="font-family:'Bebas Neue',sans-serif;color:var(--gold);font-size:1.2rem;letter-spacing:2px;text-align:center;flex:1;">JORNADA</div>
@@ -1148,7 +1188,7 @@ tr.fila-oficial-pend td{color:#9aa7b8!important;background:rgba(120,130,150,0.08
 <div id="modalEnvio" class="modal-overlay">
   <div class="modal-box">
     <h2>ESTAS SEGURO?</h2>
-    <p>Una vez enviado no podras modificar tus pronosticos. Quedaran <strong>guardados con la fecha y hora de envio</strong>, y podras consultarlos cuando quieras en la seccion <strong>"Mis Pronosticos"</strong>.</p>
+    <p>Una vez enviado no podras modificar tus pronosticos. Quedaran <strong>guardados con la fecha y hora de envio</strong>, y podras consultarlos cuando quieras en la seccion <strong>"Pronosticos"</strong>.</p>
     <div class="modal-btns">
       <button style="background:var(--green-ok);color:#000;" onclick="procesarEnvio()">SI, ENVIAR</button>
       <button style="background:#c0392b;color:#fff;" onclick="cerrarModal('modalEnvio')">CANCELAR</button>
@@ -1945,6 +1985,32 @@ var COMBINACIONES_FIFA = {
 // ============================================================
 var usuarioActual = null;
 
+// ============================================================
+// GUARDIA DE GOOGLE (Firebase Authentication)
+// ------------------------------------------------------------
+// Establece una sesion autenticada para el usuario que YA fue validado por el
+// sistema de siempre. Es 100% ADITIVO y A PRUEBA DE FALLOS: si algo del guardia
+// falla, NUNCA bloquea el ingreso (el sistema antiguo ya decidio que puede entrar).
+// La clave del jugador es la contrasena del guardia. El correo es inventado
+// (CODIGO@mipolla.com): no existe, no recibe correos, solo identifica la cuenta.
+// La recuperacion de clave sigue funcionando por el sistema de siempre (WhatsApp).
+// ============================================================
+function _guardiaSesion(cod, clave){
+  try{
+    if(typeof firebase==='undefined' || typeof firebase.auth!=='function') return;
+    if(!cod || !clave) return;
+    var email = String(cod).trim().toUpperCase() + '@mipolla.com';
+    firebase.auth().signInWithEmailAndPassword(email, clave).catch(function(e1){
+      // No pudo entrar: probablemente aun no esta migrado al guardia. Se crea.
+      firebase.auth().createUserWithEmailAndPassword(email, clave).catch(function(e2){
+        // Caso raro (ej: clave cambiada por recuperacion despues de migrar).
+        // El ingreso ya ocurrio por el sistema antiguo; aqui no se bloquea nada.
+        console.warn('Guardia: sesion no establecida para ' + cod + ' (' + (e2 && e2.code) + ')');
+      });
+    });
+  }catch(e){ console.warn('Guardia no disponible:', e); }
+}
+
 async function login() {
   var cod  = document.getElementById('loginCodigo').value.trim().toUpperCase();
   var pass = document.getElementById('loginPass').value;
@@ -1954,6 +2020,7 @@ async function login() {
   if (ADMINS[cod] && ADMINS[cod].pass === pass) {
     usuarioActual = { codigo: cod, esAdmin: true, nombre: ADMINS[cod].nombre, ciudad: ADMINS[cod].ciudad || 'Cali', adminTotal: true };
     sessionStorage.setItem('pollaUser', JSON.stringify(usuarioActual));
+    _guardiaSesion(cod, pass);
     mostrarInterfazAdmin(cod);
     return;
   }
@@ -1966,6 +2033,7 @@ async function login() {
       if (a.pass === pass && a.pass !== passHash) { db.ref('admins/' + cod + '/pass').set(passHash); }
       usuarioActual = { codigo: cod, esAdmin: true, nombre: a.nombre || ('Admin ' + cod), ciudad: a.ciudad || '', adminTotal: (a.total === true) };
       sessionStorage.setItem('pollaUser', JSON.stringify(usuarioActual));
+      _guardiaSesion(cod, pass);
       mostrarInterfazAdmin(cod);
       return;
     }
@@ -1995,6 +2063,7 @@ async function login() {
       if (_p2) _p2.style.display = 'none';
       irA('activacion');
     } else {
+      _guardiaSesion(cod, pass);
       cargarPerfil(cod, j);
     }
   });
@@ -2092,6 +2161,7 @@ function verificarChontico(nums) {
 
 function cerrarSesion() {
   if(_misPronRef){ try{ _misPronRef.off(); }catch(e){} _misPronRef=null; }
+  try{ if(typeof firebase!=='undefined' && typeof firebase.auth==='function') firebase.auth().signOut(); }catch(e){}
   usuarioActual = null;
   sessionStorage.removeItem('pollaUser');
   document.getElementById('barraNav').style.display = 'none';
@@ -2951,8 +3021,10 @@ function renderResultadosAdmin(){
       var g = guardados['p'+m.num] || {};
       var golL = (g.golL!==undefined && g.golL!==null) ? g.golL : '';
       var golV = (g.golV!==undefined && g.golV!==null) ? g.golV : '';
-      var tNum = (g.tarjetas!==undefined && g.tarjetas!==null && !isNaN(parseInt(g.tarjetas,10))) ? parseInt(g.tarjetas,10) : '';
-      var rSi = (g.roja==='SI');
+      var vTaL = (g.taL!==undefined && g.taL!==null && g.taL!=='') ? g.taL : '';
+      var vTaV = (g.taV!==undefined && g.taV!==null && g.taV!=='') ? g.taV : '';
+      var vTrL = (g.trL!==undefined && g.trL!==null && g.trL!=='') ? g.trL : '';
+      var vTrV = (g.trV!==undefined && g.trV!==null && g.trV!=='') ? g.trV : '';
       var etiqueta = m.elim ? _faseNombre(m.n) : ('Grupo '+m.grupo);
       html += '<div class="partido-block" data-num="'+m.num+'"'+(m.elim?' data-elim="1" data-local="'+String(m.local).toUpperCase()+'" data-visita="'+String(m.visita).toUpperCase()+'"':'')+' style="margin-bottom:14px;">'+
         '<div class="partido-header"><span>PARTIDO '+m.num+' &middot; '+etiqueta+'</span>'+
@@ -2963,10 +3035,16 @@ function renderResultadosAdmin(){
           '<span style="font-weight:900;color:#666;">-</span>'+
           '<div style="text-align:center;"><div style="font-size:0.7rem;color:var(--muted);">'+String(m.visita).toUpperCase()+'</div>'+
             '<input type="number" class="res-golV" min="0" value="'+golV+'" placeholder="0" oninput="calcGanadorRes('+m.num+')" style="width:56px;padding:8px;text-align:center;font-size:1.1rem;background:#0d1b2a;color:#fff;border:1px solid var(--border);border-radius:5px;"></div>'+
-          '<div style="margin-left:8px;text-align:center;"><div style="font-size:0.7rem;color:var(--muted);margin-bottom:4px;">N&ordm; TARJETAS</div>'+
-            '<input type="number" class="res-tarj" min="0" value="'+tNum+'" placeholder="0" style="width:56px;padding:8px;text-align:center;font-size:1.1rem;background:#0d1b2a;color:#fff;border:1px solid var(--border);border-radius:5px;"></div>'+
-          '<div style="text-align:center;"><div style="font-size:0.7rem;color:#ff6666;margin-bottom:4px;font-weight:700;">T. ROJA</div>'+
-            '<div class="res-roja '+(rSi?'on':'')+'" onclick="toggleResTarjeta(this)" style="cursor:pointer;padding:8px 16px;border-radius:6px;font-weight:700;background:'+(rSi?'#c0392b':'#333')+';color:'+(rSi?'#fff':'#aaa')+';min-width:50px;">'+(rSi?'SI':'NO')+'</div></div>'+
+          '<div style="margin-left:8px;display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start;">'+
+            '<div style="text-align:center;"><div style="font-size:0.62rem;color:#f1c40f;margin-bottom:4px;font-weight:700;">T.A LOC</div>'+
+              '<input type="number" class="res-taL" min="0" value="'+vTaL+'" placeholder="0" style="width:46px;padding:8px;text-align:center;font-size:1.05rem;background:#0d1b2a;color:#fff;border:1px solid #6b5d1a;border-radius:5px;"></div>'+
+            '<div style="text-align:center;"><div style="font-size:0.62rem;color:#f1c40f;margin-bottom:4px;font-weight:700;">T.A VIS</div>'+
+              '<input type="number" class="res-taV" min="0" value="'+vTaV+'" placeholder="0" style="width:46px;padding:8px;text-align:center;font-size:1.05rem;background:#0d1b2a;color:#fff;border:1px solid #6b5d1a;border-radius:5px;"></div>'+
+            '<div style="text-align:center;"><div style="font-size:0.62rem;color:#ff6666;margin-bottom:4px;font-weight:700;">T.R LOC</div>'+
+              '<input type="number" class="res-trL" min="0" value="'+vTrL+'" placeholder="0" style="width:46px;padding:8px;text-align:center;font-size:1.05rem;background:#0d1b2a;color:#fff;border:1px solid #7a3a3a;border-radius:5px;"></div>'+
+            '<div style="text-align:center;"><div style="font-size:0.62rem;color:#ff6666;margin-bottom:4px;font-weight:700;">T.R VIS</div>'+
+              '<input type="number" class="res-trV" min="0" value="'+vTrV+'" placeholder="0" style="width:46px;padding:8px;text-align:center;font-size:1.05rem;background:#0d1b2a;color:#fff;border:1px solid #7a3a3a;border-radius:5px;"></div>'+
+          '</div>'+
           (m.elim ? _bloqueElimResultado(m,g) : '')+
         '</div></div>';
     });
@@ -3180,15 +3258,25 @@ function guardarResultadosJornada(){
     var elim = b.getAttribute('data-elim')==='1';
     var gl = b.querySelector('.res-golL');
     var gv = b.querySelector('.res-golV');
-    var tj = b.querySelector('.res-tarj');
-    var rj = b.querySelector('.res-roja');
+    var taLe = b.querySelector('.res-taL');
+    var taVe = b.querySelector('.res-taV');
+    var trLe = b.querySelector('.res-trL');
+    var trVe = b.querySelector('.res-trV');
     if(!gl||!gv||gl.value==='' || gv.value===''){ return; } // sin marcador completo, no guardar ese partido
+    var _nTar=function(el){ return (el && el.value!=='') ? (parseInt(el.value,10)||0) : ''; };
+    var taL=_nTar(taLe), taV=_nTar(taVe), trL=_nTar(trLe), trV=_nTar(trVe);
+    var hayTar = !(taL===''&&taV===''&&trL===''&&trV==='');
+    // Total de tarjetas del partido (amarillas + rojas de ambos equipos) para la apuesta "+2.5".
+    var totalTarj = hayTar ? ((parseInt(taL,10)||0)+(parseInt(taV,10)||0)+(parseInt(trL,10)||0)+(parseInt(trV,10)||0)) : '';
+    // Hubo roja si cualquiera de los dos equipos tiene 1 o mas rojas.
+    var huboRoja = (((parseInt(trL,10)||0)+(parseInt(trV,10)||0))>0) ? 'SI' : 'NO';
     var d = {
       num: parseInt(num,10),
       golL: parseInt(gl.value,10)||0,
       golV: parseInt(gv.value,10)||0,
-      tarjetas: (tj && tj.value!=='') ? (parseInt(tj.value,10)||0) : '',
-      roja: (rj && rj.classList.contains('on')) ? 'SI' : 'NO',
+      taL: taL, taV: taV, trL: trL, trV: trV,
+      tarjetas: totalTarj,
+      roja: huboRoja,
       extra: 'NA', penales: 'NA'
     };
     if(elim){
@@ -4594,6 +4682,7 @@ function guardarNuevaClave(){
   hashClave(p1).then(function(passHash){
   fbUpdateJugador(usuarioActual.codigo,{pass:passHash},function(){
     hideLoading();
+    try{ if(typeof firebase!=='undefined' && typeof firebase.auth==='function' && firebase.auth().currentUser){ firebase.auth().currentUser.updatePassword(p1).catch(function(){}); } }catch(e){}
     cerrarModal('modalClaveCambio');
     alert('Contrasena cambiada exitosamente.');
   });
@@ -4679,6 +4768,7 @@ function guardarClavePaso1() {
     if (!j) { hideLoading(); alert('Error: jugador no encontrado.'); return; }
     hashClave(p1).then(function(passHash){
     j.pass = passHash;
+    _guardiaSesion(u, p1);
     if (j.nums && j.nums.length > 0 && j.nums[0] && j.nums[0] !== '--') {
       j.estado = 'activo';
       fbSetJugador(u, j, function() { hideLoading(); cargarPerfil(u, j); });
@@ -4876,7 +4966,7 @@ function _eoTablaGrupo(letra, resPorNum){
   var numDe={};
   cal.forEach(function(c){ numDe[c.grupo+'|'+c.jor+'|'+c.local+'|'+c.visita]=c.num; });
   var g=CONFIG_GRUPOS[letra];
-  var st=g.teams.map(function(name,i){ return {id:i,name:name,flag:g.flags[i],pts:0,pj:0,pg:0,pe:0,pp:0,gf:0,gc:0,dg:0}; });
+  var st=g.teams.map(function(name,i){ return {id:i,name:name,flag:g.flags[i],pts:0,pj:0,pg:0,pe:0,pp:0,gf:0,gc:0,dg:0,ta:0,tr:0}; });
   var partidos=[];
   g.matches.forEach(function(m){
     var num=numDe[letra+'|'+m.jor+'|'+g.teams[m.l]+'|'+g.teams[m.v]];
@@ -4887,6 +4977,8 @@ function _eoTablaGrupo(letra, resPorNum){
     var gl=parseInt(r.golL)||0, gv=parseInt(r.golV)||0;
     var L=st[m.l], V=st[m.v];
     L.pj++;V.pj++;L.gf+=gl;L.gc+=gv;V.gf+=gv;V.gc+=gl;
+    L.ta+=parseInt(r.taL,10)||0; L.tr+=parseInt(r.trL,10)||0;
+    V.ta+=parseInt(r.taV,10)||0; V.tr+=parseInt(r.trV,10)||0;
     if(gl>gv){L.pts+=3;L.pg++;V.pp++;}
     else if(gl<gv){V.pts+=3;V.pg++;L.pp++;}
     else{L.pts++;V.pts++;L.pe++;V.pe++;}
@@ -4930,6 +5022,15 @@ function _eoCeldaRoja(r){
   if(!r) return '<span class="eo-pend">&mdash;</span>';
   return (r.roja==='SI') ? '<span class="eo-roja-si">S&Iacute;</span>' : '<span class="eo-roja-no">No</span>';
 }
+// Muestra las tarjetas de un partido como "Local - Visitante" (amarillas o rojas).
+function _eoParTarj(r, lkey, vkey){
+  if(!r) return '<span class="eo-pend">&mdash;</span>';
+  var lv=r[lkey], vv=r[vkey];
+  var vacioL=(lv===''||lv===undefined||lv===null);
+  var vacioV=(vv===''||vv===undefined||vv===null);
+  if(vacioL && vacioV) return '<span class="eo-pend">&mdash;</span>';
+  return (parseInt(lv,10)||0)+' - '+(parseInt(vv,10)||0);
+}
 
 function _renderEOGrupo(letra){
   var res=_eoCache||{};
@@ -4937,7 +5038,7 @@ function _renderEOGrupo(letra){
   var t=_eoTablaGrupo(letra, resPorNum);
   var ter=_eoTerceros(resPorNum);
   var html='<div class="card-table"><h3>POSICIONES OFICIALES &mdash; GRUPO '+letra+'</h3>';
-  html+='<table class="tabla-pos"><thead><tr><th>#</th><th style="text-align:left;">SELECCION</th><th class="pts-cell">PTS</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>GF</th><th>GC</th><th>DG</th></tr></thead><tbody>';
+  html+='<table class="tabla-pos"><thead><tr><th>#</th><th style="text-align:left;">SELECCION</th><th class="pts-cell">PTS</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>GF</th><th>GC</th><th>DG</th><th>T.A</th><th>T.R</th></tr></thead><tbody>';
   t.stats.forEach(function(s,i){
     var clase;
     if(i<2) clase='row-pass';
@@ -4946,12 +5047,13 @@ function _renderEOGrupo(letra){
     html+='<tr class="'+clase+'"><td>'+(i+1)+'</td>'+
       '<td align="left">'+_eoFlag(s.flag)+' '+s.name+'</td>'+
       '<td class="pts-cell">'+s.pts+'</td><td>'+s.pj+'</td><td>'+s.pg+'</td><td>'+s.pe+'</td><td>'+s.pp+'</td>'+
-      '<td>'+s.gf+'</td><td>'+s.gc+'</td><td>'+s.dg+'</td></tr>';
+      '<td>'+s.gf+'</td><td>'+s.gc+'</td><td>'+s.dg+'</td>'+
+      '<td style="color:#f1c40f;">'+s.ta+'</td><td style="color:#ff6666;">'+s.tr+'</td></tr>';
   });
   html+='</tbody></table>'+_EO_LEYENDA+'</div>';
 
   html+='<div class="card-table" style="margin-top:14px;"><h3>PARTIDO A PARTIDO &mdash; GRUPO '+letra+'</h3>';
-  html+='<table class="tabla-pos"><thead><tr><th>JOR</th><th style="text-align:right;">LOCAL</th><th>RESULTADO</th><th style="text-align:left;">VISITANTE</th><th>+2.5 T.</th><th>ROJA</th></tr></thead><tbody>';
+  html+='<table class="tabla-pos"><thead><tr><th>JOR</th><th style="text-align:right;">LOCAL</th><th>RESULTADO</th><th style="text-align:left;">VISITANTE</th><th>T.A</th><th>T.R</th></tr></thead><tbody>';
   t.partidos.forEach(function(p){
     var r=p.r;
     var marc = r ? ('<span class="eo-marcador">'+(parseInt(r.golL)||0)+' - '+(parseInt(r.golV)||0)+'</span>') : '<span class="eo-pend">pendiente</span>';
@@ -4959,10 +5061,11 @@ function _renderEOGrupo(letra){
       '<td align="right">'+p.lName+' '+_eoFlag(p.lFlag)+'</td>'+
       '<td>'+marc+'</td>'+
       '<td align="left">'+_eoFlag(p.vFlag)+' '+p.vName+'</td>'+
-      '<td>'+_eoCeldaTarjetas(r)+'</td><td>'+_eoCeldaRoja(r)+'</td></tr>';
+      '<td style="color:#f1c40f;">'+_eoParTarj(r,'taL','taV')+'</td>'+
+      '<td style="color:#ff6666;">'+_eoParTarj(r,'trL','trV')+'</td></tr>';
   });
   html+='</tbody></table>';
-  html+='<p class="eo-nota">&#10003; = hubo 3 o m&aacute;s tarjetas (super&oacute; las 2.5). Todo se llena solo cuando la administraci&oacute;n carga el resultado oficial de cada partido.</p></div>';
+  html+='<p class="eo-nota">T.A = tarjetas amarillas, T.R = tarjetas rojas. En el partido a partido se muestran Local - Visitante. Todo se llena solo cuando la administraci&oacute;n carga el resultado oficial de cada partido.</p></div>';
   document.getElementById('eoContenido').innerHTML=html;
 }
 
@@ -5023,7 +5126,7 @@ function _renderEOElim(fase){
       var w=_ganadorDeMarcadores(r.golL,r.golV,r.exL,r.exV,r.peL,r.peV);
       var ganador = (w==='L')?lName:((w==='V')?vName:null);
       if(ganador) html+='<div class="eo-elim-gana">&#10148; Avanza: '+ganador+'</div>';
-      html+='<div class="eo-elim-extras"><span>+2.5 Tarjetas: '+_eoCeldaTarjetas(r)+'</span><span>Roja: '+_eoCeldaRoja(r)+'</span></div>';
+      html+='<div class="eo-elim-extras"><span style="color:#f1c40f;">T.A (L-V): '+_eoParTarj(r,'taL','taV')+'</span><span style="color:#ff6666;">T.R (L-V): '+_eoParTarj(r,'trL','trV')+'</span></div>';
     } else {
       html+='<div class="eo-elim-row"><span class="eo-elim-team local">'+lName+' '+lFlagImg+'</span>'+
         '<span class="eo-pend">vs</span>'+
