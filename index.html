@@ -3,10 +3,21 @@
   ============================================================
   POLLA MUNDIALISTA 2026
   RESUMEN DE ESTE INDEX
-  Generado: 24/06/2026 - hora Colombia (Tarjetas T.A / T.R por equipo)
+  Generado: 30/06/2026 - hora Colombia (Fixture + Pronostico Manual eliminatorias)
   ------------------------------------------------------------
   NUEVO EN ESTA VERSION:
-  T. TARJETAS POR EQUIPO (amarillas T.A y rojas T.R):
+  F. FIXTURE: nuevo boton "Fixture" en Estadistica Oficial que muestra el cuadro
+     completo de eliminatorias (16avos -> Final + 3er puesto) en columnas que se
+     deslizan de lado en celular. Se llena solo con los resultados oficiales; el
+     ganador de cada llave avanza resaltado en verde. Sin marca de agua. Solo
+     lectura (no toca nada mas).
+  M. PRONOSTICO MANUAL DEL JUGADOR ahora incluye ELIMINATORIAS: la lista de
+     jornadas suma las eliminatorias cuyos cruces ya estan definidos (igual que
+     en la pantalla del jugador). En esos partidos aparecen tambien las apuestas
+     de Tiempo Extra y Penales, y se guardan bien. No toca guardia, ranking ni
+     Control de Resultados; solo amplia la pantalla del pronostico manual.
+
+  ANTES (Tarjetas T.A / T.R - se conserva):
        - Control de Resultados Oficiales: se quitaron "N. Tarjetas" y "T. Roja"
          y se pusieron 4 casillas por partido: T.A Local, T.A Visitante, T.R
          Local, T.R Visitante.
@@ -303,6 +314,19 @@ tr.fila-oficial-pend td{color:#9aa7b8!important;background:rgba(120,130,150,0.08
 .eo-sw-green{background:rgba(0,230,118,0.55);}
 .eo-sw-yellow{background:rgba(255,221,0,0.6);}
 .eo-sw-red{background:rgba(255,23,68,0.5);}
+/* FIXTURE (cuadro de eliminatorias) */
+.fx-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;padding:4px 0 12px;}
+.fx-board{display:flex;gap:14px;min-width:760px;align-items:stretch;}
+.fx-col{display:flex;flex-direction:column;justify-content:space-around;gap:8px;min-width:150px;flex:1;}
+.fx-col-head{font-family:'Barlow Condensed',sans-serif;color:var(--gold);font-size:0.82rem;letter-spacing:1.5px;text-align:center;text-transform:uppercase;margin-bottom:4px;border-bottom:1px solid var(--border);padding-bottom:4px;}
+.fx-match{background:#0a1524;border:1px solid var(--border);border-radius:7px;overflow:hidden;}
+.fx-team{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:6px 8px;font-size:0.8rem;}
+.fx-team + .fx-team{border-top:1px solid var(--border);}
+.fx-name{display:flex;align-items:center;gap:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:108px;}
+.fx-score{font-weight:900;color:var(--gold);min-width:16px;text-align:center;}
+.fx-win{background:rgba(0,230,118,0.13);}
+.fx-win .fx-name{color:var(--green-ok);font-weight:700;}
+.fx-tercero{margin-top:14px;max-width:320px;}
 .llave-box{position:absolute;top:15px;right:20px;background:#000;color:var(--gold);border:2px solid var(--gold);padding:5px 14px;border-radius:20px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.9rem;letter-spacing:1px;}
 .card-excel{background:#e0e0e0;color:#000;width:98%;max-width:1300px;margin:0 auto 20px;border-radius:4px;overflow:hidden;}
 .tabla-excel{width:100%;border-collapse:collapse;}
@@ -805,6 +829,7 @@ tr.fila-oficial-pend td{color:#9aa7b8!important;background:rgba(120,130,150,0.08
       <button class="btn-grp btn-grp-terceros" id="eo-btn-terceros" onclick="eoMostrarTerceros()">Mejores 3</button>
     </div>
     <div class="eo-subnav">
+      <button class="btn-grp" id="eo-btn-fixture" onclick="eoMostrarFixture()">&#128202; Fixture</button>
       <button class="btn-grp" id="eo-btn-dieciseisavos" onclick="eoMostrarElim('dieciseisavos')">16 Avos</button>
       <button class="btn-grp" id="eo-btn-octavos" onclick="eoMostrarElim('octavos')">8 Avos</button>
       <button class="btn-grp" id="eo-btn-cuartos" onclick="eoMostrarElim('cuartos')">Cuartos</button>
@@ -3108,6 +3133,7 @@ function toggleResTarjeta(el){
 // ---- PRONOSTICO MANUAL DEL JUGADOR (admin) ----
 var manualJornadaVista = null;
 var _manualPartidos = [];
+var _manualNums = null;
 var manualJugadorCod = '';
 function filtrarJugadoresManual(){
   var inp=document.getElementById('manual-buscar');
@@ -3142,16 +3168,41 @@ function seleccionarJugadorManual(cod){
   renderPronosticoManual();
 }
 function renderPronosticoManual(){
+  // Bootstrap: cargar resultados oficiales una vez para resolver los cruces de eliminatoria
+  if(_resultadosCache===null && !_resLoading && typeof db!=='undefined'){
+    _resLoading=true;
+    db.ref('resultados').once('value',function(snap){
+      _resultadosCache=snap.val()||{};
+      try{ _partElim=_participantesElim(_resultadosCache); }catch(e){ _partElim={}; }
+      _resLoading=false; renderPronosticoManual();
+    },function(){ _resultadosCache={}; _resLoading=false; renderPronosticoManual(); });
+    return;
+  }
   var data=_getCal();
   if(!data.nums.length) return;
+  // Jornadas de eliminatoria visibles (con los dos equipos ya definidos), igual que en la pantalla del jugador
+  var elimBy=_elimPorJornada();
+  var elimVis=Object.keys(elimBy).map(Number).filter(function(j){
+    return elimBy[j].some(function(m){ var p=_partElim[m.n]; return p&&p.l.def&&p.v.def; });
+  }).sort(function(a,b){return a-b;});
+  _manualNums=data.nums.concat(elimVis);
   if(manualJornadaVista===null) manualJornadaVista=calcularJornadaActiva();
-  if(data.nums.indexOf(manualJornadaVista)===-1) manualJornadaVista=data.nums[0];
-  var partidos=(data.jor[manualJornadaVista]||[]).slice().sort(function(a,b){return a.ts-b.ts;});
+  if(_manualNums.indexOf(manualJornadaVista)===-1) manualJornadaVista=_manualNums[0];
+  var esElimJor=(!!elimBy[manualJornadaVista] && data.nums.indexOf(manualJornadaVista)===-1);
+  var partidos;
+  if(esElimJor){
+    partidos=elimBy[manualJornadaVista].filter(function(m){ var p=_partElim[m.n]; return p&&p.l.def&&p.v.def; })
+      .map(function(m){ var p=_partElim[m.n]; m.local=p.l.name; m.visita=p.v.name; m.localFlag=p.l.flag; m.visitaFlag=p.v.flag; return m; })
+      .sort(function(a,b){return a.ts-b.ts;});
+  } else {
+    partidos=(data.jor[manualJornadaVista]||[]).slice().sort(function(a,b){return a.ts-b.ts;});
+  }
   _manualPartidos=partidos;
   var primer=partidos.length?partidos[0]:null;
   var tit=document.getElementById('manualJornadaTitulo');
-  if(tit) tit.innerHTML='JORNADA '+manualJornadaVista+(primer?(' <span style="color:var(--muted);font-size:0.8rem;">'+primer.fec+' 2026</span>'):'');
-  _pintarSaltosJornada('manualSaltos', data.nums, manualJornadaVista, 'irAManualJornada');
+  var titTxt=(esElimJor&&primer)?_faseNombre(primer.n).toUpperCase():('JORNADA '+manualJornadaVista);
+  if(tit) tit.innerHTML=titTxt+(primer?(' <span style="color:var(--muted);font-size:0.8rem;">'+primer.fec+' 2026</span>'):'');
+  _pintarSaltosJornada('manualSaltos', _manualNums, manualJornadaVista, 'irAManualJornada');
   var cont=document.getElementById('manualContainer');
   if(!cont) return;
   var cod=manualJugadorCod;
@@ -3166,8 +3217,17 @@ function renderPronosticoManual(){
       var golV=(g.golV!==undefined&&g.golV!==null)?g.golV:'';
       var tSi=(g.tarjetas==='SI');
       var rSi=(g.roja==='SI');
+      var esElimM=!!m.elim;
+      var eSi=(g.extra==='SI'); var pSi=(g.penales==='SI');
+      var etiqueta = esElimM ? _faseNombre(m.n) : ('Grupo '+m.grupo);
+      var extrasHtml = esElimM ? (
+          '<div style="text-align:center;"><div style="font-size:0.7rem;color:#7fd1ff;margin-bottom:4px;font-weight:700;">T. EXTRA</div>'+
+            '<div class="man-extra '+(eSi?'on':'')+'" onclick="toggleResTarjeta(this)" style="cursor:pointer;padding:8px 16px;border-radius:6px;font-weight:700;background:'+(eSi?'#2a7fb5':'#333')+';color:'+(eSi?'#fff':'#aaa')+';min-width:50px;">'+(eSi?'SI':'NO')+'</div></div>'+
+          '<div style="text-align:center;"><div style="font-size:0.7rem;color:#c79bff;margin-bottom:4px;font-weight:700;">PENALES</div>'+
+            '<div class="man-penal '+(pSi?'on':'')+'" onclick="toggleResTarjeta(this)" style="cursor:pointer;padding:8px 16px;border-radius:6px;font-weight:700;background:'+(pSi?'#7a4fb5':'#333')+';color:'+(pSi?'#fff':'#aaa')+';min-width:50px;">'+(pSi?'SI':'NO')+'</div></div>'
+        ) : '';
       html+='<div class="partido-block" data-num="'+m.num+'" style="margin-bottom:14px;">'+
-        '<div class="partido-header"><span>PARTIDO '+m.num+' &middot; Grupo '+m.grupo+'</span>'+
+        '<div class="partido-header"><span>PARTIDO '+m.num+' &middot; '+etiqueta+'</span>'+
         '<span class="partido-fecha">'+String(m.local).toUpperCase()+' vs '+String(m.visita).toUpperCase()+'</span></div>'+
         '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px;background:#0a1422;border:1px solid var(--border);border-radius:0 0 8px 8px;">'+
           '<div style="text-align:center;"><div style="font-size:0.7rem;color:var(--muted);">'+String(m.local).toUpperCase()+'</div>'+
@@ -3179,6 +3239,7 @@ function renderPronosticoManual(){
             '<div class="man-tarj '+(tSi?'on':'')+'" onclick="toggleResTarjeta(this)" style="cursor:pointer;padding:8px 16px;border-radius:6px;font-weight:700;background:'+(tSi?'var(--green-ok)':'#333')+';color:'+(tSi?'#000':'#aaa')+';min-width:50px;">'+(tSi?'SI':'NO')+'</div></div>'+
           '<div style="text-align:center;"><div style="font-size:0.7rem;color:#ff6666;margin-bottom:4px;font-weight:700;">T. ROJA</div>'+
             '<div class="man-roja '+(rSi?'on':'')+'" onclick="toggleResTarjeta(this)" style="cursor:pointer;padding:8px 16px;border-radius:6px;font-weight:700;background:'+(rSi?'#c0392b':'#333')+';color:'+(rSi?'#fff':'#aaa')+';min-width:50px;">'+(rSi?'SI':'NO')+'</div></div>'+
+          extrasHtml+
         '</div></div>';
     });
     html+='<button class="btn-action btn-green" onclick="guardarPronosticoManual()" style="width:100%;padding:12px;margin-top:6px;">GUARDAR PRONOSTICO DE ESTE JUGADOR</button>';
@@ -3187,16 +3248,17 @@ function renderPronosticoManual(){
 }
 function cambiarJugadorManual(){ renderPronosticoManual(); }
 function manualJornadaAnterior(){
-  var data=_getCal(); var idx=data.nums.indexOf(manualJornadaVista);
-  if(idx>0){ manualJornadaVista=data.nums[idx-1]; renderPronosticoManual(); }
+  if(!_manualNums) return;
+  var idx=_manualNums.indexOf(manualJornadaVista);
+  if(idx>0){ manualJornadaVista=_manualNums[idx-1]; renderPronosticoManual(); }
 }
 function manualJornadaSiguiente(){
-  var data=_getCal(); var idx=data.nums.indexOf(manualJornadaVista);
-  if(idx<data.nums.length-1){ manualJornadaVista=data.nums[idx+1]; renderPronosticoManual(); }
+  if(!_manualNums) return;
+  var idx=_manualNums.indexOf(manualJornadaVista);
+  if(idx<_manualNums.length-1){ manualJornadaVista=_manualNums[idx+1]; renderPronosticoManual(); }
 }
 function irAManualJornada(n){
-  var data=_getCal();
-  if(data.nums.indexOf(n)===-1) return;
+  if(!_manualNums || _manualNums.indexOf(n)===-1) return;
   manualJornadaVista=n; renderPronosticoManual();
 }
 function guardarPronosticoManual(){
@@ -3211,11 +3273,14 @@ function guardarPronosticoManual(){
     var num=parseInt(b.getAttribute('data-num'),10);
     var m=null; for(var i=0;i<_manualPartidos.length;i++){ if(_manualPartidos[i].num===num){ m=_manualPartidos[i]; break; } }
     var gl=b.querySelector('.man-golL'), gv=b.querySelector('.man-golV'), tj=b.querySelector('.man-tarj'), rj=b.querySelector('.man-roja');
+    var ex=b.querySelector('.man-extra'), pe=b.querySelector('.man-penal');
     if(!gl||!gv||gl.value===''||gv.value===''){ incompletos++; return; }
     datos['p'+num]={ num:num, local:(m?m.local:''), visita:(m?m.visita:''),
       golL:parseInt(gl.value,10)||0, golV:parseInt(gv.value,10)||0,
       tarjetas:(tj&&tj.classList.contains('on'))?'SI':'NO',
-      roja:(rj&&rj.classList.contains('on'))?'SI':'NO', extra:'NA', penales:'NA' };
+      roja:(rj&&rj.classList.contains('on'))?'SI':'NO',
+      extra: ex ? ((ex.classList.contains('on'))?'SI':'NO') : 'NA',
+      penales: pe ? ((pe.classList.contains('on'))?'SI':'NO') : 'NA' };
   });
   if(Object.keys(datos).length===0){ alert('Escribe el marcador (los dos goles) de al menos un partido.'); return; }
   // AVISO: hay partidos sin marcador; se guardan solo los que tienen marcador.
@@ -4936,12 +5001,14 @@ function _eoRefrescar(){
   if(_eoCache===null){ cont.innerHTML = '<p style="text-align:center;color:#8892b0;padding:34px;">Cargando estadistica oficial...</p>'; return; }
   if(_eoVista.tipo==='grupo') _renderEOGrupo(_eoVista.val);
   else if(_eoVista.tipo==='terceros') _renderEOTerceros();
+  else if(_eoVista.tipo==='fixture') _renderEOFixture();
   else _renderEOElim(_eoVista.val);
 }
 
 function eoMostrarGrupo(letra){ _eoVista={tipo:'grupo',val:letra}; _eoActivarBtn('eo-btn-'+letra); _eoRefrescar(); }
 function eoMostrarElim(fase){ _eoVista={tipo:'elim',val:fase}; _eoActivarBtn('eo-btn-'+fase); _eoRefrescar(); }
 function eoMostrarTerceros(){ _eoVista={tipo:'terceros',val:''}; _eoActivarBtn('eo-btn-terceros'); _eoRefrescar(); }
+function eoMostrarFixture(){ _eoVista={tipo:'fixture',val:''}; _eoActivarBtn('eo-btn-fixture'); _eoRefrescar(); }
 function _eoActivarBtn(id){
   document.querySelectorAll('#sec-estadistica .btn-grp').forEach(function(b){ b.classList.remove('active'); });
   var el=document.getElementById(id); if(el) el.classList.add('active');
@@ -5091,6 +5158,52 @@ function _renderEOTerceros(){
   document.getElementById('eoContenido').innerHTML=html;
 }
 
+function _eoFixtureCard(m, part, resPorNum){
+  var pr=part[m.n]||{};
+  var lName=(pr.l&&pr.l.name)||m.l, lFlag=(pr.l&&pr.l.flag)||'';
+  var vName=(pr.v&&pr.v.name)||m.v, vFlag=(pr.v&&pr.v.flag)||'';
+  var r=resPorNum[m.n];
+  var lScore='', vScore='', wL=false, wV=false;
+  if(r){
+    lScore=(parseInt(r.golL)||0); vScore=(parseInt(r.golV)||0);
+    var w=_ganadorDeMarcadores(r.golL,r.golV,r.exL,r.exV,r.peL,r.peV);
+    wL=(w==='L'); wV=(w==='V');
+  }
+  var lFlagImg=lFlag?_eoFlag(lFlag):'';
+  var vFlagImg=vFlag?_eoFlag(vFlag):'';
+  return '<div class="fx-match" title="Partido '+m.n+' &middot; '+m.fec+'">'+
+    '<div class="fx-team'+(wL?' fx-win':'')+'"><span class="fx-name">'+lFlagImg+' '+lName+'</span><span class="fx-score">'+(r?lScore:'')+'</span></div>'+
+    '<div class="fx-team'+(wV?' fx-win':'')+'"><span class="fx-name">'+vFlagImg+' '+vName+'</span><span class="fx-score">'+(r?vScore:'')+'</span></div>'+
+    '</div>';
+}
+
+function _renderEOFixture(){
+  var res=_eoCache||{};
+  var resPorNum=_eoResPorNum(res);
+  var part; try{ part=_participantesElim(res); }catch(e){ part={}; }
+  var rounds=[
+    {t:'Dieciseisavos', ll:LLAVES_16},
+    {t:'Octavos', ll:LLAVES_8},
+    {t:'Cuartos', ll:LLAVES_CUARTOS},
+    {t:'Semifinal', ll:LLAVES_SEMI},
+    {t:'Final', ll:LLAVES_FINAL.filter(function(m){return m.esFinal;})}
+  ];
+  var html='<div class="card-table"><h3>FIXTURE &mdash; CAMINO A LA FINAL</h3>';
+  html+='<div class="fx-wrap"><div class="fx-board">';
+  rounds.forEach(function(rd){
+    html+='<div class="fx-col"><div class="fx-col-head">'+rd.t+'</div>';
+    rd.ll.forEach(function(m){ html+=_eoFixtureCard(m, part, resPorNum); });
+    html+='</div>';
+  });
+  html+='</div></div>';
+  var ter=LLAVES_FINAL.filter(function(m){return m.tercero;});
+  if(ter.length){
+    html+='<div class="fx-tercero"><div class="fx-col-head" style="color:#cd7f32;">Tercer Puesto</div>'+_eoFixtureCard(ter[0], part, resPorNum)+'</div>';
+  }
+  html+='<p class="eo-nota">El cuadro se llena solo a medida que la administraci&oacute;n carga los resultados oficiales. Desliza de lado para ver todas las rondas; el ganador de cada llave avanza resaltado en verde.</p></div>';
+  document.getElementById('eoContenido').innerHTML=html;
+}
+
 function _renderEOElim(fase){
   var res=_eoCache||{};
   var resPorNum=_eoResPorNum(res);
@@ -5143,6 +5256,7 @@ window.renderEstadisticaOficial = renderEstadisticaOficial;
 window.eoMostrarGrupo = eoMostrarGrupo;
 window.eoMostrarElim = eoMostrarElim;
 window.eoMostrarTerceros = eoMostrarTerceros;
+window.eoMostrarFixture = eoMostrarFixture;
 
 window.exportarExcel = exportarExcel;
 
