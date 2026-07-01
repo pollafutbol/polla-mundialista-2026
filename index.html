@@ -3,9 +3,15 @@
   ============================================================
   POLLA MUNDIALISTA 2026
   RESUMEN DE ESTE INDEX
-  Generado: 01/07/2026 - 11:45 a. m. (hora Colombia) - Correccion de la API key
+  Generado: 01/07/2026 - 12:30 p. m. (hora Colombia) - Version LIMPIA (guardia OK)
   ------------------------------------------------------------
   NUEVO EN ESTA VERSION:
+  - El Guardia de Google quedo FUNCIONANDO (se confirmo que crea las cuentas en
+    Authentication > Users). Esta es la version LIMPIA: se quito el diagnostico
+    (ya no aparece ningun mensaje con ?diag=1). La API key sigue corregida
+    (AIzaSyCVINCBel...). Esta es la version para publicar de forma definitiva.
+
+  ANTES (Correccion de la API key - se conserva):
   - CORREGIDA la API key de Firebase en firebaseConfig: tenia una letra mal
     (una "L" mayuscula donde iba "l" minuscula). La base de datos funcionaba,
     pero el Guardia de Google (Firebase Auth) rechazaba la clave con el error
@@ -2059,23 +2065,19 @@ var usuarioActual = null;
 // La recuperacion de clave sigue funcionando por el sistema de siempre (WhatsApp).
 // ============================================================
 function _guardiaSesion(cod, clave){
-  var _diag = (typeof location!=='undefined' && location.search && location.search.indexOf('diag')!==-1);
-  function _d(msg){ if(_diag){ try{ alert('GUARDIA (diagnostico):\n\n'+msg); }catch(e){} } }
   try{
-    if(typeof firebase==='undefined' || typeof firebase.auth!=='function'){ _d('El SDK de Google (auth) NO esta cargado: firebase.auth no existe. (Probablemente la pagina publicada no tiene el guardia o no cargo el script.)'); return; }
-    if(!cod || !clave){ _d('Falta codigo o clave.'); return; }
+    if(typeof firebase==='undefined' || typeof firebase.auth!=='function') return;
+    if(!cod || !clave) return;
     var email = String(cod).trim().toUpperCase() + '@mipolla.com';
-    firebase.auth().signInWithEmailAndPassword(email, clave).then(function(){
-      _d('OK: ya existia la cuenta del guardia y se inicio sesion (' + email + ').');
-    }).catch(function(e1){
-      firebase.auth().createUserWithEmailAndPassword(email, clave).then(function(){
-        _d('OK: cuenta del guardia CREADA (' + email + '). Debe aparecer en Authentication > Users.');
-      }).catch(function(e2){
-        _d('ERROR al crear la cuenta (' + email + '):\n' + (e2 && e2.code) + '\n' + (e2 && e2.message));
+    firebase.auth().signInWithEmailAndPassword(email, clave).catch(function(e1){
+      // No pudo entrar: probablemente aun no esta migrado al guardia. Se crea.
+      firebase.auth().createUserWithEmailAndPassword(email, clave).catch(function(e2){
+        // Caso raro (ej: clave cambiada por recuperacion despues de migrar).
+        // El ingreso ya ocurrio por el sistema antiguo; aqui no se bloquea nada.
         console.warn('Guardia: sesion no establecida para ' + cod + ' (' + (e2 && e2.code) + ')');
       });
     });
-  }catch(e){ _d('Excepcion inesperada: ' + e); console.warn('Guardia no disponible:', e); }
+  }catch(e){ console.warn('Guardia no disponible:', e); }
 }
 
 async function login() {
