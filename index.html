@@ -3,10 +3,20 @@
   ============================================================
   POLLA MUNDIALISTA 2026
   RESUMEN DE ESTE INDEX
-  Generado: 30/06/2026 - 5:35 p. m. (hora Colombia) - Cruce de terceros corregido
+  Generado: 01/07/2026 - 11:45 a. m. (hora Colombia) - Correccion de la API key
   ------------------------------------------------------------
   NUEVO EN ESTA VERSION:
-  - CRUCE DE MEJORES TERCEROS corregido. Se elimino el uso de la tabla vieja de
+  - CORREGIDA la API key de Firebase en firebaseConfig: tenia una letra mal
+    (una "L" mayuscula donde iba "l" minuscula). La base de datos funcionaba,
+    pero el Guardia de Google (Firebase Auth) rechazaba la clave con el error
+    "API key not valid", por eso no se creaban las cuentas. Ahora la clave es
+    la correcta (AIzaSyCVINCBel...). El guardia ya deberia crear las cuentas.
+  - Sigue incluida la version de diagnostico del guardia (mensaje en pantalla
+    solo si se abre la pagina con ?diag=1). Se quitara en la proxima entrega,
+    cuando se confirme que el guardia crea las cuentas.
+
+  ANTES (Cruce de terceros - se conserva):
+  - CRUCE DE MEJORES TERCEROS corregido: se elimino la tabla vieja de
     combinaciones (que asignaba mal y llegaba a cruzar equipos del mismo grupo,
     ej: Alemania 1E vs Ecuador 3E). Ahora se usa un emparejamiento que RESPETA
     las reglas FIFA: cada tercero solo puede caer en una llave cuyos grupos
@@ -1272,7 +1282,7 @@ tr.fila-oficial-pend td{color:#9aa7b8!important;background:rgba(120,130,150,0.08
 // FIREBASE CONFIG
 // ============================================================
 var firebaseConfig = {
-  apiKey: "AIzaSyCVINCBeLJgd3VzEud5rrMeLpbeCkCIvCw",
+  apiKey: "AIzaSyCVINCBelJgd3VzEud5rrMeLpbeCkCIvCw",
   authDomain: "polla-mundialista-2026-7354f.firebaseapp.com",
   databaseURL: "https://polla-mundialista-2026-7354f-default-rtdb.firebaseio.com",
   projectId: "polla-mundialista-2026-7354f",
