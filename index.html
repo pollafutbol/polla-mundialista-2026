@@ -3,10 +3,37 @@
   ============================================================
   POLLA MUNDIALISTA 2026
   RESUMEN DE ESTE INDEX
-  Generado: 30/06/2026 - hora Colombia (Fixture + Pronostico Manual eliminatorias)
+  Generado: 30/06/2026 - 5:35 p. m. (hora Colombia) - Cruce de terceros corregido
   ------------------------------------------------------------
   NUEVO EN ESTA VERSION:
-  F. FIXTURE: nuevo boton "Fixture" en Estadistica Oficial que muestra el cuadro
+  - CRUCE DE MEJORES TERCEROS corregido. Se elimino el uso de la tabla vieja de
+    combinaciones (que asignaba mal y llegaba a cruzar equipos del mismo grupo,
+    ej: Alemania 1E vs Ecuador 3E). Ahora se usa un emparejamiento que RESPETA
+    las reglas FIFA: cada tercero solo puede caer en una llave cuyos grupos
+    permitidos lo incluyan, y NUNCA contra un equipo de su propio grupo. Funcion
+    _matchTerceros + _SLOTS_TERCERO_ALLOW. Aplica al oficial (Estadistica/Fixture)
+    y al simulador. Probado en las 495 combinaciones: 0 asignaciones invalidas.
+    Nota: FIFA en su tabla oficial elige una opcion concreta entre varias validas;
+    esta logica garantiza un cuadro VALIDO por reglas, no necesariamente identico
+    a la eleccion puntual de FIFA en cada caso.
+
+  ANTES (Ajustes varios - se conserva):
+  - RESULTADO OFICIAL en la hoja de pronosticos aunque el jugador no haya enviado:
+    si la jornada ya tiene resultados oficiales cargados, ahora la fila verde
+    "Oficial" aparece igual bajo cada partido (antes solo salia si el jugador
+    habia enviado; por eso en eliminatorias no se veia). Funcion mostrarOficialesSinEnvio.
+  - REGLAMENTO: nota nueva aclarando que en eliminatorias el marcador (Exacto/
+    Ganador/Empate) se califica SOLO con el resultado de los 90 minutos; el tiempo
+    extra y los penales no cambian ese marcador (son apuestas aparte).
+  - COLORES: nombres de los equipos en Control de Resultados mas sobrios y en
+    negrita; el verde del resultado oficial ahora es mas oscuro.
+  - TERCEROS: confirmado que el orden de los mejores terceros sigue el criterio
+    FIFA (puntos -> diferencia de gol -> goles a favor), tanto en el ranking como
+    en la asignacion de llaves. La asignacion a cada llave usa la tabla de
+    combinaciones FIFA (COMBINACIONES_FIFA).
+
+  ANTES (Fixture + Pronostico Manual eliminatorias - se conserva):
+  F. FIXTURE: boton "Fixture" en Estadistica Oficial con el cuadro
      completo de eliminatorias (16avos -> Final + 3er puesto) en columnas que se
      deslizan de lado en celular. Se llena solo con los resultados oficiales; el
      ganador de cada llave avanza resaltado en verde. Sin marca de agua. Solo
@@ -259,7 +286,7 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-
 /* Aviso de fecha/hora de envio (y edicion por admin) sobre la hoja enviada */
 .aviso-enviado{background:rgba(0,200,120,0.10);border:1px solid rgba(0,200,120,0.35);border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:0.85rem;color:#cfe9d8;text-align:center;line-height:1.5;}
 /* Fila verde "Oficial" bajo cada partido en la hoja enviada */
-tr.fila-oficial td{background:rgba(0,180,100,0.12)!important;color:#00e08a!important;font-size:0.82rem;border-top:2px solid rgba(0,200,120,0.5);padding:6px 4px;text-align:center;}
+tr.fila-oficial td{background:rgba(0,150,80,0.14)!important;color:#0a9d57!important;font-size:0.82rem;border-top:2px solid rgba(0,150,90,0.55);padding:6px 4px;text-align:center;}
 tr.fila-oficial-pend td{color:#9aa7b8!important;background:rgba(120,130,150,0.08)!important;}
 /* RESULTADOS — TA amarillo TR rojo */
 .resultados-wrap{padding:20px;max-width:1200px;margin:0 auto;}
@@ -901,6 +928,7 @@ tr.fila-oficial-pend td{color:#9aa7b8!important;background:rgba(120,130,150,0.08
           <tr><td>Marcador Exacto</td><td class="pts-num">3 pts</td><td>Aciertas el resultado exacto (los dos goles). Ya incluye al ganador: NO se suma ademas "Al Ganador" ni "Al Empate".</td></tr>
           <tr><td>Al Ganador</td><td class="pts-num">2 pts</td><td>Aciertas que equipo gana, pero no el marcador exacto.</td></tr>
           <tr><td>Al Empate</td><td class="pts-num">1 pt</td><td>Aciertas que hay empate (cualquier marcador igualado), pero no el marcador exacto.</td></tr>
+          <tr><td colspan="3" style="background:rgba(255,221,0,0.08);color:#ffe680;font-size:0.85rem;padding:8px;line-height:1.5;"><strong>Importante (solo eliminatorias):</strong> el Marcador Exacto, Al Ganador y Al Empate se califican <strong>solo con el resultado de los 90 minutos</strong>. El tiempo extra y los penales NO cambian ese marcador (son apuestas aparte, ver abajo). Ejemplo: si en los 90 va 1&minus;1 y el partido se define luego en tiempo extra o penales, para el marcador cuenta como <strong>EMPATE</strong>.</td></tr>
           <tr><td>+2.5 Tarjetas</td><td class="pts-num" style="color:#ff8888;">+3 / &minus;1</td><td>Apuesta de riesgo: apuestas a que en el partido habra <strong>3 o mas tarjetas</strong>. Si marcas <strong>SI</strong> y de verdad hubo 3 o mas, ganas <strong>+3 pts</strong>; si marcas SI y hubo menos de 3, pierdes <strong>&minus;1 pt</strong>. Si lo dejas en "-" (NO) no arriesgas nada (ni ganas ni pierdes).</td></tr>
           <tr><td>Tarjeta Roja</td><td class="pts-num" style="color:#ff8888;">+4 / &minus;1</td><td>Apuesta de riesgo: si marcas <strong>SI</strong> y de verdad hubo tarjeta roja ganas <strong>+4 pts</strong>; pero si marcas SI y NO hubo, pierdes <strong>&minus;1 pt</strong>. Si lo dejas en "-" (NO) no arriesgas nada (ni ganas ni pierdes). Solo juegatela cuando de verdad lo creas.</td></tr>
           <tr><td>Tiempo Extra</td><td class="pts-num" style="color:#ff8888;">+3 / &minus;1.5</td><td>Apuesta de riesgo (solo fase eliminatoria): si marcas <strong>SI</strong> y el partido se va a tiempo extra ganas <strong>+3 pts</strong>; si marcas SI y se define en los 90, pierdes <strong>&minus;1.5 pts</strong>. Si lo dejas en "-" (NO) no arriesgas nada.</td></tr>
@@ -3055,10 +3083,10 @@ function renderResultadosAdmin(){
         '<div class="partido-header"><span>PARTIDO '+m.num+' &middot; '+etiqueta+'</span>'+
         '<span class="partido-fecha">'+String(m.local).toUpperCase()+' vs '+String(m.visita).toUpperCase()+'</span></div>'+
         '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px;background:#0a1422;border:1px solid var(--border);border-radius:0 0 8px 8px;">'+
-          '<div style="text-align:center;"><div style="font-size:0.7rem;color:var(--muted);">'+String(m.local).toUpperCase()+'</div>'+
+          '<div style="text-align:center;"><div style="font-size:0.72rem;color:#6e7d99;font-weight:700;">'+String(m.local).toUpperCase()+'</div>'+
             '<input type="number" class="res-golL" min="0" value="'+golL+'" placeholder="0" oninput="calcGanadorRes('+m.num+')" style="width:56px;padding:8px;text-align:center;font-size:1.1rem;background:#0d1b2a;color:#fff;border:1px solid var(--border);border-radius:5px;"></div>'+
           '<span style="font-weight:900;color:#666;">-</span>'+
-          '<div style="text-align:center;"><div style="font-size:0.7rem;color:var(--muted);">'+String(m.visita).toUpperCase()+'</div>'+
+          '<div style="text-align:center;"><div style="font-size:0.72rem;color:#6e7d99;font-weight:700;">'+String(m.visita).toUpperCase()+'</div>'+
             '<input type="number" class="res-golV" min="0" value="'+golV+'" placeholder="0" oninput="calcGanadorRes('+m.num+')" style="width:56px;padding:8px;text-align:center;font-size:1.1rem;background:#0d1b2a;color:#fff;border:1px solid var(--border);border-radius:5px;"></div>'+
           '<div style="margin-left:8px;display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start;">'+
             '<div style="text-align:center;"><div style="font-size:0.62rem;color:#f1c40f;margin-bottom:4px;font-weight:700;">T.A LOC</div>'+
@@ -3710,9 +3738,44 @@ function verificarEnvioJornada(){
       var btn=document.querySelector('.btn-enviar');
       if(btn){ btn.disabled=true; btn.style.background='#555'; btn.style.cursor='not-allowed'; btn.innerText='\u2705 YA ENVIADA'; btn.onclick=null; }
       cargarPronosticoEnviado(cod, jN);  // llenar con lo que se envio + fila oficial + aviso
+    } else {
+      // No envio esta jornada: si ya hay resultados oficiales cargados, mostrar igual la fila oficial.
+      mostrarOficialesSinEnvio(jN);
     }
   });
 }
+
+// Muestra la fila verde "Oficial" bajo cada partido aunque el jugador no haya
+// enviado pronostico, siempre que ya existan resultados oficiales de esa jornada.
+function mostrarOficialesSinEnvio(jN){
+  db.ref('resultados/j'+jN).once('value',function(snap){
+    var resJ=snap.val();
+    if(!resJ) return; // todavia no hay resultados oficiales: no se muestra nada
+    var bloques=document.querySelectorAll('#pronosticosContainer .partido-block');
+    bloques.forEach(function(bloque, idx){
+      var m=(_partidosVista && _partidosVista[idx]) ? _partidosVista[idx] : null;
+      if(!m) return;
+      if(bloque.querySelector('tr.fila-oficial')) return; // ya tiene fila oficial
+      var res=resJ['p'+m.num]||null;
+      if(!res) return; // ese partido aun no tiene resultado oficial
+      var esElimM=!!m.elim;
+      var tbody=bloque.querySelector('table.tabla-juego tbody');
+      if(!tbody) return;
+      var nt=parseInt(res.tarjetas,10);
+      var tarjTxt=isNaN(nt)?'-':(nt+' tarj.'+(nt>=3?' (SI +2.5)':''));
+      var rojaTxt=(res.roja==='SI')?'SI':'NO';
+      var extraTxt=esElimM?((res.extra==='SI')?'SI':(res.extra==='NO'?'NO':'-')):'-';
+      var penTxt=esElimM?((res.penales==='SI')?'SI':(res.penales==='NO'?'NO':'-')):'-';
+      var filaHTML='<tr class="fila-oficial">'+
+        '<td style="text-align:center;font-weight:800;">'+(res.golL!=null?res.golL:'-')+'</td>'+
+        '<td style="font-weight:800;letter-spacing:1px;">OFICIAL</td>'+
+        '<td style="text-align:center;font-weight:800;">'+(res.golV!=null?res.golV:'-')+'</td>'+
+        '<td>'+tarjTxt+'</td><td>'+rojaTxt+'</td><td>'+extraTxt+'</td><td>'+penTxt+'</td></tr>';
+      tbody.insertAdjacentHTML('beforeend', filaHTML);
+    });
+  });
+}
+window.mostrarOficialesSinEnvio = mostrarOficialesSinEnvio;
 
 // Rellena la hoja YA ENVIADA con el pronostico real del jugador, agrega la fila
 // verde "Oficial" bajo cada partido (o "Oficial: pendiente"), muestra fecha/hora
@@ -4337,17 +4400,17 @@ function calcularClasificados() {
     });
   }
 
-  if (matchC) {
-    // La combinación FIFA define el orden: cada letra del string va al slot correspondiente
-    var letrasCombinacion = matchC[1].split('');
-    letrasCombinacion.forEach(function(letra, i) {
-      var tercero = todosTerceros.find(function(t){ return t.grp === letra; });
-      if (tercero && SLOTS_TERCEROS[i] !== undefined) {
-        clasificados['3_' + SLOTS_TERCEROS[i]] = { name: tercero.name, flag: tercero.flag };
-      }
+  // Asignacion por emparejamiento perfecto: cada tercero va a una llave permitida
+  // (respeta la regla FIFA de no cruzar equipos del mismo grupo).
+  var asignaciones = _matchTerceros(top8.map(function(t){ return t.grp; }));
+  if (asignaciones) {
+    Object.keys(asignaciones).forEach(function(slot){
+      var grupo = asignaciones[slot];
+      var tercero = top8.find(function(t){ return t.grp === grupo; });
+      if (tercero) clasificados['3_' + slot] = { name: tercero.name, flag: tercero.flag };
     });
   } else if (top8.length > 0) {
-    // Sin combinación exacta: asignar por ranking directo
+    // Respaldo (no deberia ocurrir con 8 terceros): asignacion directa por ranking
     top8.forEach(function(t, i) {
       if (SLOTS_TERCEROS[i] !== undefined) {
         clasificados['3_' + SLOTS_TERCEROS[i]] = { name: t.name, flag: t.flag };
@@ -4366,6 +4429,46 @@ function calcularClasificados() {
 // NOTA: aun NO esta conectada a la pantalla. La apertura progresiva de fases en la
 // hoja de pronosticos debe construirse sobre ESTA funcion y sobre el bracket ya corregido.
 // ============================================================
+// ============================================================
+// ASIGNACION OFICIAL DE LOS 8 MEJORES TERCEROS A SUS LLAVES (16avos)
+// ------------------------------------------------------------
+// Cada llave de 16avos que recibe un "mejor tercero" solo admite terceros de
+// ciertos grupos (definido por FIFA justamente para que un tercero NUNCA
+// enfrente a un equipo de su propio grupo). Resolvemos la asignacion como un
+// emparejamiento perfecto por backtracking: a cada grupo clasificado se le da
+// una llave permitida, sin repetir. Esto reemplaza la antigua tabla de 495
+// combinaciones (que asignaba mal y llegaba a cruzar equipos del mismo grupo).
+// ============================================================
+var _SLOTS_TERCERO_ALLOW = [
+  {slot:74, allow:['A','B','C','D','F']},
+  {slot:77, allow:['C','D','F','G','H']},
+  {slot:79, allow:['C','E','F','H','I']},
+  {slot:80, allow:['E','H','I','J','K']},
+  {slot:81, allow:['B','E','F','I','J']},
+  {slot:82, allow:['A','E','H','I','J']},
+  {slot:85, allow:['E','F','G','I','J']},
+  {slot:87, allow:['D','E','I','J','L']}
+];
+function _matchTerceros(grupos){
+  if(!grupos || grupos.length!==8) return null;
+  var slots=_SLOTS_TERCERO_ALLOW;
+  var asign={}, usados={};
+  function bt(i){
+    if(i>=slots.length) return true;
+    var s=slots[i];
+    for(var k=0;k<grupos.length;k++){
+      var g=grupos[k];
+      if(usados[g]) continue;
+      if(s.allow.indexOf(g)===-1) continue;
+      asign[s.slot]=g; usados[g]=true;
+      if(bt(i+1)) return true;
+      delete asign[s.slot]; usados[g]=false;
+    }
+    return false;
+  }
+  return bt(0) ? asign : null; // devuelve {slot: grupo}
+}
+
 function calcularClasificadosOficiales(resultados) {
   resultados = resultados || {};
   var cal = _getCal().cal;
@@ -4409,23 +4512,18 @@ function calcularClasificadosOficiales(resultados) {
     }
   });
 
-  // Asignar los 8 mejores terceros a sus slots con la tabla FIFA de 495 combinaciones
+  // Asignar los 8 mejores terceros a sus llaves respetando los grupos permitidos
   todosTerceros.sort(function(a,b){ return (b.pts-a.pts)||(b.dg-a.dg)||(b.gf-a.gf); });
   var top8 = todosTerceros.slice(0,8);
   var SLOTS_TERCEROS = [74,77,79,80,81,82,85,87];
-  if (top8.length === 8) {
-    var combinacion = top8.map(function(t){ return t.grp; }).join('');
-    var matchC = Object.entries(COMBINACIONES_FIFA).find(function(e){
-      return e[1].split('').sort().join('') === combinacion.split('').sort().join('');
+  var asignaciones = _matchTerceros(top8.map(function(t){ return t.grp; }));
+  if (asignaciones) {
+    Object.keys(asignaciones).forEach(function(slot){
+      var t = top8.find(function(x){ return x.grp===asignaciones[slot]; });
+      if (t) clasificados['3_'+slot] = { name:t.name, flag:t.flag };
     });
-    if (matchC) {
-      matchC[1].split('').forEach(function(letra,i){
-        var t = todosTerceros.find(function(x){ return x.grp===letra; });
-        if (t && SLOTS_TERCEROS[i]!==undefined) clasificados['3_'+SLOTS_TERCEROS[i]] = { name:t.name, flag:t.flag };
-      });
-    } else {
-      top8.forEach(function(t,i){ if (SLOTS_TERCEROS[i]!==undefined) clasificados['3_'+SLOTS_TERCEROS[i]] = { name:t.name, flag:t.flag }; });
-    }
+  } else if (top8.length === 8) {
+    top8.forEach(function(t,i){ if (SLOTS_TERCEROS[i]!==undefined) clasificados['3_'+SLOTS_TERCEROS[i]] = { name:t.name, flag:t.flag }; });
   }
   return clasificados;
 }
