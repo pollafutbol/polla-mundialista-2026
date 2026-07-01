@@ -3,10 +3,15 @@
   ============================================================
   POLLA MUNDIALISTA 2026
   RESUMEN DE ESTE INDEX
-  Generado: 01/07/2026 - 12:30 p. m. (hora Colombia) - Version LIMPIA (guardia OK)
+  Generado: 01/07/2026 - 1:15 p. m. (hora Colombia) - Nombres de equipos mas oscuros
   ------------------------------------------------------------
   NUEVO EN ESTA VERSION:
-  - El Guardia de Google quedo FUNCIONANDO (se confirmo que crea las cuentas en
+  - Nombres de los equipos mas OSCUROS (color #4d5a75, en negrita) en las dos
+    pantallas del admin: Control de Resultados y Pronostico Manual del Jugador.
+  - (Guardia OK y version limpia, se conserva de la version anterior.)
+
+  ANTES (Version LIMPIA - guardia OK - se conserva):
+  - El Guardia de Google quedo FUNCIONANDO (crea las cuentas en
     Authentication > Users). Esta es la version LIMPIA: se quito el diagnostico
     (ya no aparece ningun mensaje con ?diag=1). La API key sigue corregida
     (AIzaSyCVINCBel...). Esta es la version para publicar de forma definitiva.
@@ -3099,10 +3104,10 @@ function renderResultadosAdmin(){
         '<div class="partido-header"><span>PARTIDO '+m.num+' &middot; '+etiqueta+'</span>'+
         '<span class="partido-fecha">'+String(m.local).toUpperCase()+' vs '+String(m.visita).toUpperCase()+'</span></div>'+
         '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px;background:#0a1422;border:1px solid var(--border);border-radius:0 0 8px 8px;">'+
-          '<div style="text-align:center;"><div style="font-size:0.72rem;color:#6e7d99;font-weight:700;">'+String(m.local).toUpperCase()+'</div>'+
+          '<div style="text-align:center;"><div style="font-size:0.72rem;color:#4d5a75;font-weight:700;">'+String(m.local).toUpperCase()+'</div>'+
             '<input type="number" class="res-golL" min="0" value="'+golL+'" placeholder="0" oninput="calcGanadorRes('+m.num+')" style="width:56px;padding:8px;text-align:center;font-size:1.1rem;background:#0d1b2a;color:#fff;border:1px solid var(--border);border-radius:5px;"></div>'+
           '<span style="font-weight:900;color:#666;">-</span>'+
-          '<div style="text-align:center;"><div style="font-size:0.72rem;color:#6e7d99;font-weight:700;">'+String(m.visita).toUpperCase()+'</div>'+
+          '<div style="text-align:center;"><div style="font-size:0.72rem;color:#4d5a75;font-weight:700;">'+String(m.visita).toUpperCase()+'</div>'+
             '<input type="number" class="res-golV" min="0" value="'+golV+'" placeholder="0" oninput="calcGanadorRes('+m.num+')" style="width:56px;padding:8px;text-align:center;font-size:1.1rem;background:#0d1b2a;color:#fff;border:1px solid var(--border);border-radius:5px;"></div>'+
           '<div style="margin-left:8px;display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start;">'+
             '<div style="text-align:center;"><div style="font-size:0.62rem;color:#f1c40f;margin-bottom:4px;font-weight:700;">T.A LOC</div>'+
@@ -3274,10 +3279,10 @@ function renderPronosticoManual(){
         '<div class="partido-header"><span>PARTIDO '+m.num+' &middot; '+etiqueta+'</span>'+
         '<span class="partido-fecha">'+String(m.local).toUpperCase()+' vs '+String(m.visita).toUpperCase()+'</span></div>'+
         '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px;background:#0a1422;border:1px solid var(--border);border-radius:0 0 8px 8px;">'+
-          '<div style="text-align:center;"><div style="font-size:0.7rem;color:var(--muted);">'+String(m.local).toUpperCase()+'</div>'+
+          '<div style="text-align:center;"><div style="font-size:0.72rem;color:#4d5a75;font-weight:700;">'+String(m.local).toUpperCase()+'</div>'+
             '<input type="number" class="man-golL" min="0" value="'+golL+'" placeholder="0" style="width:60px;padding:8px;text-align:center;font-size:1.1rem;background:#0d1b2a;color:#fff;border:1px solid var(--border);border-radius:5px;"></div>'+
           '<span style="font-weight:900;color:#666;">-</span>'+
-          '<div style="text-align:center;"><div style="font-size:0.7rem;color:var(--muted);">'+String(m.visita).toUpperCase()+'</div>'+
+          '<div style="text-align:center;"><div style="font-size:0.72rem;color:#4d5a75;font-weight:700;">'+String(m.visita).toUpperCase()+'</div>'+
             '<input type="number" class="man-golV" min="0" value="'+golV+'" placeholder="0" style="width:60px;padding:8px;text-align:center;font-size:1.1rem;background:#0d1b2a;color:#fff;border:1px solid var(--border);border-radius:5px;"></div>'+
           '<div style="margin-left:auto;text-align:center;"><div style="font-size:0.7rem;color:var(--muted);margin-bottom:4px;">+2.5 TARJETAS</div>'+
             '<div class="man-tarj '+(tSi?'on':'')+'" onclick="toggleResTarjeta(this)" style="cursor:pointer;padding:8px 16px;border-radius:6px;font-weight:700;background:'+(tSi?'var(--green-ok)':'#333')+';color:'+(tSi?'#000':'#aaa')+';min-width:50px;">'+(tSi?'SI':'NO')+'</div></div>'+
