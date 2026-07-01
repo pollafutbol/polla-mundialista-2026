@@ -2049,19 +2049,23 @@ var usuarioActual = null;
 // La recuperacion de clave sigue funcionando por el sistema de siempre (WhatsApp).
 // ============================================================
 function _guardiaSesion(cod, clave){
+  var _diag = (typeof location!=='undefined' && location.search && location.search.indexOf('diag')!==-1);
+  function _d(msg){ if(_diag){ try{ alert('GUARDIA (diagnostico):\n\n'+msg); }catch(e){} } }
   try{
-    if(typeof firebase==='undefined' || typeof firebase.auth!=='function') return;
-    if(!cod || !clave) return;
+    if(typeof firebase==='undefined' || typeof firebase.auth!=='function'){ _d('El SDK de Google (auth) NO esta cargado: firebase.auth no existe. (Probablemente la pagina publicada no tiene el guardia o no cargo el script.)'); return; }
+    if(!cod || !clave){ _d('Falta codigo o clave.'); return; }
     var email = String(cod).trim().toUpperCase() + '@mipolla.com';
-    firebase.auth().signInWithEmailAndPassword(email, clave).catch(function(e1){
-      // No pudo entrar: probablemente aun no esta migrado al guardia. Se crea.
-      firebase.auth().createUserWithEmailAndPassword(email, clave).catch(function(e2){
-        // Caso raro (ej: clave cambiada por recuperacion despues de migrar).
-        // El ingreso ya ocurrio por el sistema antiguo; aqui no se bloquea nada.
+    firebase.auth().signInWithEmailAndPassword(email, clave).then(function(){
+      _d('OK: ya existia la cuenta del guardia y se inicio sesion (' + email + ').');
+    }).catch(function(e1){
+      firebase.auth().createUserWithEmailAndPassword(email, clave).then(function(){
+        _d('OK: cuenta del guardia CREADA (' + email + '). Debe aparecer en Authentication > Users.');
+      }).catch(function(e2){
+        _d('ERROR al crear la cuenta (' + email + '):\n' + (e2 && e2.code) + '\n' + (e2 && e2.message));
         console.warn('Guardia: sesion no establecida para ' + cod + ' (' + (e2 && e2.code) + ')');
       });
     });
-  }catch(e){ console.warn('Guardia no disponible:', e); }
+  }catch(e){ _d('Excepcion inesperada: ' + e); console.warn('Guardia no disponible:', e); }
 }
 
 async function login() {
