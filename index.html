@@ -3,7 +3,35 @@
   ============================================================
   POLLA MUNDIALISTA 2026
   RESUMEN DE ESTE INDEX
-  Generado: 01/07/2026 - 1:15 p. m. (hora Colombia) - Nombres de equipos mas oscuros
+  Generado: 2 de julio de 2026 - ~12:15 p. m. aprox. (hora Colombia)
+  ------------------------------------------------------------
+  NUEVO EN ESTA VERSION:
+  - CORRECCION DE CRUCES REALES DE MEJORES TERCEROS (dieciseisavos): el
+    algoritmo _matchTerceros arma un cuadro valido por reglas, pero no
+    siempre coincide con la eleccion puntual real de FIFA. Como el
+    Mundial ya esta en curso y estos 8 cruces ya son un hecho confirmado,
+    se agrego una tabla de correccion (CRUCES_TERCEROS_REALES) en
+    calcularClasificadosOficiales() con los cruces reales verificados:
+    P74 Alemania-Paraguay, P77 Francia-Suecia, P79 Mexico-Ecuador,
+    P80 Inglaterra-RD Congo, P81 Estados Unidos-Bosnia, P82 Belgica-
+    Senegal, P85 Suiza-Argelia (el que Hector detecto mal, mostraba
+    Suiza vs Senegal), P87 Colombia-Ghana. Solo se aplica si el equipo
+    real esta entre los 8 mejores terceros calculados, para no romper
+    nada si aun faltan resultados de grupos por cargar.
+  - REGISTRAR JUGADOR: se quito el boton viejo "REGISTRAR JUGADOR" (solo
+    guardaba, sin enviar WhatsApp, y solo lo veia el admin absoluto).
+    Ahora un solo boton "GUARDAR Y ENVIAR POR WHATSAPP" hace las dos
+    cosas, disponible para admin absoluto y admin parcial.
+  - ESTADISTICA DE APUESTAS POR PARTIDO: nuevo boton (icono de barras)
+    junto a cada partido en la hoja de Pronosticos del jugador (abre
+    ventana con el porcentaje de cada marcador pronosticado, se
+    actualiza sola, funciona con envio cerrado) y en Control de
+    Resultados del admin (con extras: "Copiar para WhatsApp" y
+    "Descargar imagen").
+  - Estos 3 cambios funcionales ya se habian hecho primero en el index
+    NUEVO ("Polla Futbolera") y estaban anotados como pendientes en
+    cambios_pendientes_index_viejo.md; ahora quedan aplicados tambien
+    aqui, en el index viejo.
   ------------------------------------------------------------
   NUEVO EN ESTA VERSION:
   - Nombres de los equipos mas OSCUROS (color #4d5a75, en negrita) en las dos
@@ -472,6 +500,12 @@ tr.fila-oficial-pend td{color:#9aa7b8!important;background:rgba(120,130,150,0.08
 .pts-num{color:var(--gold);font-weight:900;}
 /* MODAL */
 .modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);z-index:9999;align-items:center;justify-content:center;}
+.btn-stat{background:#111;border:2px solid var(--gold);color:var(--gold);border-radius:4px;width:34px;height:30px;font-size:0.95rem;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:0.15s;}
+.btn-stat:hover{background:var(--gold);color:#000;}
+.stat-modal-box{background:#0d1b2a;border:2px solid var(--gold);border-radius:8px;padding:24px;max-width:440px;width:92%;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.6);color:#fff;}
+.stat-modal-box h2{font-family:'Inter',sans-serif;font-weight:900;color:var(--gold);font-size:1.3rem;letter-spacing:1px;margin-bottom:4px;}
+.stat-modal-btns{display:flex;gap:8px;justify-content:center;margin-top:18px;flex-wrap:wrap;}
+.stat-modal-btns button{padding:9px 16px;border:none;border-radius:6px;cursor:pointer;font-family:'Inter',sans-serif;font-weight:700;font-size:0.8rem;}
 .modal-overlay.open{display:flex;}
 .modal-box{background:#fff;color:#000;padding:30px;border-radius:10px;text-align:center;border:4px solid var(--gold);max-width:460px;width:90%;}
 .modal-box h2{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:2px;margin-bottom:10px;}
@@ -1108,10 +1142,9 @@ tr.fila-oficial-pend td{color:#9aa7b8!important;background:rgba(120,130,150,0.08
           <input type="text" id="adm-ciudad" placeholder="Ciudad del jugador" style="background:#0d1b2a;border:1px solid #233554;border-radius:5px;color:#fff;padding:8px;width:100%;">
         </div>
       </div>
-      <!-- Botones: REGISTRAR solo H175, WHATSAPP todos -->
+      <!-- Un solo boton: guarda el jugador en la base de datos Y abre WhatsApp con sus credenciales. Disponible para admin absoluto y parcial. -->
       <div style="display:flex;gap:10px;margin-top:15px;flex-wrap:wrap;">
-        <button id="btnRegistrarJugador" class="btn-action btn-green" onclick="registrarJugador()" style="flex:1;display:none;">REGISTRAR JUGADOR</button>
-        <button class="btn-action btn-blue" onclick="enviarWhatsApp()" style="flex:1;">📱 ENVIAR POR WHATSAPP</button>
+        <button class="btn-action btn-blue" onclick="enviarWhatsApp()" style="flex:1;">📱 GUARDAR Y ENVIAR POR WHATSAPP</button>
       </div>
       <div style="margin-top:6px;text-align:center;">
         <span style="font-size:0.7rem;color:#444;font-family:'Barlow Condensed';letter-spacing:1px;"><span style="color:#ff4444;">*</span> Campos obligatorios</span>
@@ -1266,6 +1299,17 @@ tr.fila-oficial-pend td{color:#9aa7b8!important;background:rgba(120,130,150,0.08
     <div class="modal-btns">
       <button style="background:var(--green-ok);color:#000;" onclick="procesarEnvio()">SI, ENVIAR</button>
       <button style="background:#c0392b;color:#fff;" onclick="cerrarModal('modalEnvio')">CANCELAR</button>
+    </div>
+  </div>
+</div>
+<div id="statModalOverlay" class="modal-overlay">
+  <div class="stat-modal-box" id="statModalBox">
+    <h2 id="statModalTitulo">Partido</h2>
+    <div id="statModalBody"><p style="color:#aaa;">Cargando...</p></div>
+    <div class="stat-modal-btns">
+      <button id="statModalBtnCopiar" style="background:var(--usa);color:#fff;display:none;" onclick="copiarEstadisticaWA()">Copiar para WhatsApp</button>
+      <button id="statModalBtnImagen" style="background:var(--gold);color:#000;display:none;" onclick="descargarImagenEstadistica()">Descargar imagen</button>
+      <button style="background:#3a1f1f;color:#ff8a8a;" onclick="cerrarStatModal()">Cerrar</button>
     </div>
   </div>
 </div>
@@ -2164,9 +2208,7 @@ function mostrarInterfazAdmin(cod) {
   cargarPremundialOficial();
   cargarChonticoResultado();
   setTimeout(aplicarRestriccionFechas, 300);
-  // Botón REGISTRAR (guardado directo) solo para admins con control absoluto
-  var btnReg = document.getElementById('btnRegistrarJugador');
-  if (btnReg) btnReg.style.display = esAbsoluto ? 'block' : 'none';
+  // El boton de registrar/enviar ahora es unico y visible para todos los admins (absoluto y parcial).
   // Secciones SOLO para control absoluto: Pronostico Manual y Crear Admins
   var cardPM = document.getElementById('cardPronosticoManual');
   if (cardPM) cardPM.style.display = esAbsoluto ? 'block' : 'none';
@@ -3102,6 +3144,7 @@ function renderResultadosAdmin(){
       var etiqueta = m.elim ? _faseNombre(m.n) : ('Grupo '+m.grupo);
       html += '<div class="partido-block" data-num="'+m.num+'"'+(m.elim?' data-elim="1" data-local="'+String(m.local).toUpperCase()+'" data-visita="'+String(m.visita).toUpperCase()+'"':'')+' style="margin-bottom:14px;">'+
         '<div class="partido-header"><span>PARTIDO '+m.num+' &middot; '+etiqueta+'</span>'+
+        '<button class="btn-stat" data-jornada="'+resJornadaVista+'" data-num="'+m.num+'" data-titulo="'+String(m.local).toUpperCase()+' vs '+String(m.visita).toUpperCase()+'" data-admin="1" onclick="verEstadisticaPartidoBtn(this)" title="Ver estadistica de apuestas">&#128202;</button>'+
         '<span class="partido-fecha">'+String(m.local).toUpperCase()+' vs '+String(m.visita).toUpperCase()+'</span></div>'+
         '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px;background:#0a1422;border:1px solid var(--border);border-radius:0 0 8px 8px;">'+
           '<div style="text-align:center;"><div style="font-size:0.72rem;color:#4d5a75;font-weight:700;">'+String(m.local).toUpperCase()+'</div>'+
@@ -3439,6 +3482,96 @@ function toggleSi(el) {
 }
 function abrirModalEnvio() { document.getElementById('modalEnvio').classList.add('open'); }
 function cerrarModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// ============================================================
+// ESTADISTICA DE APUESTAS POR PARTIDO
+// ============================================================
+function _obtenerEstadisticaPartido(jornada, numPartido, cb){
+  if(typeof db==='undefined'){ cb({error:true}); return; }
+  db.ref('pronosticos').once('value', function(snap){
+    var todos = snap.val()||{};
+    var conteo = {};
+    var total = 0;
+    Object.keys(todos).forEach(function(cod){
+      var j = todos[cod] && todos[cod]['j'+jornada];
+      var p = j && j['p'+numPartido];
+      if(p && p.golL!==undefined && p.golL!==null && p.golL!=='' && p.golV!==undefined && p.golV!==null && p.golV!==''){
+        var key = p.golL+' - '+p.golV;
+        conteo[key] = (conteo[key]||0)+1;
+        total++;
+      }
+    });
+    var filas = Object.keys(conteo).map(function(k){
+      return {marcador:k, cant:conteo[k], pct: total? Math.round(conteo[k]*100/total) : 0};
+    }).sort(function(a,b){ return b.cant-a.cant; });
+    cb({error:false, total:total, filas:filas});
+  }, function(){ cb({error:true}); });
+}
+function verEstadisticaPartidoBtn(el){
+  var jornada = el.getAttribute('data-jornada');
+  var num = el.getAttribute('data-num');
+  var titulo = el.getAttribute('data-titulo');
+  var esAdmin = el.getAttribute('data-admin')==='1';
+  verEstadisticaPartido(jornada, num, titulo, esAdmin);
+}
+function verEstadisticaPartido(jornada, numPartido, titulo, esAdmin){
+  var overlay=document.getElementById('statModalOverlay');
+  var tit=document.getElementById('statModalTitulo');
+  var body=document.getElementById('statModalBody');
+  if(tit) tit.textContent = titulo || ('Partido '+numPartido);
+  if(body) body.innerHTML = '<p style="color:#aaa;">Cargando estadistica...</p>';
+  overlay.dataset.textoCopiar = '';
+  document.getElementById('statModalBtnCopiar').style.display = esAdmin ? 'inline-block' : 'none';
+  document.getElementById('statModalBtnImagen').style.display = esAdmin ? 'inline-block' : 'none';
+  overlay.classList.add('open');
+  _obtenerEstadisticaPartido(jornada, numPartido, function(res){
+    if(res.error){ if(body) body.innerHTML='<p style="color:var(--red-alert);">No se pudo cargar la estadistica (sin conexion a la base de datos).</p>'; return; }
+    if(!res.total){ if(body) body.innerHTML='<p style="color:#aaa;">Aun no hay pronosticos enviados para este partido.</p>'; return; }
+    var html='<p style="color:#aaa;font-size:0.82rem;margin-bottom:14px;">'+res.total+' jugador(es) enviaron pronostico para este partido</p>';
+    var textoWA = titulo+'\n'+res.total+' pronosticos recibidos:\n';
+    res.filas.forEach(function(f){
+      html+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:9px;">'+
+        '<div style="min-width:58px;font-family:\'Inter\',sans-serif;font-weight:900;font-size:1.05rem;color:var(--gold);text-align:center;">'+f.marcador+'</div>'+
+        '<div style="flex:1;background:#000;border-radius:4px;height:10px;overflow:hidden;"><div style="height:100%;width:'+f.pct+'%;background:var(--gold);"></div></div>'+
+        '<div style="min-width:56px;text-align:right;font-weight:700;color:#fff;font-size:0.85rem;">'+f.pct+'% ('+f.cant+')</div>'+
+      '</div>';
+      textoWA += f.marcador+': '+f.pct+'% ('+f.cant+' jugador(es))\n';
+    });
+    if(body) body.innerHTML = html;
+    overlay.dataset.textoCopiar = textoWA;
+  });
+}
+function cerrarStatModal(){ document.getElementById('statModalOverlay').classList.remove('open'); }
+function copiarEstadisticaWA(){
+  var txt = document.getElementById('statModalOverlay').dataset.textoCopiar || '';
+  if(!txt){ alert('Aun no hay datos para copiar.'); return; }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(function(){ alert('Estadistica copiada. Ya la puedes pegar en el grupo de WhatsApp.'); });
+  } else {
+    var ta=document.createElement('textarea'); ta.value=txt; document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); }catch(e){}
+    document.body.removeChild(ta);
+    alert('Estadistica copiada. Ya la puedes pegar en el grupo de WhatsApp.');
+  }
+}
+function descargarImagenEstadistica(){
+  if(typeof html2canvas==='undefined'){
+    var s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+    s.onload=function(){ _capturarModalStat(); };
+    s.onerror=function(){ alert('No se pudo cargar la herramienta de imagen. Revisa tu conexion a internet.'); };
+    document.head.appendChild(s);
+  } else { _capturarModalStat(); }
+}
+function _capturarModalStat(){
+  var box=document.getElementById('statModalBox');
+  html2canvas(box,{backgroundColor:'#0d1b2a'}).then(function(canvas){
+    var link=document.createElement('a');
+    link.download='estadistica_partido.png';
+    link.href=canvas.toDataURL();
+    link.click();
+  });
+}
 function procesarEnvio() {
   cerrarModal('modalEnvio');
   if (!usuarioActual) { alert('Debes iniciar sesion para enviar pronosticos.'); return; }
@@ -3694,6 +3827,7 @@ function renderPronosticos(){
     html+='<div class="partido-block">'+
       '<div class="partido-header">'+
         '<span>PARTIDO '+m.num+' &middot; '+etiqueta+'</span>'+
+        '<button class="btn-stat" data-jornada="'+jornadaVista+'" data-num="'+m.num+'" data-titulo="'+String(m.local).toUpperCase()+' vs '+String(m.visita).toUpperCase()+'" data-admin="0" onclick="verEstadisticaPartidoBtn(this)" title="Ver estadistica de apuestas">&#128202;</button>'+
         '<span class="partido-fecha">'+m.fec+' 2026 &middot; '+ajustarHora(m.hor)+'</span>'+
       '</div>'+
       '<div class="tabla-juego-wrap"><table class="tabla-juego">'+
@@ -4546,6 +4680,18 @@ function calcularClasificadosOficiales(resultados) {
   } else if (top8.length === 8) {
     top8.forEach(function(t,i){ if (SLOTS_TERCEROS[i]!==undefined) clasificados['3_'+SLOTS_TERCEROS[i]] = { name:t.name, flag:t.flag }; });
   }
+  // CORRECCION CON CRUCES REALES CONFIRMADOS DEL MUNDIAL 2026 (dieciseisavos):
+  // el algoritmo de arriba arma un cuadro VALIDO por reglas, pero no siempre coincide
+  // con la eleccion puntual real de FIFA. Como estos 8 cruces ya son un hecho
+  // confirmado (fase de grupos terminada), se sobreescriben aqui con los cruces
+  // reales. Solo se aplica si ese equipo real esta entre los 8 mejores terceros
+  // calculados, para no romper nada si aun faltan resultados de grupos por cargar.
+  var CRUCES_TERCEROS_REALES = { 74:'Paraguay', 77:'Suecia', 79:'Ecuador', 80:'RD Congo', 81:'Bosnia', 82:'Senegal', 85:'Argelia', 87:'Ghana' };
+  Object.keys(CRUCES_TERCEROS_REALES).forEach(function(slotNum){
+    var nombreReal = CRUCES_TERCEROS_REALES[slotNum];
+    var t = top8.find(function(x){ return x.name===nombreReal; });
+    if (t) clasificados['3_'+slotNum] = { name:t.name, flag:t.flag };
+  });
   return clasificados;
 }
 
