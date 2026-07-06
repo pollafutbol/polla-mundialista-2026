@@ -3,183 +3,35 @@
   ============================================================
   POLLA MUNDIALISTA 2026
   RESUMEN DE ESTE INDEX
-  Generado: 2 de julio de 2026 - ~12:15 p. m. aprox. (hora Colombia)
+  Generado: 6 de julio de 2026 - ~9:50 a. m. aprox. (hora Colombia)
   ------------------------------------------------------------
   NUEVO EN ESTA VERSION:
-  - CORRECCION DE CRUCES REALES DE MEJORES TERCEROS (dieciseisavos): el
-    algoritmo _matchTerceros arma un cuadro valido por reglas, pero no
-    siempre coincide con la eleccion puntual real de FIFA. Como el
-    Mundial ya esta en curso y estos 8 cruces ya son un hecho confirmado,
-    se agrego una tabla de correccion (CRUCES_TERCEROS_REALES) en
-    calcularClasificadosOficiales() con los cruces reales verificados:
-    P74 Alemania-Paraguay, P77 Francia-Suecia, P79 Mexico-Ecuador,
-    P80 Inglaterra-RD Congo, P81 Estados Unidos-Bosnia, P82 Belgica-
-    Senegal, P85 Suiza-Argelia (el que Hector detecto mal, mostraba
-    Suiza vs Senegal), P87 Colombia-Ghana. Solo se aplica si el equipo
-    real esta entre los 8 mejores terceros calculados, para no romper
-    nada si aun faltan resultados de grupos por cargar.
-  - REGISTRAR JUGADOR: se quito el boton viejo "REGISTRAR JUGADOR" (solo
-    guardaba, sin enviar WhatsApp, y solo lo veia el admin absoluto).
-    Ahora un solo boton "GUARDAR Y ENVIAR POR WHATSAPP" hace las dos
-    cosas, disponible para admin absoluto y admin parcial.
-  - ESTADISTICA DE APUESTAS POR PARTIDO: nuevo boton (icono de barras)
-    junto a cada partido en la hoja de Pronosticos del jugador (abre
-    ventana con el porcentaje de cada marcador pronosticado, se
-    actualiza sola, funciona con envio cerrado) y en Control de
-    Resultados del admin (con extras: "Copiar para WhatsApp" y
-    "Descargar imagen").
-  - Estos 3 cambios funcionales ya se habian hecho primero en el index
-    NUEVO ("Polla Futbolera") y estaban anotados como pendientes en
-    cambios_pendientes_index_viejo.md; ahora quedan aplicados tambien
-    aqui, en el index viejo.
+  - REPARACION DE LA SESION SEGURA (Guardia): se detecto que el aviso
+    "Hubo un problema guardando. Revisa tu conexion" en Control de
+    Resultados NO era de internet: era que la sesion segura (Firebase
+    Auth) no habia quedado activa, y esos nodos (resultados,
+    pronosticos, envios, admins) exigen sesion segura para escribir.
+    Se agrego la funcion _asegurarSesionSegura(), que detecta si la
+    sesion esta vencida, pide la clave una vez para reactivarla, y
+    reintenta guardar solo SIN perder lo ya escrito. Se conecto a:
+    guardarResultadosJornada (Control de Resultados), procesarEnvio
+    (el jugador envia su pronostico), guardarPronosticoManual
+    (Pronostico Manual del admin) y crearAdminNuevo.
+  - Esto probablemente tambien explica por que a un jugador
+    (Anael Gutierrez) no le quedo guardada la Jornada 19: su envio
+    pudo haber fallado silenciosamente ese dia por el mismo motivo.
+    OJO: esta reparacion evita que el problema se repita, pero NO
+    recupera datos que ya se perdieron; si la Jornada 19 de ese
+    jugador nunca se guardo, hay que reingresarla a mano con
+    "Pronostico Manual" si Hector sabe (o puede confirmar con el
+    jugador) que pronostico habia hecho.
+  - CORRECCION DE CRUCES REALES DE MEJORES TERCEROS (dieciseisavos):
+    ya aplicada en la entrega anterior (P74 Alemania-Paraguay, P77
+    Francia-Suecia, P79 Mexico-Ecuador, P80 Inglaterra-RD Congo, P81
+    Estados Unidos-Bosnia, P82 Belgica-Senegal, P85 Suiza-Argelia,
+    P87 Colombia-Ghana). Se conserva.
   ------------------------------------------------------------
-  NUEVO EN ESTA VERSION:
-  - Nombres de los equipos mas OSCUROS (color #4d5a75, en negrita) en las dos
-    pantallas del admin: Control de Resultados y Pronostico Manual del Jugador.
-  - (Guardia OK y version limpia, se conserva de la version anterior.)
 
-  ANTES (Version LIMPIA - guardia OK - se conserva):
-  - El Guardia de Google quedo FUNCIONANDO (crea las cuentas en
-    Authentication > Users). Esta es la version LIMPIA: se quito el diagnostico
-    (ya no aparece ningun mensaje con ?diag=1). La API key sigue corregida
-    (AIzaSyCVINCBel...). Esta es la version para publicar de forma definitiva.
-
-  ANTES (Correccion de la API key - se conserva):
-  - CORREGIDA la API key de Firebase en firebaseConfig: tenia una letra mal
-    (una "L" mayuscula donde iba "l" minuscula). La base de datos funcionaba,
-    pero el Guardia de Google (Firebase Auth) rechazaba la clave con el error
-    "API key not valid", por eso no se creaban las cuentas. Ahora la clave es
-    la correcta (AIzaSyCVINCBel...). El guardia ya deberia crear las cuentas.
-  - Sigue incluida la version de diagnostico del guardia (mensaje en pantalla
-    solo si se abre la pagina con ?diag=1). Se quitara en la proxima entrega,
-    cuando se confirme que el guardia crea las cuentas.
-
-  ANTES (Cruce de terceros - se conserva):
-  - CRUCE DE MEJORES TERCEROS corregido: se elimino la tabla vieja de
-    combinaciones (que asignaba mal y llegaba a cruzar equipos del mismo grupo,
-    ej: Alemania 1E vs Ecuador 3E). Ahora se usa un emparejamiento que RESPETA
-    las reglas FIFA: cada tercero solo puede caer en una llave cuyos grupos
-    permitidos lo incluyan, y NUNCA contra un equipo de su propio grupo. Funcion
-    _matchTerceros + _SLOTS_TERCERO_ALLOW. Aplica al oficial (Estadistica/Fixture)
-    y al simulador. Probado en las 495 combinaciones: 0 asignaciones invalidas.
-    Nota: FIFA en su tabla oficial elige una opcion concreta entre varias validas;
-    esta logica garantiza un cuadro VALIDO por reglas, no necesariamente identico
-    a la eleccion puntual de FIFA en cada caso.
-
-  ANTES (Ajustes varios - se conserva):
-  - RESULTADO OFICIAL en la hoja de pronosticos aunque el jugador no haya enviado:
-    si la jornada ya tiene resultados oficiales cargados, ahora la fila verde
-    "Oficial" aparece igual bajo cada partido (antes solo salia si el jugador
-    habia enviado; por eso en eliminatorias no se veia). Funcion mostrarOficialesSinEnvio.
-  - REGLAMENTO: nota nueva aclarando que en eliminatorias el marcador (Exacto/
-    Ganador/Empate) se califica SOLO con el resultado de los 90 minutos; el tiempo
-    extra y los penales no cambian ese marcador (son apuestas aparte).
-  - COLORES: nombres de los equipos en Control de Resultados mas sobrios y en
-    negrita; el verde del resultado oficial ahora es mas oscuro.
-  - TERCEROS: confirmado que el orden de los mejores terceros sigue el criterio
-    FIFA (puntos -> diferencia de gol -> goles a favor), tanto en el ranking como
-    en la asignacion de llaves. La asignacion a cada llave usa la tabla de
-    combinaciones FIFA (COMBINACIONES_FIFA).
-
-  ANTES (Fixture + Pronostico Manual eliminatorias - se conserva):
-  F. FIXTURE: boton "Fixture" en Estadistica Oficial con el cuadro
-     completo de eliminatorias (16avos -> Final + 3er puesto) en columnas que se
-     deslizan de lado en celular. Se llena solo con los resultados oficiales; el
-     ganador de cada llave avanza resaltado en verde. Sin marca de agua. Solo
-     lectura (no toca nada mas).
-  M. PRONOSTICO MANUAL DEL JUGADOR ahora incluye ELIMINATORIAS: la lista de
-     jornadas suma las eliminatorias cuyos cruces ya estan definidos (igual que
-     en la pantalla del jugador). En esos partidos aparecen tambien las apuestas
-     de Tiempo Extra y Penales, y se guardan bien. No toca guardia, ranking ni
-     Control de Resultados; solo amplia la pantalla del pronostico manual.
-
-  ANTES (Tarjetas T.A / T.R - se conserva):
-       - Control de Resultados Oficiales: se quitaron "N. Tarjetas" y "T. Roja"
-         y se pusieron 4 casillas por partido: T.A Local, T.A Visitante, T.R
-         Local, T.R Visitante.
-       - El ranking NO cambia: al guardar, el sistema deriva el total de
-         tarjetas (amarillas + rojas de ambos) para la apuesta "+2.5", y marca
-         roja=SI si hubo 1 o mas rojas. _puntuarPartido sigue igual.
-       - Estadistica Oficial: la tabla de posiciones de cada grupo gana columnas
-         T.A y T.R (acumuladas por equipo); el partido a partido muestra T.A y
-         T.R como Local - Visitante; la vista de eliminatorias tambien.
-       - Los partidos cargados con el formato viejo muestran "-" en T.A/T.R
-         hasta que se reescriban en Control de Resultados.
-       - La pantalla "Pronostico Manual del Jugador" NO se toco (ahi el jugador
-         pronostica SI/NO, que es lo correcto).
-
-  ANTES (Guardia de Google - se conserva):
-     Montado de forma ADITIVA y A PRUEBA DE FALLOS sobre el ingreso de siempre:
-       - El sistema de siempre sigue VALIDANDO el ingreso (codigo + clave, con
-         su hash y la recuperacion por WhatsApp). El guardia se monta encima.
-       - Tras validar, se establece una sesion del guardia con la clave del
-         jugador y un correo inventado CODIGO@mipolla.com (no existe, no recibe
-         correos). La primera vez crea la cuenta del guardia (migracion solita).
-       - TODO el guardia va envuelto en try/catch: si algo del guardia falla,
-         NUNCA bloquea el ingreso. Los jugadores entran igual que siempre.
-       - Aplica a los 3 caminos (admin de fabrica H175, admin de la nube y
-         jugador), a la activacion de cuenta y al cambio de clave. El cierre de
-         sesion tambien cierra el guardia.
-       - Requiere el SDK firebase-auth.js (agregado) y que en la consola de
-         Firebase este habilitado "Correo electronico/contrasena" (ya hecho).
-  H. Corregido el mensaje de confirmacion al enviar pronosticos: ya no apunta a
-     "Mis Pronosticos" (boton retirado); ahora dice "Pronosticos".
-
-  PENDIENTE A PROPOSITO (siguientes pasos):
-    - Apretar las reglas de Firebase (quitar el aviso rojo): DESPUES de confirmar
-      que el login con guardia funciona bien.
-    - Cambio de tarjetas T.A / T.R por equipo en Estadistica Oficial y en Control
-      de Resultados (siguiente entrega).
-
-  ANTES (se conserva):
-  A. Tablas de grupo de Estadistica Oficial: ahora el 3er puesto se pinta de
-     AMARILLO cuando esta entre los 8 mejores terceros (verde 1-2, rojo fuera),
-     con su leyenda de colores debajo.
-  B. Nuevo boton "Mejores 3" dentro de Estadistica Oficial: ranking oficial de
-     los 12 terceros con los 8 que clasifican resaltados en amarillo. Provisional
-     hasta que terminen los grupos; se llena solo con resultados oficiales.
-  C. Menu: "Simulador Grupos" se renombro a "SIMULADOR PERSONAL" y ahora incluye
-     adentro las Eliminatorias (16avos, 8vos, Cuartos, Semi y Final).
-  D. Se quitaron del menu los botones "RESULTADOS" y "MIS PRONOSTICOS" (quedan
-     dormidos en el codigo, no se borraron). El "Control de Resultados" del panel
-     de administrador NO se toco: sigue siendo donde se cargan los oficiales.
-
-  ANTES (Estadistica Oficial - se conserva):
-  0. ESTADISTICA OFICIAL: nuevo boton en la barra (junto a Ranking). Muestra,
-     leyendo SOLO lo que la administracion carga en Control de Resultados:
-       - Tabla de posiciones oficial de cada grupo A-L (Pts, PJ, PG, PE, PP,
-         GF, GC, DG), ordenada sola, con los 2 primeros en verde (clasifican).
-       - Partido a partido de cada grupo con marcador, columna +2.5 Tarjetas
-         (marca si hubo 3 o mas) y columna Roja (Si/No).
-       - Eliminatorias completas hasta la Gran Final (16avos, 8vos, Cuartos,
-         Semifinal, 3er Puesto y Final), resolviendo cruces y los 8 mejores
-         terceros, con marcador, tiempo extra, penales, +2.5 Tarjetas y Roja.
-     Es SOLO LECTURA: no escribe nada, no toca el Ranking ni el login. Se
-     actualiza en vivo cuando se cargan resultados. El boton RESULTADOS se
-     mantiene tal cual (no se quita).
-
-  VERSIONES ANTERIORES (se conservan):
-  1. Crear Administrador: boton para poner/quitar control absoluto a un admin
-     ya creado, y se muestra la fecha y hora de creacion de cada uno.
-  2. Hoja de pronosticos YA ENVIADA: se rellena con el pronostico real del
-     jugador (marcador + SI/NO de cada apuesta con castigo); aviso con fecha y
-     hora de envio y, si un admin lo modifico, "Modificado por la administracion
-     (codigo) el (fecha y hora)". Fila verde "Oficial" bajo cada partido con el
-     resultado real (o "Oficial: pendiente" si aun no se ha cargado).
-  3. Ranking en celular plegable: top 3 completos; del 4to en adelante solo
-     nombre + puntaje, con clic para desplegar/cerrar el detalle.
-  4. Proteccion de H175: el administrador principal H175 NO se puede eliminar
-     ni se le puede quitar el control absoluto (intocable para todos). Los
-     admins absolutos si pueden crear, ascender/degradar y borrar a OTROS admins.
-
-  PENDIENTE / FUTURO:
-  - Firebase Authentication (login propio de Google; las claves nunca tocan la
-    pagina). Es el salto de seguridad real; implica rediseñar el flujo
-    "codigo + clave por WhatsApp". Para un index futuro.
-  - Reglas de seguridad de Firebase (ajuste en la consola, sin tocar codigo)
-    para apretar quien puede leer la base. Se puede hacer cuando se quiera.
-  ============================================================
--->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -2128,6 +1980,27 @@ function _guardiaSesion(cod, clave){
     });
   }catch(e){ console.warn('Guardia no disponible:', e); }
 }
+// Repara la sesion segura si se vencio/no quedo activa, y REINTENTA la accion.
+// Se usa antes de guardar en nodos protegidos (resultados, pronosticos, envios,
+// admins) para que un fallo silencioso del Guardia no impida guardar ni se
+// confunda con "problema de internet". Si no hace falta reparar nada, ejecuta
+// la accion de inmediato.
+function _asegurarSesionSegura(accion){
+  try{
+    if(typeof firebase==='undefined' || typeof firebase.auth!=='function'){ accion(); return; }
+    if(firebase.auth().currentUser){ accion(); return; }
+    var cod = usuarioActual ? usuarioActual.codigo : '';
+    if(!cod){ accion(); return; }
+    var clave = prompt('Tu sesion segura se vencio. Escribe de nuevo tu clave de ' + cod + ' para poder guardar:');
+    if(!clave){ alert('No se guardo nada: se necesita la clave para continuar de forma segura.'); return; }
+    var email = String(cod).trim().toUpperCase() + '@mipolla.com';
+    firebase.auth().signInWithEmailAndPassword(email, clave).then(function(){ accion(); }).catch(function(){
+      firebase.auth().createUserWithEmailAndPassword(email, clave).then(function(){ accion(); }).catch(function(e2){
+        alert('No se pudo restablecer la sesion segura. Revisa que la clave sea correcta. (' + (e2 && e2.message ? e2.message : '') + ')');
+      });
+    });
+  }catch(e){ accion(); }
+}
 
 async function login() {
   var cod  = document.getElementById('loginCodigo').value.trim().toUpperCase();
@@ -2795,7 +2668,8 @@ function toggleNivelAdmin(){
 }
 window.toggleNivelAdmin=toggleNivelAdmin;
 
-function crearAdminNuevo(){
+function crearAdminNuevo(){ _asegurarSesionSegura(_crearAdminNuevoReal); }
+function _crearAdminNuevoReal(){
   // Seguridad: solo un admin con control absoluto puede crear admins
   if(!(usuarioActual && usuarioActual.esAdmin && usuarioActual.adminTotal===true)){
     alert('Solo un administrador con control absoluto puede crear administradores.'); return;
@@ -3353,7 +3227,8 @@ function irAManualJornada(n){
   if(!_manualNums || _manualNums.indexOf(n)===-1) return;
   manualJornadaVista=n; renderPronosticoManual();
 }
-function guardarPronosticoManual(){
+function guardarPronosticoManual(){ _asegurarSesionSegura(_guardarPronosticoManualReal); }
+function _guardarPronosticoManualReal(){
   var cod=manualJugadorCod;
   if(!cod){ alert('Busca y elige un jugador primero.'); return; }
   var cont=document.getElementById('manualContainer');
@@ -3405,7 +3280,8 @@ function irAResJornada(n){
   if(nums.indexOf(n)===-1) return;
   resJornadaVista=n; renderResultadosAdmin();
 }
-function guardarResultadosJornada(){
+function guardarResultadosJornada(){ _asegurarSesionSegura(_guardarResultadosJornadaReal); }
+function _guardarResultadosJornadaReal(){
   var cont = document.getElementById('resultadosContainer');
   if(!cont) return;
   var bloques = cont.querySelectorAll('.partido-block');
@@ -3572,7 +3448,8 @@ function _capturarModalStat(){
     link.click();
   });
 }
-function procesarEnvio() {
+function procesarEnvio() { _asegurarSesionSegura(_procesarEnvioReal); }
+function _procesarEnvioReal() {
   cerrarModal('modalEnvio');
   if (!usuarioActual) { alert('Debes iniciar sesion para enviar pronosticos.'); return; }
   var cod = usuarioActual.codigo;
