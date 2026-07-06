@@ -3,45 +3,19 @@
   ============================================================
   POLLA MUNDIALISTA 2026
   RESUMEN DE ESTE INDEX
-  Generado: 6 de julio de 2026 - ~9:50 a. m. aprox. (hora Colombia)
+  Generado: 6 de julio de 2026 - ~11:20 a. m. aprox. (hora Colombia)
   ------------------------------------------------------------
   NUEVO EN ESTA VERSION:
-  - REPARACION DE LA SESION SEGURA (Guardia): se detecto que el aviso
-    "Hubo un problema guardando. Revisa tu conexion" en Control de
-    Resultados NO era de internet: era que la sesion segura (Firebase
-    Auth) no habia quedado activa, y esos nodos (resultados,
-    pronosticos, envios, admins) exigen sesion segura para escribir.
-    Se agrego la funcion _asegurarSesionSegura(), que detecta si la
-    sesion esta vencida, pide la clave una vez para reactivarla, y
-    reintenta guardar solo SIN perder lo ya escrito. Se conecto a:
-    guardarResultadosJornada (Control de Resultados), procesarEnvio
-    (el jugador envia su pronostico), guardarPronosticoManual
-    (Pronostico Manual del admin) y crearAdminNuevo.
-  - Esto probablemente tambien explica por que a un jugador
-    (Anael Gutierrez) no le quedo guardada la Jornada 19: su envio
-    pudo haber fallado silenciosamente ese dia por el mismo motivo.
-    OJO: esta reparacion evita que el problema se repita, pero NO
-    recupera datos que ya se perdieron; si la Jornada 19 de ese
-    jugador nunca se guardo, hay que reingresarla a mano con
-    "Pronostico Manual" si Hector sabe (o puede confirmar con el
-    jugador) que pronostico habia hecho.
-  - CORRECCION DE CRUCES REALES DE MEJORES TERCEROS (dieciseisavos):
-    ya aplicada en la entrega anterior (P74 Alemania-Paraguay, P77
-    Francia-Suecia, P79 Mexico-Ecuador, P80 Inglaterra-RD Congo, P81
-    Estados Unidos-Bosnia, P82 Belgica-Senegal, P85 Suiza-Argelia,
-    P87 Colombia-Ghana). Se conserva.
+  - FIXTURE ESCALONADO: la pantalla "Fixture - Camino a la Final" (en
+    Estadistica Oficial) ahora se ve como un cuadro de eliminacion real
+    (columnas escalonadas con lineas conectoras entre cada partido y
+    el siguiente), en vez de la lista pareja de antes.
+  - Se agrego el numero de partido visible en cada tarjeta (antes solo
+    aparecia al pasar el mouse).
+  - Se agrego una caja de "CAMPEON" (con el nombre una vez definido) y,
+    justo al lado, la caja de "Tercer Puesto", debajo de todo el cuadro.
   ------------------------------------------------------------
 
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>POLLA MUNDIALISTA 2026</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;600&display=swap" rel="stylesheet">
-<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
@@ -242,19 +216,28 @@ tr.fila-oficial-pend td{color:#9aa7b8!important;background:rgba(120,130,150,0.08
 .eo-sw-green{background:rgba(0,230,118,0.55);}
 .eo-sw-yellow{background:rgba(255,221,0,0.6);}
 .eo-sw-red{background:rgba(255,23,68,0.5);}
-/* FIXTURE (cuadro de eliminatorias) */
+/* FIXTURE (cuadro de eliminatorias) — version escalonada con conectores */
 .fx-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;padding:4px 0 12px;}
-.fx-board{display:flex;gap:14px;min-width:760px;align-items:stretch;}
-.fx-col{display:flex;flex-direction:column;justify-content:space-around;gap:8px;min-width:150px;flex:1;}
-.fx-col-head{font-family:'Barlow Condensed',sans-serif;color:var(--gold);font-size:0.82rem;letter-spacing:1.5px;text-align:center;text-transform:uppercase;margin-bottom:4px;border-bottom:1px solid var(--border);padding-bottom:4px;}
+.fx-board{display:flex;gap:26px;min-width:900px;align-items:stretch;}
+.fx-col-outer{display:flex;flex-direction:column;min-width:150px;flex:1;}
+.fx-col-head{font-family:'Barlow Condensed',sans-serif;color:var(--gold);font-size:0.78rem;letter-spacing:1.5px;text-align:center;text-transform:uppercase;margin-bottom:8px;border-bottom:1px solid var(--border);padding-bottom:4px;}
+.fx-col{display:flex;flex-direction:column;justify-content:space-around;flex:1;}
+.fx-match-wrap{position:relative;padding:0 13px;}
+.fx-col[data-conn="1"] .fx-match-wrap::before{content:'';position:absolute;top:0;bottom:50%;right:100%;width:13px;border-bottom:2px solid var(--border);border-right:2px solid var(--border);}
+.fx-col[data-conn="1"] .fx-match-wrap:nth-child(2n)::before{top:50%;bottom:auto;border-top:2px solid var(--border);border-bottom:none;border-right:2px solid var(--border);}
 .fx-match{background:#0a1524;border:1px solid var(--border);border-radius:7px;overflow:hidden;}
+.fx-match-num{font-family:'Barlow Condensed',sans-serif;font-size:0.6rem;color:var(--muted);text-align:center;letter-spacing:1px;padding:2px 0;background:#050c16;border-bottom:1px solid var(--border);}
 .fx-team{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:6px 8px;font-size:0.8rem;}
 .fx-team + .fx-team{border-top:1px solid var(--border);}
 .fx-name{display:flex;align-items:center;gap:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:108px;}
 .fx-score{font-weight:900;color:var(--gold);min-width:16px;text-align:center;}
 .fx-win{background:rgba(0,230,118,0.13);}
 .fx-win .fx-name{color:var(--green-ok);font-weight:700;}
-.fx-tercero{margin-top:14px;max-width:320px;}
+.fx-abajo{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-top:20px;padding-top:16px;border-top:1px dashed var(--border);}
+.fx-campeon-box{background:linear-gradient(180deg,#2c2408,#0a1524);border:2px solid var(--gold);border-radius:8px;padding:10px 20px;text-align:center;min-width:200px;}
+.fx-campeon-label{font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;color:var(--gold);letter-spacing:2px;margin-bottom:4px;}
+.fx-campeon-name{font-family:'Bebas Neue';font-size:1.05rem;color:#fff;letter-spacing:1px;}
+.fx-tercero{min-width:200px;}
 .llave-box{position:absolute;top:15px;right:20px;background:#000;color:var(--gold);border:2px solid var(--gold);padding:5px 14px;border-radius:20px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.9rem;letter-spacing:1px;}
 .card-excel{background:#e0e0e0;color:#000;width:98%;max-width:1300px;margin:0 auto 20px;border-radius:4px;overflow:hidden;}
 .tabla-excel{width:100%;border-collapse:collapse;}
@@ -5314,6 +5297,7 @@ function _eoFixtureCard(m, part, resPorNum){
   var lFlagImg=lFlag?_eoFlag(lFlag):'';
   var vFlagImg=vFlag?_eoFlag(vFlag):'';
   return '<div class="fx-match" title="Partido '+m.n+' &middot; '+m.fec+'">'+
+    '<div class="fx-match-num">PARTIDO '+m.n+'</div>'+
     '<div class="fx-team'+(wL?' fx-win':'')+'"><span class="fx-name">'+lFlagImg+' '+lName+'</span><span class="fx-score">'+(r?lScore:'')+'</span></div>'+
     '<div class="fx-team'+(wV?' fx-win':'')+'"><span class="fx-name">'+vFlagImg+' '+vName+'</span><span class="fx-score">'+(r?vScore:'')+'</span></div>'+
     '</div>';
@@ -5330,18 +5314,39 @@ function _renderEOFixture(){
     {t:'Semifinal', ll:LLAVES_SEMI},
     {t:'Final', ll:LLAVES_FINAL.filter(function(m){return m.esFinal;})}
   ];
+  // Altura compartida por todas las columnas, calculada segun la ronda con mas
+  // partidos (Dieciseisavos), para que las siguientes rondas queden centradas
+  // exactamente entre sus dos partidos anteriores (efecto "escalonado").
+  var maxCount = rounds[0].ll.length || 1;
+  var altoPartido = 78, espacio = 12;
+  var alturaBoard = (altoPartido+espacio)*maxCount - espacio;
   var html='<div class="card-table"><h3>FIXTURE &mdash; CAMINO A LA FINAL</h3>';
-  html+='<div class="fx-wrap"><div class="fx-board">';
-  rounds.forEach(function(rd){
-    html+='<div class="fx-col"><div class="fx-col-head">'+rd.t+'</div>';
-    rd.ll.forEach(function(m){ html+=_eoFixtureCard(m, part, resPorNum); });
-    html+='</div>';
+  html+='<div class="fx-wrap"><div class="fx-board" style="height:'+alturaBoard+'px;">';
+  rounds.forEach(function(rd, ci){
+    html+='<div class="fx-col-outer"><div class="fx-col-head">'+rd.t+'</div>'+
+      '<div class="fx-col"'+(ci>0?' data-conn="1"':'')+'>';
+    rd.ll.forEach(function(m){ html+='<div class="fx-match-wrap">'+_eoFixtureCard(m, part, resPorNum)+'</div>'; });
+    html+='</div></div>';
   });
   html+='</div></div>';
-  var ter=LLAVES_FINAL.filter(function(m){return m.tercero;});
+  // Campeon y Tercer Puesto, justo debajo del cuadro (fuera del area de altura
+  // fija del bracket, para que nunca se corten ni se desalineen).
+  var finalM = rounds[rounds.length-1].ll[0];
+  var r = finalM ? resPorNum[finalM.n] : null;
+  var pr = finalM ? (part[finalM.n]||{}) : {};
+  var nombreCampeon = 'Por definir';
+  if(r && finalM){
+    var w=_ganadorDeMarcadores(r.golL,r.golV,r.exL,r.exV,r.peL,r.peV);
+    if(w==='L') nombreCampeon=(pr.l&&pr.l.name)||finalM.l;
+    else if(w==='V') nombreCampeon=(pr.v&&pr.v.name)||finalM.v;
+  }
+  html+='<div class="fx-abajo">';
+  html+='<div class="fx-campeon-box"><div class="fx-campeon-label">&#127942; CAMPEON</div><div class="fx-campeon-name">'+nombreCampeon+'</div></div>';
+  var ter=LLAVES_FINAL.filter(function(mm){return mm.tercero;});
   if(ter.length){
     html+='<div class="fx-tercero"><div class="fx-col-head" style="color:#cd7f32;">Tercer Puesto</div>'+_eoFixtureCard(ter[0], part, resPorNum)+'</div>';
   }
+  html+='</div>';
   html+='<p class="eo-nota">El cuadro se llena solo a medida que la administraci&oacute;n carga los resultados oficiales. Desliza de lado para ver todas las rondas; el ganador de cada llave avanza resaltado en verde.</p></div>';
   document.getElementById('eoContenido').innerHTML=html;
 }
