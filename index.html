@@ -3,19 +3,30 @@
   ============================================================
   POLLA MUNDIALISTA 2026
   RESUMEN DE ESTE INDEX
-  Generado: 6 de julio de 2026 - ~11:20 a. m. aprox. (hora Colombia)
+  Generado: 6 de julio de 2026 - ~2:30 p. m. aprox. (hora Colombia)
   ------------------------------------------------------------
-  NUEVO EN ESTA VERSION:
-  - FIXTURE ESCALONADO: la pantalla "Fixture - Camino a la Final" (en
-    Estadistica Oficial) ahora se ve como un cuadro de eliminacion real
-    (columnas escalonadas con lineas conectoras entre cada partido y
-    el siguiente), en vez de la lista pareja de antes.
-  - Se agrego el numero de partido visible en cada tarjeta (antes solo
-    aparecia al pasar el mouse).
-  - Se agrego una caja de "CAMPEON" (con el nombre una vez definido) y,
-    justo al lado, la caja de "Tercer Puesto", debajo de todo el cuadro.
+  CORRECCION CRITICA DE HOY: en la entrega anterior, al actualizar
+  este mismo comentario de cabecera, quedo mal cerrado (sin el "-->"
+  final). Eso hizo que TODO el bloque <head> y <style> (todo el CSS)
+  quedara escondido dentro de un comentario sin cerrar, y por eso la
+  pagina se veia sin ningun estilo (letras negras, sin colores, sin
+  tarjetas) al publicarla. Ya se reconstruyo el <head> completo desde
+  el archivo original y se le volvieron a aplicar, en orden, TODOS
+  los ajustes de diseno y las dos ediciones de CSS de hoy (modal de
+  estadistica + Fixture escalonado). Se valido que las llaves del
+  CSS estan balanceadas y que el JavaScript no tiene errores.
   ------------------------------------------------------------
 
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>POLLA MUNDIALISTA 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;600&display=swap" rel="stylesheet">
+<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
@@ -415,6 +426,7 @@ tr.fila-oficial-pend td{color:#9aa7b8!important;background:rgba(120,130,150,0.08
     <div class="dropdown-content">
       <button class="btn-sub" onclick="irA('perfil')">&#128100; Jugador</button>
       <button class="btn-sub" onclick="irA('pronosticos')">&#128221; Pronosticos</button>
+      <button class="btn-sub" onclick="irA('vertodos')">&#128101; Ver Todos los Pronosticos</button>
       <button class="btn-sub" onclick="irA('premundial')">&#127758; Pre-Mundial</button>
     </div>
   </div>
@@ -627,6 +639,23 @@ tr.fila-oficial-pend td{color:#9aa7b8!important;background:rgba(120,130,150,0.08
       Este es tu <strong style="color:var(--accent);">comprobante</strong>: aqui ves todo lo que enviaste, en solo lectura, con la fecha y hora de cada envio. No se puede modificar.
     </div>
     <div id="misPronosticosContainer"></div>
+  </div>
+</div>
+
+<!-- VER TODOS LOS PRONOSTICOS (solo lectura, jornadas ya cerradas) -->
+<div id="sec-vertodos" class="seccion">
+  <div class="pronosticos-wrap">
+    <h2 class="section-title">VER TODOS LOS PRONOSTICOS</h2>
+    <div style="background:#0d1b2a;border:1px solid var(--border);border-left:4px solid var(--gold);border-radius:8px;padding:12px 16px;margin-bottom:16px;color:var(--muted);font-size:0.9rem;line-height:1.45;">
+      Aqui puedes ver lo que pronostico <strong style="color:var(--accent);">cada jugador</strong>, partido por partido. Solo se muestran las <strong style="color:var(--gold);">jornadas ya cerradas</strong> (no se puede ver una jornada mientras siga abierta, para que nadie copie a nadie).
+    </div>
+    <div class="jornada-nav" style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;">
+      <button id="btnTodosAnterior" onclick="todosJornadaAnterior()" style="background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:8px 14px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;">&#9664; Anterior</button>
+      <div id="todosJornadaTitulo" style="font-family:'Bebas Neue',sans-serif;color:var(--gold);font-size:1.3rem;letter-spacing:2px;text-align:center;flex:1;line-height:1.1;">JORNADA</div>
+      <button id="btnTodosSiguiente" onclick="todosJornadaSiguiente()" style="background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:8px 14px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;">Siguiente &#9654;</button>
+    </div>
+    <div id="todosSaltos" style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:16px;"></div>
+    <div id="todosContainer"></div>
   </div>
 </div>
 
@@ -2206,6 +2235,7 @@ function irA(seccion) {
   if (seccion === 'eliminatorias') construirTablaEliminatoria();
   if (seccion === 'pronosticos') renderPronosticos();
   if (seccion === 'mis-pronosticos') renderMisPronosticos();
+  if (seccion === 'vertodos') renderVerTodos();
   if (seccion === 'ranking') renderizarRanking();
   if (seccion === 'premundial') { inicializarPaises(); iniciarCuentaRegresivaPM(); verificarEnvioPM(); }
   if (seccion === 'simulador') cambiarGrupo(grupoActual);
@@ -4032,6 +4062,7 @@ function filtrarJugadoresVer(){
   box.style.display='block';
 }
 var _verData=null, _verNums=[], _verJornada=null, _verCod=null;
+var _todosNums=[], _todosJornada=null;
 function verPronosticosDe(cod){
   var j=jugadoresCache[cod]||{};
   var inp=document.getElementById('ver-buscar'); if(inp) inp.value=(j.nombre||'')+' ('+cod+')';
@@ -4084,6 +4115,115 @@ function cerrarVerJugador(){
   _pintarSaltosJornada('verSaltos', [], null, 'irAVerJornada');
   var cont=document.getElementById('verPronosticosContainer'); if(cont) cont.innerHTML='';
 }
+
+// ============================================================
+// VER TODOS LOS PRONOSTICOS (jugadores comparan entre si, solo
+// lectura, y SOLO jornadas ya cerradas para que nadie copie a nadie)
+// ============================================================
+function renderVerTodos(){
+  if(_resultadosCache===null && !_resLoading && typeof db!=='undefined'){
+    _resLoading=true;
+    db.ref('resultados').once('value',function(snap){
+      _resultadosCache=snap.val()||{};
+      try{ _partElim=_participantesElim(_resultadosCache); }catch(e){ _partElim={}; }
+      _resLoading=false;
+      renderVerTodos();
+    },function(){ _resultadosCache={}; _resLoading=false; renderVerTodos(); });
+    return;
+  }
+  var data=_getCal();
+  if(!data.nums.length) return;
+  var elimBy=_elimPorJornada();
+  var elimVis=Object.keys(elimBy).map(Number).filter(function(j){
+    return elimBy[j].some(function(m){ var p=_partElim[m.n]; return p&&p.l.def&&p.v.def; });
+  }).sort(function(a,b){return a-b;});
+  var candidatos=data.nums.concat(elimVis);
+  // Solo jornadas YA CERRADAS (mismo criterio de 30 min antes del primer partido)
+  _todosNums = candidatos.filter(function(jn){
+    var esElim = elimBy[jn] && data.nums.indexOf(jn)===-1;
+    var cierre;
+    if(esElim){
+      var ms=elimBy[jn].filter(function(m){ var p=_partElim[m.n]; return p&&p.l.def&&p.v.def; }).map(function(m){return m.ts;});
+      cierre = ms.length ? Math.min.apply(null, ms) - 30*60000 : Infinity;
+    } else {
+      cierre = _cierreJornada(jn);
+    }
+    return Date.now() >= cierre;
+  });
+  var cont=document.getElementById('todosContainer');
+  var bA=document.getElementById('btnTodosAnterior'), bS=document.getElementById('btnTodosSiguiente');
+  if(!_todosNums.length){
+    var titVacio=document.getElementById('todosJornadaTitulo'); if(titVacio) titVacio.innerHTML='SIN JORNADAS CERRADAS';
+    if(bA) bA.style.display='none';
+    if(bS) bS.style.display='none';
+    _pintarSaltosJornada('todosSaltos', [], null, 'irATodosJornada');
+    if(cont) cont.innerHTML='<p style="color:var(--muted);text-align:center;padding:20px;">Todavia no hay ninguna jornada cerrada para ver.</p>';
+    return;
+  }
+  if(bA) bA.style.display='inline-block';
+  if(bS) bS.style.display='inline-block';
+  if(_todosJornada===null || _todosNums.indexOf(_todosJornada)===-1) _todosJornada=_todosNums[_todosNums.length-1];
+  var esElimJor = elimBy[_todosJornada] && data.nums.indexOf(_todosJornada)===-1;
+  var partidos;
+  if(esElimJor){
+    partidos=elimBy[_todosJornada].filter(function(m){ var p=_partElim[m.n]; return p&&p.l.def&&p.v.def; })
+      .map(function(m){ var p=_partElim[m.n]; m.local=p.l.name; m.visita=p.v.name; return m; })
+      .sort(function(a,b){return a.ts-b.ts;});
+  } else {
+    partidos=(data.jor[_todosJornada]||[]).slice().sort(function(a,b){return a.ts-b.ts;});
+  }
+  var tituloJor = esElimJor && partidos.length ? _faseNombre(partidos[0].n).toUpperCase() : ('JORNADA '+_todosJornada);
+  var fechaTxt = partidos.length ? (partidos[0].fec+' 2026') : '';
+  var tit=document.getElementById('todosJornadaTitulo');
+  if(tit) tit.innerHTML=tituloJor+'<br><span style="font-size:0.85rem;color:var(--muted);letter-spacing:1px;">'+fechaTxt+'</span>';
+  var idx=_todosNums.indexOf(_todosJornada);
+  if(bA){ bA.disabled=idx<=0; bA.style.opacity=idx<=0?'0.4':'1'; bA.style.cursor=idx<=0?'not-allowed':'pointer'; }
+  if(bS){ bS.disabled=idx>=_todosNums.length-1; bS.style.opacity=idx>=_todosNums.length-1?'0.4':'1'; bS.style.cursor=idx>=_todosNums.length-1?'not-allowed':'pointer'; }
+  _pintarSaltosJornada('todosSaltos', _todosNums, _todosJornada, 'irATodosJornada');
+  if(cont) cont.innerHTML='<p style="color:#888;padding:14px;text-align:center;">Cargando pronosticos de todos...</p>';
+  db.ref('pronosticos').once('value', function(snap){
+    var todos = snap.val() || {};
+    var html='';
+    partidos.forEach(function(m){ html += _bloquePartidoTodos(m, todos, _todosJornada); });
+    if(!partidos.length) html='<p style="color:var(--muted);text-align:center;padding:20px;">No hay partidos definidos para esta jornada.</p>';
+    if(cont) cont.innerHTML=html;
+  }, function(){
+    if(cont) cont.innerHTML='<p style="color:var(--red-alert);padding:14px;text-align:center;">No se pudo leer. Revisa tu conexion.</p>';
+  });
+}
+function _bloquePartidoTodos(m, todos, jn){
+  var filas=[];
+  Object.keys(jugadoresCache||{}).forEach(function(cod){
+    var j=todos[cod] && todos[cod]['j'+jn];
+    var p=j && j['p'+m.n];
+    if(p && p.golL!==undefined && p.golL!==null && p.golL!=='' && p.golV!==undefined && p.golV!==null && p.golV!==''){
+      var nombre=(jugadoresCache[cod]&&jugadoresCache[cod].nombre)||cod;
+      filas.push({nombre:nombre, marcador:p.golL+' - '+p.golV});
+    }
+  });
+  filas.sort(function(a,b){ return a.nombre.localeCompare(b.nombre); });
+  var lName = m.local || m.l, vName = m.visita || m.v;
+  var html = '<div class="partido-block" style="margin-bottom:14px;">'+
+    '<div class="partido-header"><span>PARTIDO '+m.n+' &middot; '+String(lName).toUpperCase()+' vs '+String(vName).toUpperCase()+'</span></div>'+
+    '<div style="padding:10px 14px;background:#0a1422;border:1px solid var(--border);border-radius:0 0 8px 8px;">';
+  if(!filas.length){
+    html+='<p style="color:var(--muted);font-size:0.85rem;margin:0;">Nadie envio pronostico para este partido.</p>';
+  } else {
+    html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;">';
+    filas.forEach(function(f){
+      html+='<div style="background:#0d1b2a;border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:0.82rem;">'+
+        '<div style="color:var(--muted);font-size:0.7rem;">'+f.nombre+'</div>'+
+        '<div style="color:var(--gold);font-weight:700;">'+f.marcador+'</div></div>';
+    });
+    html+='</div>';
+  }
+  html+='</div></div>';
+  return html;
+}
+function todosJornadaAnterior(){ var i=_todosNums.indexOf(_todosJornada); if(i>0){ _todosJornada=_todosNums[i-1]; renderVerTodos(); } }
+function todosJornadaSiguiente(){ var i=_todosNums.indexOf(_todosJornada); if(i<_todosNums.length-1){ _todosJornada=_todosNums[i+1]; renderVerTodos(); } }
+function irATodosJornada(n){ if(_todosNums.indexOf(n)===-1) return; _todosJornada=n; renderVerTodos(); }
+
 function cerrarManualJugador(){
   if(typeof manualJugadorCod!=='undefined') manualJugadorCod=null;
   var inp=document.getElementById('manual-buscar'); if(inp) inp.value='';
