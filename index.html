@@ -3,21 +3,17 @@
   ============================================================
   POLLA MUNDIALISTA 2026
   RESUMEN DE ESTE INDEX
-  Generado: 6 de julio de 2026 - ~2:30 p. m. aprox. (hora Colombia)
+  Generado: 7 de julio de 2026 - ~9:35 a. m. aprox. (hora Colombia)
   ------------------------------------------------------------
-  CORRECCION CRITICA DE HOY: en la entrega anterior, al actualizar
-  este mismo comentario de cabecera, quedo mal cerrado (sin el "-->"
-  final). Eso hizo que TODO el bloque <head> y <style> (todo el CSS)
-  quedara escondido dentro de un comentario sin cerrar, y por eso la
-  pagina se veia sin ningun estilo (letras negras, sin colores, sin
-  tarjetas) al publicarla. Ya se reconstruyo el <head> completo desde
-  el archivo original y se le volvieron a aplicar, en orden, TODOS
-  los ajustes de diseno y las dos ediciones de CSS de hoy (modal de
-  estadistica + Fixture escalonado). Se valido que las llaves del
-  CSS estan balanceadas y que el JavaScript no tiene errores.
+  NUEVO EN ESTA VERSION:
+  - Las pestanas de fase (16 Avos, 8 Avos, Cuartos, Semifinal, 3er y
+    Final) dentro de Estadistica Oficial ahora muestran la misma
+    vista conectada del Fixture (con lineas entre cada partido y el
+    siguiente), en vez de una lista plana sin conectores.
+  - La etiqueta pequena "PARTIDO XX" de cada tarjeta del Fixture
+    quedo con fondo mas oscuro para verse mejor.
   ------------------------------------------------------------
 -->
-
 
 <head>
 <meta charset="UTF-8">
@@ -238,7 +234,7 @@ tr.fila-oficial-pend td{color:#9aa7b8!important;background:rgba(120,130,150,0.08
 .fx-col[data-conn="1"] .fx-match-wrap::before{content:'';position:absolute;top:0;bottom:50%;right:100%;width:13px;border-bottom:2px solid var(--border);border-right:2px solid var(--border);}
 .fx-col[data-conn="1"] .fx-match-wrap:nth-child(2n)::before{top:50%;bottom:auto;border-top:2px solid var(--border);border-bottom:none;border-right:2px solid var(--border);}
 .fx-match{background:#0a1524;border:1px solid var(--border);border-radius:7px;overflow:hidden;}
-.fx-match-num{font-family:'Barlow Condensed',sans-serif;font-size:0.6rem;color:var(--muted);text-align:center;letter-spacing:1px;padding:2px 0;background:#050c16;border-bottom:1px solid var(--border);}
+.fx-match-num{font-family:'Barlow Condensed',sans-serif;font-size:0.6rem;color:#8a97ad;text-align:center;letter-spacing:1px;padding:3px 0;background:#000;border-bottom:1px solid var(--border);}
 .fx-team{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:6px 8px;font-size:0.8rem;}
 .fx-team + .fx-team{border-top:1px solid var(--border);}
 .fx-name{display:flex;align-items:center;gap:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:108px;}
@@ -5272,7 +5268,7 @@ function _eoRefrescar(){
 }
 
 function eoMostrarGrupo(letra){ _eoVista={tipo:'grupo',val:letra}; _eoActivarBtn('eo-btn-'+letra); _eoRefrescar(); }
-function eoMostrarElim(fase){ _eoVista={tipo:'elim',val:fase}; _eoActivarBtn('eo-btn-'+fase); _eoRefrescar(); }
+function eoMostrarElim(fase){ _eoActivarBtn('eo-btn-fixture'); eoMostrarFixture(); }
 function eoMostrarTerceros(){ _eoVista={tipo:'terceros',val:''}; _eoActivarBtn('eo-btn-terceros'); _eoRefrescar(); }
 function eoMostrarFixture(){ _eoVista={tipo:'fixture',val:''}; _eoActivarBtn('eo-btn-fixture'); _eoRefrescar(); }
 function _eoActivarBtn(id){
