@@ -3,15 +3,14 @@
   ============================================================
   POLLA MUNDIALISTA 2026
   RESUMEN DE ESTE INDEX
-  Generado: 7 de julio de 2026 - ~9:35 a. m. aprox. (hora Colombia)
+  Generado: 7 de julio de 2026 - ~10:15 a. m. aprox. (hora Colombia)
   ------------------------------------------------------------
   NUEVO EN ESTA VERSION:
-  - Las pestanas de fase (16 Avos, 8 Avos, Cuartos, Semifinal, 3er y
-    Final) dentro de Estadistica Oficial ahora muestran la misma
-    vista conectada del Fixture (con lineas entre cada partido y el
-    siguiente), en vez de una lista plana sin conectores.
-  - La etiqueta pequena "PARTIDO XX" de cada tarjeta del Fixture
-    quedo con fondo mas oscuro para verse mejor.
+  - Corregido: las lineas del Fixture conectaban por posicion en la
+    lista (partido 1 con 2, 3 con 4...), no por el origen real. Ahora
+    cada linea se dibuja leyendo el codigo real de cada llave (por
+    ejemplo Gana P.85 y Gana P.87), asi que conecta siempre con el
+    partido correcto sin importar el orden en pantalla.
   ------------------------------------------------------------
 -->
 
@@ -226,15 +225,14 @@ tr.fila-oficial-pend td{color:#9aa7b8!important;background:rgba(120,130,150,0.08
 .eo-sw-red{background:rgba(255,23,68,0.5);}
 /* FIXTURE (cuadro de eliminatorias) — version escalonada con conectores */
 .fx-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;padding:4px 0 12px;}
-.fx-board{display:flex;gap:26px;min-width:900px;align-items:stretch;}
+.fx-board{display:flex;gap:26px;min-width:900px;align-items:stretch;position:relative;}
 .fx-col-outer{display:flex;flex-direction:column;min-width:150px;flex:1;}
 .fx-col-head{font-family:'Barlow Condensed',sans-serif;color:var(--gold);font-size:0.78rem;letter-spacing:1.5px;text-align:center;text-transform:uppercase;margin-bottom:8px;border-bottom:1px solid var(--border);padding-bottom:4px;}
 .fx-col{display:flex;flex-direction:column;justify-content:space-around;flex:1;}
 .fx-match-wrap{position:relative;padding:0 13px;}
-.fx-col[data-conn="1"] .fx-match-wrap::before{content:'';position:absolute;top:0;bottom:50%;right:100%;width:13px;border-bottom:2px solid var(--border);border-right:2px solid var(--border);}
-.fx-col[data-conn="1"] .fx-match-wrap:nth-child(2n)::before{top:50%;bottom:auto;border-top:2px solid var(--border);border-bottom:none;border-right:2px solid var(--border);}
+.fx-connectors{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;overflow:visible;}
 .fx-match{background:#0a1524;border:1px solid var(--border);border-radius:7px;overflow:hidden;}
-.fx-match-num{font-family:'Barlow Condensed',sans-serif;font-size:0.6rem;color:#8a97ad;text-align:center;letter-spacing:1px;padding:3px 0;background:#000;border-bottom:1px solid var(--border);}
+.fx-match-num{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.62rem;color:#fff;text-align:center;letter-spacing:1px;padding:3px 0;background:#000;border-bottom:1px solid var(--border);}
 .fx-team{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:6px 8px;font-size:0.8rem;}
 .fx-team + .fx-team{border-top:1px solid var(--border);}
 .fx-name{display:flex;align-items:center;gap:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:108px;}
@@ -5458,11 +5456,20 @@ function _renderEOFixture(){
   var altoPartido = 78, espacio = 12;
   var alturaBoard = (altoPartido+espacio)*maxCount - espacio;
   var html='<div class="card-table"><h3>FIXTURE &mdash; CAMINO A LA FINAL</h3>';
-  html+='<div class="fx-wrap"><div class="fx-board" style="height:'+alturaBoard+'px;">';
+  html+='<div class="fx-wrap"><div class="fx-board" id="fxBoard" style="height:'+alturaBoard+'px;">';
+  html+='<svg class="fx-connectors" id="fxConnectors"></svg>';
+  // numToId: mapa "numero de partido" -> id del elemento en pantalla. Sirve
+  // para dibujar las lineas conectando el partido REAL de origen (segun el
+  // codigo "Gana P.XX" de cada llave), no por posicion en la lista.
+  var numToId = {};
   rounds.forEach(function(rd, ci){
     html+='<div class="fx-col-outer"><div class="fx-col-head">'+rd.t+'</div>'+
-      '<div class="fx-col"'+(ci>0?' data-conn="1"':'')+'>';
-    rd.ll.forEach(function(m){ html+='<div class="fx-match-wrap">'+_eoFixtureCard(m, part, resPorNum)+'</div>'; });
+      '<div class="fx-col">';
+    rd.ll.forEach(function(m, mi){
+      var idEl = 'fxmw-'+ci+'-'+mi;
+      numToId[m.n] = idEl;
+      html+='<div class="fx-match-wrap" id="'+idEl+'">'+_eoFixtureCard(m, part, resPorNum)+'</div>';
+    });
     html+='</div></div>';
   });
   html+='</div></div>';
@@ -5481,11 +5488,57 @@ function _renderEOFixture(){
   html+='<div class="fx-campeon-box"><div class="fx-campeon-label">&#127942; CAMPEON</div><div class="fx-campeon-name">'+nombreCampeon+'</div></div>';
   var ter=LLAVES_FINAL.filter(function(mm){return mm.tercero;});
   if(ter.length){
-    html+='<div class="fx-tercero"><div class="fx-col-head" style="color:#cd7f32;">Tercer Puesto</div>'+_eoFixtureCard(ter[0], part, resPorNum)+'</div>';
+    numToId[ter[0].n] = 'fxmw-tercero';
+    html+='<div class="fx-tercero"><div class="fx-col-head" style="color:#cd7f32;">Tercer Puesto</div><div id="fxmw-tercero">'+_eoFixtureCard(ter[0], part, resPorNum)+'</div></div>';
   }
   html+='</div>';
   html+='<p class="eo-nota">El cuadro se llena solo a medida que la administraci&oacute;n carga los resultados oficiales. Desliza de lado para ver todas las rondas; el ganador de cada llave avanza resaltado en verde.</p></div>';
   document.getElementById('eoContenido').innerHTML=html;
+  // Todos los partidos con su l/v (para leer "Gana P.XX" / "Pierde P.XX")
+  var todosPartidos = [].concat(LLAVES_16, LLAVES_8, LLAVES_CUARTOS, LLAVES_SEMI, LLAVES_FINAL);
+  setTimeout(function(){ _dibujarConectoresFixture(todosPartidos, numToId); }, 30);
+}
+// Dibuja con SVG las lineas rojas que conectan cada partido con sus DOS
+// partidos de origen REALES (leidos del codigo "Gana P.XX" / "Pierde P.XX"
+// de cada llave, no por posicion en la lista) — asi la linea siempre conecta
+// con el partido correcto, sin importar el orden en que aparezcan en pantalla.
+function _dibujarConectoresFixture(todosPartidos, numToId){
+  var board = document.getElementById('fxBoard');
+  var svg = document.getElementById('fxConnectors');
+  if(!board || !svg) return;
+  var boardRect = board.getBoundingClientRect();
+  svg.setAttribute('width', board.scrollWidth);
+  svg.setAttribute('height', board.scrollHeight);
+  var lineas = '';
+  function numeroOrigen(texto){
+    var mch = /P\.?\s*(\d+)/i.exec(texto||'');
+    return mch ? parseInt(mch[1],10) : null;
+  }
+  todosPartidos.forEach(function(m){
+    var idTarget = numToId[m.n];
+    if(!idTarget) return;
+    var nOrigenL = numeroOrigen(m.l);
+    var nOrigenV = numeroOrigen(m.v);
+    if(!nOrigenL || !nOrigenV) return; // partido de grupos, no tiene origen "Gana P.XX"
+    var idSrc1 = numToId[nOrigenL];
+    var idSrc2 = numToId[nOrigenV];
+    var target = document.getElementById(idTarget);
+    var src1 = idSrc1 ? document.getElementById(idSrc1) : null;
+    var src2 = idSrc2 ? document.getElementById(idSrc2) : null;
+    if(!target || !src1 || !src2) return;
+    var tr = target.getBoundingClientRect();
+    var s1 = src1.getBoundingClientRect();
+    var s2 = src2.getBoundingClientRect();
+    var x1 = s1.right - boardRect.left;
+    var y1 = (s1.top + s1.bottom)/2 - boardRect.top;
+    var y2 = (s2.top + s2.bottom)/2 - boardRect.top;
+    var xTarget = tr.left - boardRect.left;
+    var yTarget = (tr.top + tr.bottom)/2 - boardRect.top;
+    var midX = x1 + (xTarget - x1)/2;
+    lineas += '<path d="M'+x1+','+y1+' H'+midX+' V'+y2+'" fill="none" stroke="#e05252" stroke-width="2"/>';
+    lineas += '<path d="M'+midX+','+yTarget+' H'+xTarget+'" fill="none" stroke="#e05252" stroke-width="2"/>';
+  });
+  svg.innerHTML = lineas;
 }
 
 function _renderEOElim(fase){
