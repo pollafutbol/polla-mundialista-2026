@@ -3,14 +3,14 @@
   ============================================================
   POLLA MUNDIALISTA 2026
   RESUMEN DE ESTE INDEX
-  Generado: 7 de julio de 2026 - ~10:15 a. m. aprox. (hora Colombia)
+  Generado: 7 de julio de 2026 - ~11:05 a. m. aprox. (hora Colombia)
   ------------------------------------------------------------
   NUEVO EN ESTA VERSION:
-  - Corregido: las lineas del Fixture conectaban por posicion en la
-    lista (partido 1 con 2, 3 con 4...), no por el origen real. Ahora
-    cada linea se dibuja leyendo el codigo real de cada llave (por
-    ejemplo Gana P.85 y Gana P.87), asi que conecta siempre con el
-    partido correcto sin importar el orden en pantalla.
+  - Corregidas las lineas del Fixture: antes solo salia una rayita de
+    uno de los dos partidos de origen y saltaba directo a la altura
+    del otro. Ahora sale una rayita de CADA partido de origen, las
+    dos se unen con una barra vertical, y de ahi sale una sola linea
+    hacia el partido siguiente — igual al dibujo de referencia.
   ------------------------------------------------------------
 -->
 
@@ -229,7 +229,7 @@ tr.fila-oficial-pend td{color:#9aa7b8!important;background:rgba(120,130,150,0.08
 .fx-col-outer{display:flex;flex-direction:column;min-width:150px;flex:1;}
 .fx-col-head{font-family:'Barlow Condensed',sans-serif;color:var(--gold);font-size:0.78rem;letter-spacing:1.5px;text-align:center;text-transform:uppercase;margin-bottom:8px;border-bottom:1px solid var(--border);padding-bottom:4px;}
 .fx-col{display:flex;flex-direction:column;justify-content:space-around;flex:1;}
-.fx-match-wrap{position:relative;padding:0 13px;}
+.fx-match-wrap{position:relative;padding:0 13px;z-index:2;}
 .fx-connectors{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;overflow:visible;}
 .fx-match{background:#0a1524;border:1px solid var(--border);border-radius:7px;overflow:hidden;}
 .fx-match-num{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.62rem;color:#fff;text-align:center;letter-spacing:1px;padding:3px 0;background:#000;border-bottom:1px solid var(--border);}
@@ -364,6 +364,13 @@ tr.fila-oficial-pend td{color:#9aa7b8!important;background:rgba(120,130,150,0.08
   .premundial-grid,.grid-3,.grid-2{grid-template-columns:1fr;}
   .podio-1{width:120px;height:160px;}.podio-2{width:100px;height:120px;}.podio-3{width:90px;height:90px;}
 }
+/* ACORDEON PANEL ADMON */
+.form-card.acc-card .acc-header{cursor:pointer;display:flex;align-items:center;justify-content:space-between;user-select:none;}
+.form-card.acc-card .acc-header:hover{opacity:0.85;}
+.form-card.acc-card .acc-icon{font-size:0.9em;margin-left:10px;flex-shrink:0;transition:transform 0.15s ease;}
+.form-card.acc-card .acc-body{overflow:hidden;}
+.acc-close-btn{background:#222;color:#aabbff;border:1px solid #333;padding:6px 14px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:0.8rem;letter-spacing:1px;}
+.acc-close-btn:hover{background:#2a2a3a;}
 </style>
 </head>
 <body>
@@ -588,6 +595,7 @@ tr.fila-oficial-pend td{color:#9aa7b8!important;background:rgba(120,130,150,0.08
     <p class="section-sub">Predicciones especiales antes del torneo</p>
     <div class="countdown-pm"><span class="cdlabel">Tiempo restante para enviar tus predicciones</span><span class="cdtime" id="timerPM">--:--:--</span></div>
     <div class="aviso-pm">Una vez enviadas las predicciones NO podran modificarse. Revisa bien antes de confirmar.</div>
+    <div id="avisoModificadoAdminPM" style="display:none;background:rgba(255,187,0,0.1);border:1px solid #ffbb00;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:0.82rem;color:#ffbb55;text-align:center;"></div>
     <div class="premundial-grid">
       <div class="pm-card gold-border">
         <h3 style="color:var(--gold);">Cuadro de Honor</h3>
@@ -920,8 +928,9 @@ tr.fila-oficial-pend td{color:#9aa7b8!important;background:rgba(120,130,150,0.08
 <div id="sec-admin" class="seccion">
   <div class="admin-wrap">
     <h2 class="admin-title">Panel de Administracion</h2>
-    <div class="form-card">
-      <h3>Registrar Nuevo Jugador</h3>
+    <div class="form-card acc-card">
+      <h3 class="acc-header" onclick="toggleAdminAccordion(this)" ondblclick="cerrarAdminAccordion(this)"><span class="acc-title-text">Registrar Nuevo Jugador</span><span class="acc-icon">&#9662;</span></h3>
+        <div class="acc-body" style="display:none;">
       <div class="grid-3" style="margin-bottom:15px;">
         <div class="field"><label>Codigo Generado</label><input type="text" id="adm-codigo" readonly placeholder="Auto-generado"></div>
         <div class="field"><label>Clave Provisional</label><input type="text" id="adm-clave" readonly placeholder="Auto-generada"></div>
@@ -1008,16 +1017,22 @@ tr.fila-oficial-pend td{color:#9aa7b8!important;background:rgba(120,130,150,0.08
       <div style="margin-top:6px;text-align:center;">
         <span style="font-size:0.7rem;color:#444;font-family:'Barlow Condensed';letter-spacing:1px;"><span style="color:#ff4444;">*</span> Campos obligatorios</span>
       </div>
+        <div style="text-align:right;margin-top:10px;"><button type="button" class="acc-close-btn" onclick="cerrarAdminAccordion(this)">&#9652; Cerrar</button></div>
+        </div>
     </div>
     <!-- BUSCADOR CON EDICION -->
-    <div class="form-card">
-      <h3>Buscar y Editar Jugador</h3>
+    <div class="form-card acc-card">
+      <h3 class="acc-header" onclick="toggleAdminAccordion(this)" ondblclick="cerrarAdminAccordion(this)"><span class="acc-title-text">Buscar y Editar Jugador</span><span class="acc-icon">&#9662;</span></h3>
+        <div class="acc-body" style="display:none;">
       <input type="text" class="busca-input" id="buscadorInput" placeholder="Buscar por codigo o nombre..." oninput="buscarJugador(this.value)">
       <button onclick="cerrarBuscarEditar()" style="width:100%;background:#3a1f1f;color:#ff8a8a;border:1px solid #7a3a3a;border-radius:6px;padding:8px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;margin-top:10px;">&#10005; CERRAR / LIMPIAR JUGADOR</button>
       <div id="resultadoBusqueda" style="display:none;margin-top:12px;"></div>
+        <div style="text-align:right;margin-top:10px;"><button type="button" class="acc-close-btn" onclick="cerrarAdminAccordion(this)">&#9652; Cerrar</button></div>
+        </div>
     </div>
-    <div class="form-card" style="border-color:var(--accent);">
-      <h3 style="color:var(--accent);">Control de Resultados Oficiales</h3>
+    <div class="form-card acc-card" style="border-color:var(--accent);">
+      <h3 style="color:var(--accent);" class="acc-header" onclick="toggleAdminAccordion(this)" ondblclick="cerrarAdminAccordion(this)"><span class="acc-title-text">Control de Resultados Oficiales</span><span class="acc-icon">&#9662;</span></h3>
+        <div class="acc-body" style="display:none;">
       <p style="font-size:0.8rem;color:#aaa;margin-bottom:14px;">Ingresa el marcador real de cada partido y las tarjetas de cada equipo: <strong>T.A</strong> (amarillas) y <strong>T.R</strong> (rojas) del Local y del Visitante. El sistema suma solo (amarillas + rojas) para la apuesta "+2.5". Guarda, y luego dale a <strong style="color:var(--gold);">Ejecutar Escrutinio Global</strong> para repartir los puntos.</p>
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;">
         <button onclick="resJornadaAnterior()" id="btnResAnterior" class="btn-action" style="background:#222;color:#fff;">&#9664; Anterior</button>
@@ -1026,9 +1041,12 @@ tr.fila-oficial-pend td{color:#9aa7b8!important;background:rgba(120,130,150,0.08
       </div>
       <div id="resSaltos" style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:12px;"></div>
       <div id="resultadosContainer"></div>
+        <div style="text-align:right;margin-top:10px;"><button type="button" class="acc-close-btn" onclick="cerrarAdminAccordion(this)">&#9652; Cerrar</button></div>
+        </div>
     </div>
-    <div class="form-card" id="cardPronosticoManual" style="border-color:var(--accent);">
-      <h3 style="color:var(--accent);">Pronostico Manual del Jugador</h3>
+    <div class="form-card acc-card" id="cardPronosticoManual" style="border-color:var(--accent);">
+      <h3 style="color:var(--accent);" class="acc-header" onclick="toggleAdminAccordion(this)" ondblclick="cerrarAdminAccordion(this)"><span class="acc-title-text">Pronostico Manual del Jugador</span><span class="acc-icon">&#9662;</span></h3>
+        <div class="acc-body" style="display:none;">
       <p style="font-size:0.8rem;color:#aaa;margin-bottom:12px;">Respaldo para casos puntuales: ingresa el pronostico de un jugador a mano. Se guarda como si el lo hubiera enviado. Luego dale a Ejecutar Escrutinio Global.</p>
       <div class="pm-field" style="position:relative;"><label>Jugador (escribe nombre o codigo)</label>
         <input type="text" id="manual-buscar" autocomplete="off" oninput="filtrarJugadoresManual()" onfocus="this.value='';filtrarJugadoresManual()" onblur="setTimeout(function(){var b=document.getElementById('manual-resultados'); if(b) b.style.display='none';},200)" placeholder="Escribe nombre o codigo..." class="pm-select" style="width:100%;">
@@ -1042,10 +1060,13 @@ tr.fila-oficial-pend td{color:#9aa7b8!important;background:rgba(120,130,150,0.08
       <div id="manualSaltos" style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:0 0 10px;"></div>
       <button onclick="cerrarManualJugador()" style="width:100%;background:#3a1f1f;color:#ff8a8a;border:1px solid #7a3a3a;border-radius:6px;padding:8px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;margin-bottom:10px;">&#10005; CERRAR / LIMPIAR JUGADOR</button>
       <div id="manualContainer"></div>
+        <div style="text-align:right;margin-top:10px;"><button type="button" class="acc-close-btn" onclick="cerrarAdminAccordion(this)">&#9652; Cerrar</button></div>
+        </div>
     </div>
-    <div class="form-card" style="border-color:var(--gold);">
+    <div class="form-card acc-card" style="border-color:var(--gold);">
 
-      <h3 style="color:var(--gold);">Ver Pronosticos del Jugador (solo lectura)</h3>
+      <h3 style="color:var(--gold);" class="acc-header" onclick="toggleAdminAccordion(this)" ondblclick="cerrarAdminAccordion(this)"><span class="acc-title-text">Ver Pronosticos del Jugador (solo lectura)</span><span class="acc-icon">&#9662;</span></h3>
+        <div class="acc-body" style="display:none;">
       <p style="font-size:0.8rem;color:#aaa;margin-bottom:12px;">Para revisar lo que envio un jugador <strong>sin riesgo de editar nada</strong>. Escribe el nombre o codigo y elige al jugador.</p>
       <div class="pm-field" style="position:relative;"><label>Jugador (escribe nombre o codigo)</label>
         <input type="text" id="ver-buscar" autocomplete="off" oninput="filtrarJugadoresVer()" onfocus="this.value='';filtrarJugadoresVer()" onblur="setTimeout(function(){var b=document.getElementById('ver-resultados'); if(b) b.style.display='none';},200)" placeholder="Escribe nombre o codigo..." class="pm-select" style="width:100%;">
@@ -1059,9 +1080,12 @@ tr.fila-oficial-pend td{color:#9aa7b8!important;background:rgba(120,130,150,0.08
       </div>
       <div id="verSaltos" style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:10px;"></div>
       <div id="verPronosticosContainer" style="margin-top:12px;"></div>
+        <div style="text-align:right;margin-top:10px;"><button type="button" class="acc-close-btn" onclick="cerrarAdminAccordion(this)">&#9652; Cerrar</button></div>
+        </div>
     </div>
-    <div class="form-card" id="cardCrearAdmin" style="border-color:var(--gold);">
-      <h3 style="color:var(--gold);">Crear Administrador</h3>
+    <div class="form-card acc-card" id="cardCrearAdmin" style="border-color:var(--gold);">
+      <h3 style="color:var(--gold);" class="acc-header" onclick="toggleAdminAccordion(this)" ondblclick="cerrarAdminAccordion(this)"><span class="acc-title-text">Crear Administrador</span><span class="acc-icon">&#9662;</span></h3>
+        <div class="acc-body" style="display:none;">
       <p style="font-size:0.8rem;color:#aaa;margin-bottom:12px;">Solo para administradores con <strong>control absoluto</strong>. Crea un nuevo administrador con su usuario y clave. Elige si tendra <strong>control absoluto</strong> (ve todo) o <strong>control parcial</strong> (ve todo MENOS Pronostico Manual y Crear Administrador).</p>
       <div class="grid-3" style="margin-bottom:12px;">
         <div class="field"><label>Codigo (usuario) <span style="color:#ff4444;">*</span></label>
@@ -1088,20 +1112,29 @@ tr.fila-oficial-pend td{color:#9aa7b8!important;background:rgba(120,130,150,0.08
         </div>
       </div>
       <div id="ca-lista" style="margin-top:6px;"></div>
+        <div style="text-align:right;margin-top:10px;"><button type="button" class="acc-close-btn" onclick="cerrarAdminAccordion(this)">&#9652; Cerrar</button></div>
+        </div>
     </div>
-    <div class="form-card" style="border-color:var(--gold);">
-      <h3 style="color:var(--gold);">Escrutinio Global</h3>
+    <div class="form-card acc-card" style="border-color:var(--gold);">
+      <h3 style="color:var(--gold);" class="acc-header" onclick="toggleAdminAccordion(this)" ondblclick="cerrarAdminAccordion(this)"><span class="acc-title-text">Escrutinio Global</span><span class="acc-icon">&#9662;</span></h3>
+        <div class="acc-body" style="display:none;">
       <p style="font-size:0.8rem;color:#aaa;margin-bottom:15px;">Al ejecutar, el sistema compara los resultados oficiales contra los pronosticos de todos y reparte los puntos. Puedes ejecutarlo cuantas veces quieras.</p>
       <button class="btn-action btn-gold" onclick="sincronizarFIFA()" style="width:100%;padding:15px;font-size:1rem;">EJECUTAR ESCRUTINIO GLOBAL</button>
       <div id="statusFIFA" class="status-box">&gt; Listo para ejecutar.<br><span id="statusLog" style="color:var(--accent);">Esperando...</span></div>
+        <div style="text-align:right;margin-top:10px;"><button type="button" class="acc-close-btn" onclick="cerrarAdminAccordion(this)">&#9652; Cerrar</button></div>
+        </div>
     </div>
-    <div class="form-card" style="border-color:#7a2a2a;background:rgba(122,42,42,0.06);">
-      <h3 style="color:#ff7a7a;">&#9888; Zona de peligro &middot; Reiniciar polla</h3>
+    <div class="form-card acc-card" style="border-color:#7a2a2a;background:rgba(122,42,42,0.06);">
+      <h3 style="color:#ff7a7a;" class="acc-header" onclick="toggleAdminAccordion(this)" ondblclick="cerrarAdminAccordion(this)"><span class="acc-title-text">&#9888; Zona de peligro &middot; Reiniciar polla</span><span class="acc-icon">&#9662;</span></h3>
+        <div class="acc-body" style="display:none;">
       <p style="font-size:0.8rem;color:#d8a3a3;margin-bottom:12px;">Borra de la nube: predicciones de partidos de los jugadores, resultados oficiales, ajustes, marcas de envio y todos los puntos del ranking. <strong>CONSERVA las predicciones pre-mundial, el numero del chontico y las cuentas de los jugadores (con sus claves).</strong> Esto NO se puede deshacer.</p>
       <button class="btn-action" onclick="reiniciarPolla()" style="width:100%;padding:13px;background:#3a1414;color:#ff8a8a;border:1px solid #7a2a2a;font-weight:700;letter-spacing:1px;">REINICIAR POLLA (DEJA EL RANKING EN CERO)</button>
+        <div style="text-align:right;margin-top:10px;"><button type="button" class="acc-close-btn" onclick="cerrarAdminAccordion(this)">&#9652; Cerrar</button></div>
+        </div>
     </div>
-    <div class="form-card" style="border-color:var(--gold2);">
-      <h3 style="color:var(--gold2);">Resultados Oficiales Pre-Mundial</h3>
+    <div class="form-card acc-card" style="border-color:var(--gold2);">
+      <h3 style="color:var(--gold2);" class="acc-header" onclick="toggleAdminAccordion(this)" ondblclick="cerrarAdminAccordion(this)"><span class="acc-title-text">Resultados Oficiales Pre-Mundial</span><span class="acc-icon">&#9662;</span></h3>
+        <div class="acc-body" style="display:none;">
       <p style="font-size:0.8rem;color:#aaa;margin-bottom:14px;">Llena esto SOLO al final del torneo. Al guardar y ejecutar el Escrutinio Global, se reparten los bonos del Pre-Mundial a quien acerto.</p>
       <div class="pm-field"><label>Campeon <span class="pts-badge">(5 pts)</span></label><select class="pm-select selector-paises" id="po-campeon"><option>Elegir Seleccion...</option></select></div>
       <div class="pm-field"><label>Sub-Campeon <span class="pts-badge">(3 pts)</span></label><select class="pm-select selector-paises" id="po-subcampeon"><option>Elegir Seleccion...</option></select></div>
@@ -1114,17 +1147,47 @@ tr.fila-oficial-pend td{color:#9aa7b8!important;background:rgba(120,130,150,0.08
       <div class="pm-field"><label>Mejor Portero <span class="pts-badge">(3 pts)</span></label>
         <div class="dual-sel"><select class="pm-select selector-filtro" id="po-portero-pais" onchange="cargarJugadores(this,'po-portero-list',true)"><option value="">Pais...</option></select><select class="pm-select" id="po-portero-list"><option>Portero...</option></select></div></div>
       <button class="btn-action btn-gold" onclick="guardarPremundialOficial()" style="width:100%;padding:12px;margin-top:10px;">GUARDAR RESULTADOS PRE-MUNDIAL</button>
+        <div style="text-align:right;margin-top:10px;"><button type="button" class="acc-close-btn" onclick="cerrarAdminAccordion(this)">&#9652; Cerrar</button></div>
+        </div>
     </div>
-    <div class="form-card">
-      <h3 style="color:var(--gold2);">Rifa Chontico Noche &mdash; Numero Ganador</h3>
+    <div class="form-card acc-card" style="border-color:var(--gold2);" id="cardEditarPM">
+      <h3 style="color:var(--gold2);" class="acc-header" onclick="toggleAdminAccordion(this)" ondblclick="cerrarAdminAccordion(this)"><span class="acc-title-text">Editar Pre-Mundial de un Jugador (Solo Control Absoluto)</span><span class="acc-icon">&#9662;</span></h3>
+        <div class="acc-body" style="display:none;">
+      <p style="font-size:0.8rem;color:#aaa;margin-bottom:14px;">Selecciona un jugador para ver y/o corregir sus predicciones del Pre-Mundial. El jugador vera un aviso indicando que un administrador modifico su informacion, con el nombre del admon y la fecha.</p>
+      <div class="pm-field"><label>Jugador</label>
+        <select class="pm-select" id="epm-jugador-select" onchange="cargarPremundialJugadorAdmin()"><option value="">Seleccionar jugador...</option></select>
+      </div>
+      <p id="epm-modificado-aviso" style="font-size:0.8rem;color:#ffbb55;margin:6px 0 14px;display:none;"></p>
+      <div id="epm-campos" style="display:none;">
+        <div class="pm-field"><label>Campeon <span class="pts-badge">(5 pts)</span></label><select class="pm-select selector-paises" id="epm-campeon"><option>Elegir Seleccion...</option></select></div>
+        <div class="pm-field"><label>Sub-Campeon <span class="pts-badge">(3 pts)</span></label><select class="pm-select selector-paises" id="epm-subcampeon"><option>Elegir Seleccion...</option></select></div>
+        <div class="pm-field"><label>Tercer Puesto <span class="pts-badge">(2 pts)</span></label><select class="pm-select selector-paises" id="epm-tercero"><option>Elegir Seleccion...</option></select></div>
+        <div class="pm-field"><label>Cuarto Puesto <span class="pts-badge">(2 pts)</span></label><select class="pm-select selector-paises" id="epm-cuarto"><option>Elegir Seleccion...</option></select></div>
+        <div class="pm-field"><label>Bota de Oro / Goleador <span class="pts-badge">(5 pts)</span></label>
+          <div class="dual-sel"><select class="pm-select selector-filtro" id="epm-goleador-pais" onchange="cargarJugadores(this,'epm-goleador-list')"><option value="">Pais...</option></select><select class="pm-select" id="epm-goleador-list"><option>Jugador...</option></select></div></div>
+        <div class="pm-field"><label>Mejor Jugador MVP <span class="pts-badge">(5 pts)</span></label>
+          <div class="dual-sel"><select class="pm-select selector-filtro" id="epm-mvp-pais" onchange="cargarJugadores(this,'epm-mvp-list')"><option value="">Pais...</option></select><select class="pm-select" id="epm-mvp-list"><option>Jugador...</option></select></div></div>
+        <div class="pm-field"><label>Mejor Portero <span class="pts-badge">(3 pts)</span></label>
+          <div class="dual-sel"><select class="pm-select selector-filtro" id="epm-portero-pais" onchange="cargarJugadores(this,'epm-portero-list',true)"><option value="">Pais...</option></select><select class="pm-select" id="epm-portero-list"><option>Portero...</option></select></div></div>
+        <button class="btn-action btn-gold" onclick="guardarPremundialAdmin()" style="width:100%;padding:12px;margin-top:10px;">GUARDAR CAMBIOS (ADMIN)</button>
+      </div>
+        <div style="text-align:right;margin-top:10px;"><button type="button" class="acc-close-btn" onclick="cerrarAdminAccordion(this)">&#9652; Cerrar</button></div>
+        </div>
+    </div>
+    <div class="form-card acc-card">
+      <h3 style="color:var(--gold2);" class="acc-header" onclick="toggleAdminAccordion(this)" ondblclick="cerrarAdminAccordion(this)"><span class="acc-title-text">Rifa Chontico Noche &mdash; Numero Ganador</span><span class="acc-icon">&#9662;</span></h3>
+        <div class="acc-body" style="display:none;">
       <p style="font-size:0.8rem;color:#aaa;margin-bottom:14px;">Escribe aqui el numero que salio en la loteria Chontico Noche. Cada jugador vera automaticamente en su perfil si gano. Este aviso se muestra el dia del sorteo (19 de Julio).</p>
       <div class="pm-field"><label>Numero ganador (4 digitos)</label>
         <input type="number" id="chontico-num" min="0" max="9999" placeholder="####" oninput="limitarDigitos(this)" class="pm-select" style="width:100%;"></div>
       <p id="chontico-actual" style="font-size:0.85rem;color:#aabbff;margin:4px 0 12px;">Numero guardado actualmente: <strong>ninguno</strong></p>
       <button class="btn-action btn-gold" onclick="guardarChonticoResultado()" style="width:100%;padding:12px;">GUARDAR NUMERO GANADOR</button>
+        <div style="text-align:right;margin-top:10px;"><button type="button" class="acc-close-btn" onclick="cerrarAdminAccordion(this)">&#9652; Cerrar</button></div>
+        </div>
     </div>
-    <div class="form-card">
-      <h3>Lista de Jugadores Inscritos</h3>
+    <div class="form-card acc-card">
+      <h3 class="acc-header" onclick="toggleAdminAccordion(this)" ondblclick="cerrarAdminAccordion(this)"><span class="acc-title-text">Lista de Jugadores Inscritos</span><span class="acc-icon">&#9662;</span></h3>
+        <div class="acc-body" style="display:none;">
       <div style="display:flex;gap:8px;margin-bottom:15px;flex-wrap:wrap;">
         <button class="btn-action" style="background:#333;color:#aaa;" onclick="filtrarJugadores('todos')">Todos</button>
         <button class="btn-action btn-green" onclick="filtrarJugadores('pagado')">Pagados</button>
@@ -1146,6 +1209,8 @@ tr.fila-oficial-pend td{color:#9aa7b8!important;background:rgba(120,130,150,0.08
           <tbody id="jugadoresBody"></tbody>
         </table>
       </div>
+        <div style="text-align:right;margin-top:10px;"><button type="button" class="acc-close-btn" onclick="cerrarAdminAccordion(this)">&#9652; Cerrar</button></div>
+        </div>
     </div>
   </div>
 </div>
@@ -2094,6 +2159,8 @@ function mostrarInterfazAdmin(cod) {
   if (cardPM) cardPM.style.display = esAbsoluto ? 'block' : 'none';
   var cardCA = document.getElementById('cardCrearAdmin');
   if (cardCA) cardCA.style.display = esAbsoluto ? 'block' : 'none';
+  var cardEPM = document.getElementById('cardEditarPM');
+  if (cardEPM) { cardEPM.style.display = esAbsoluto ? 'block' : 'none'; if (esAbsoluto) poblarSelectJugadoresPM(); }
   if (esAbsoluto && typeof renderListaAdmins==='function') { try{ renderListaAdmins(); }catch(e){} }
 }
 
@@ -4331,6 +4398,15 @@ function verificarEnvioPM() {
       _restaurarAwardPM('pm-goleador-pais','pm-goleador-list', pm.goleadorPais, pm.goleador, false);
       _restaurarAwardPM('pm-mvp-pais','pm-mvp-list', pm.mvpPais, pm.mvp, false);
       _restaurarAwardPM('pm-portero-pais','pm-portero-list', pm.porteroPais, pm.portero, true);
+      var avisoAdminPM = document.getElementById('avisoModificadoAdminPM');
+      if (avisoAdminPM) {
+        if (pm.modificadoPorAdmin && pm.modificadoPorAdmin.admin) {
+          avisoAdminPM.style.display = 'block';
+          avisoAdminPM.innerHTML = '&#9888; Un administrador (<strong>' + pm.modificadoPorAdmin.admin + '</strong>) modifico estas predicciones el ' + _fmtFechaCol(new Date(pm.modificadoPorAdmin.fecha).getTime()) + '.';
+        } else {
+          avisoAdminPM.style.display = 'none';
+        }
+      }
     } else if (pmCerrado()) {
       bloquearBotonPM('CERRADO - PLAZO VENCIDO');
     }
@@ -4343,7 +4419,130 @@ function _restaurarAwardPM(paisId, listId, pais, jugador, soloPorteros){
   var ls = document.getElementById(listId);
   if(ls) ls.value = jugador;
 }
+
+// ============================================================
+// EDITAR PRE-MUNDIAL DE UN JUGADOR (solo admin con control absoluto)
+// ============================================================
+function poblarSelectJugadoresPM(){
+  var sel = document.getElementById('epm-jugador-select');
+  if(!sel) return;
+  var valorPrevio = sel.value;
+  sel.innerHTML = '<option value="">Seleccionar jugador...</option>';
+  Object.keys(jugadoresCache).sort(function(a,b){
+    var na = (jugadoresCache[a].nombre || a), nb = (jugadoresCache[b].nombre || b);
+    return na.localeCompare(nb);
+  }).forEach(function(cod){
+    var j = jugadoresCache[cod];
+    var o = document.createElement('option');
+    o.value = cod;
+    o.text = (j.nombre || cod) + ' (' + cod + ')';
+    sel.appendChild(o);
+  });
+  if (valorPrevio && jugadoresCache[valorPrevio]) sel.value = valorPrevio;
+}
+
+function _limpiarCamposEPM(){
+  ['epm-campeon','epm-subcampeon','epm-tercero','epm-cuarto'].forEach(function(id){
+    var e = document.getElementById(id); if(e) e.value = '';
+  });
+  ['epm-goleador','epm-mvp','epm-portero'].forEach(function(pref){
+    var ps = document.getElementById(pref+'-pais'); if(ps) ps.value = '';
+    var ls = document.getElementById(pref+'-list');
+    if(ls) ls.innerHTML = (pref==='epm-portero') ? '<option>Portero...</option>' : '<option>Jugador...</option>';
+  });
+}
+
+function cargarPremundialJugadorAdmin(){
+  var cod = document.getElementById('epm-jugador-select').value;
+  var campos = document.getElementById('epm-campos');
+  var aviso = document.getElementById('epm-modificado-aviso');
+  if(!cod){ if(campos) campos.style.display='none'; if(aviso) aviso.style.display='none'; return; }
+  if(campos) campos.style.display='block';
+  _limpiarCamposEPM();
+  if(aviso) aviso.style.display='none';
+  db.ref('premundial/'+cod).once('value', function(snap){
+    var pm = snap.val();
+    if(pm){
+      if(pm.campeon) document.getElementById('epm-campeon').value = pm.campeon;
+      if(pm.subcampeon) document.getElementById('epm-subcampeon').value = pm.subcampeon;
+      if(pm.tercero) document.getElementById('epm-tercero').value = pm.tercero;
+      if(pm.cuarto) document.getElementById('epm-cuarto').value = pm.cuarto;
+      _restaurarAwardPM('epm-goleador-pais','epm-goleador-list', pm.goleadorPais, pm.goleador, false);
+      _restaurarAwardPM('epm-mvp-pais','epm-mvp-list', pm.mvpPais, pm.mvp, false);
+      _restaurarAwardPM('epm-portero-pais','epm-portero-list', pm.porteroPais, pm.portero, true);
+      if(pm.modificadoPorAdmin && pm.modificadoPorAdmin.admin && aviso){
+        aviso.style.display='block';
+        aviso.innerHTML = '&#9888; Ya fue modificado por: <strong>'+pm.modificadoPorAdmin.admin+'</strong> el '+_fmtFechaCol(new Date(pm.modificadoPorAdmin.fecha).getTime());
+      }
+    }
+  });
+}
+
+function guardarPremundialAdmin(){
+  if(!(usuarioActual && usuarioActual.adminTotal===true)){ alert('Solo un administrador con control absoluto puede modificar el Pre-Mundial de un jugador.'); return; }
+  var cod = document.getElementById('epm-jugador-select').value;
+  if(!cod){ alert('Selecciona un jugador primero.'); return; }
+  function valSel(id){ var e=document.getElementById(id); if(!e) return ''; var v=e.value||''; if(v.indexOf('...')!==-1||v==='Elegir Seleccion...'||v==='Seleccionar...') return ''; return v; }
+  function paisDe(id){ var e=document.getElementById(id); return (e&&e.value)?e.value:''; }
+  var nombreJ = (jugadoresCache[cod] && jugadoresCache[cod].nombre) ? jugadoresCache[cod].nombre : cod;
+  if(!confirm('Vas a modificar las predicciones Pre-Mundial de '+nombreJ+' ('+cod+'). El jugador vera un aviso indicando que un administrador realizo este cambio, con tu nombre y la fecha. Deseas continuar?')) return;
+  showLoading('Guardando cambios...');
+  db.ref('premundial/'+cod).once('value', function(snap){
+    var actual = snap.val() || {};
+    var pm = {
+      campeon: valSel('epm-campeon'),
+      subcampeon: valSel('epm-subcampeon'),
+      tercero: valSel('epm-tercero'),
+      cuarto: valSel('epm-cuarto'),
+      goleador: valSel('epm-goleador-list'),
+      goleadorPais: paisDe('epm-goleador-pais'),
+      mvp: valSel('epm-mvp-list'),
+      mvpPais: paisDe('epm-mvp-pais'),
+      portero: valSel('epm-portero-list'),
+      porteroPais: paisDe('epm-portero-pais'),
+      enviado: true,
+      fecha: actual.fecha || new Date().toISOString(),
+      modificadoPorAdmin: {
+        admin: (usuarioActual.nombre || usuarioActual.codigo) + ' (' + usuarioActual.codigo + ')',
+        fecha: new Date().toISOString()
+      }
+    };
+    db.ref('premundial/'+cod).set(pm, function(err){
+      hideLoading();
+      if(err){ alert('Hubo un problema guardando. Revisa tu conexion.'); return; }
+      alert('Predicciones Pre-Mundial de '+nombreJ+' actualizadas correctamente. El jugador vera el aviso de modificacion en su perfil.');
+      cargarPremundialJugadorAdmin();
+    });
+  });
+}
+window.poblarSelectJugadoresPM = poblarSelectJugadoresPM;
+window.cargarPremundialJugadorAdmin = cargarPremundialJugadorAdmin;
+window.guardarPremundialAdmin = guardarPremundialAdmin;
 window.bloquearBotonPM = bloquearBotonPM;
+
+// ============================================================
+// ACORDEON PANEL ADMON — cada titulo abre/cierra su contenido
+// ============================================================
+function toggleAdminAccordion(headerEl){
+  var card = headerEl.closest('.form-card');
+  if(!card) return;
+  var body = card.querySelector('.acc-body');
+  var icon = headerEl.querySelector('.acc-icon');
+  if(!body) return;
+  var abierto = body.style.display !== 'none';
+  body.style.display = abierto ? 'none' : 'block';
+  if(icon) icon.innerHTML = abierto ? '&#9662;' : '&#9652;';
+}
+function cerrarAdminAccordion(el){
+  var card = el.closest('.form-card');
+  if(!card) return;
+  var body = card.querySelector('.acc-body');
+  var header = card.querySelector('.acc-header');
+  if(body) body.style.display = 'none';
+  if(header){ var icon = header.querySelector('.acc-icon'); if(icon) icon.innerHTML = '&#9662;'; }
+}
+window.toggleAdminAccordion = toggleAdminAccordion;
+window.cerrarAdminAccordion = cerrarAdminAccordion;
 window.verificarEnvioPM = verificarEnvioPM;
 
 // ============================================================
@@ -5438,6 +5637,33 @@ function _eoFixtureCard(m, part, resPorNum){
     '</div>';
 }
 
+// Reordena cada ronda anterior segun el orden real del arbol (empezando desde
+// la Final hacia atras), leyendo los codigos "Gana P.XX" de cada llave. Esto
+// evita que las lineas conectoras tengan que cruzar de forma rara: el partido
+// que aparece arriba en una ronda siempre corresponde a los dos partidos que
+// aparecen arriba en la ronda anterior.
+function _ordenarBracket(rounds){
+  function numeroOrigen(texto){
+    var m = /P\.?\s*(\d+)/i.exec(texto||'');
+    return m ? parseInt(m[1],10) : null;
+  }
+  var ordenActual = rounds[rounds.length-1].ll.slice();
+  for(var ri=rounds.length-1; ri>0; ri--){
+    var porNum = {};
+    rounds[ri-1].ll.forEach(function(m){ porNum[m.n]=m; });
+    var nuevo = [];
+    ordenActual.forEach(function(m){
+      var nL = numeroOrigen(m.l), nV = numeroOrigen(m.v);
+      var sL = nL!=null ? porNum[nL] : null;
+      var sV = nV!=null ? porNum[nV] : null;
+      if(sL) nuevo.push(sL);
+      if(sV) nuevo.push(sV);
+    });
+    if(nuevo.length === rounds[ri-1].ll.length){ rounds[ri-1].ll = nuevo; }
+    ordenActual = rounds[ri-1].ll;
+  }
+  return rounds;
+}
 function _renderEOFixture(){
   var res=_eoCache||{};
   var resPorNum=_eoResPorNum(res);
@@ -5449,6 +5675,7 @@ function _renderEOFixture(){
     {t:'Semifinal', ll:LLAVES_SEMI},
     {t:'Final', ll:LLAVES_FINAL.filter(function(m){return m.esFinal;})}
   ];
+  rounds = _ordenarBracket(rounds);
   // Altura compartida por todas las columnas, calculada segun la ronda con mas
   // partidos (Dieciseisavos), para que las siguientes rondas queden centradas
   // exactamente entre sus dos partidos anteriores (efecto "escalonado").
@@ -5530,13 +5757,19 @@ function _dibujarConectoresFixture(todosPartidos, numToId){
     var s1 = src1.getBoundingClientRect();
     var s2 = src2.getBoundingClientRect();
     var x1 = s1.right - boardRect.left;
+    var x2 = s2.right - boardRect.left;
     var y1 = (s1.top + s1.bottom)/2 - boardRect.top;
     var y2 = (s2.top + s2.bottom)/2 - boardRect.top;
     var xTarget = tr.left - boardRect.left;
     var yTarget = (tr.top + tr.bottom)/2 - boardRect.top;
-    var midX = x1 + (xTarget - x1)/2;
-    lineas += '<path d="M'+x1+','+y1+' H'+midX+' V'+y2+'" fill="none" stroke="#e05252" stroke-width="2"/>';
-    lineas += '<path d="M'+midX+','+yTarget+' H'+xTarget+'" fill="none" stroke="#e05252" stroke-width="2"/>';
+    var midX = Math.max(x1,x2) + (xTarget - Math.max(x1,x2))/2;
+    // Una rayita horizontal que sale de CADA partido de origen (74 y 75, por
+    // ejemplo), luego la barra vertical que las une, y una sola linea que
+    // entra al partido siguiente (81) — igual que en el dibujo de Hector.
+    lineas += '<line x1="'+x1+'" y1="'+y1+'" x2="'+midX+'" y2="'+y1+'" stroke="#e05252" stroke-width="2"/>';
+    lineas += '<line x1="'+x2+'" y1="'+y2+'" x2="'+midX+'" y2="'+y2+'" stroke="#e05252" stroke-width="2"/>';
+    lineas += '<line x1="'+midX+'" y1="'+y1+'" x2="'+midX+'" y2="'+y2+'" stroke="#e05252" stroke-width="2"/>';
+    lineas += '<line x1="'+midX+'" y1="'+yTarget+'" x2="'+xTarget+'" y2="'+yTarget+'" stroke="#e05252" stroke-width="2"/>';
   });
   svg.innerHTML = lineas;
 }
