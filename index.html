@@ -1125,6 +1125,15 @@ tr.fila-oficial-pend td{color:#9aa7b8!important;background:rgba(120,130,150,0.08
         </div>
     </div>
     <div class="form-card acc-card" style="border-color:#7a2a2a;background:rgba(122,42,42,0.06);">
+      <h3 style="color:#ff7a7a;" class="acc-header" onclick="toggleAdminAccordion(this)" ondblclick="cerrarAdminAccordion(this)"><span class="acc-title-text">&#9888; Migrar Numeracion de Jornadas (Eliminatorias) &mdash; USAR UNA SOLA VEZ</span><span class="acc-icon">&#9662;</span></h3>
+        <div class="acc-body" style="display:none;">
+      <p style="font-size:0.8rem;color:#d8a3a3;margin-bottom:12px;">Se corrigio la fecha de Argentina vs Egipto (paso del 6 al 7 de julio) y se renumeraron las jornadas de Cuartos, Semifinal, Tercer Puesto y Final para que sean consecutivas (sin saltos por dias de descanso). Este boton mueve los resultados que YA guardaste a su nueva jornada, para que no se pierdan. Ejecutalo <strong>una sola vez</strong>, justo despues de subir esta version del index. Si ya lo ejecutaste, no lo vuelvas a correr.</p>
+      <button class="btn-action" onclick="migrarNumeracionJornadas()" style="width:100%;padding:13px;background:#3a1414;color:#ff8a8a;border:1px solid #7a2a2a;font-weight:700;letter-spacing:1px;">MIGRAR RESULTADOS A LA NUEVA NUMERACION</button>
+      <div id="statusMigracion" class="status-box">&gt; Listo para ejecutar.</div>
+        <div style="text-align:right;margin-top:10px;"><button type="button" class="acc-close-btn" onclick="cerrarAdminAccordion(this)">&#9652; Cerrar</button></div>
+        </div>
+    </div>
+    <div class="form-card acc-card" style="border-color:#7a2a2a;background:rgba(122,42,42,0.06);">
       <h3 style="color:#ff7a7a;" class="acc-header" onclick="toggleAdminAccordion(this)" ondblclick="cerrarAdminAccordion(this)"><span class="acc-title-text">&#9888; Zona de peligro &middot; Reiniciar polla</span><span class="acc-icon">&#9662;</span></h3>
         <div class="acc-body" style="display:none;">
       <p style="font-size:0.8rem;color:#d8a3a3;margin-bottom:12px;">Borra de la nube: predicciones de partidos de los jugadores, resultados oficiales, ajustes, marcas de envio y todos los puntos del ranking. <strong>CONSERVA las predicciones pre-mundial, el numero del chontico y las cuentas de los jugadores (con sus claves).</strong> Esto NO se puede deshacer.</p>
@@ -1507,22 +1516,22 @@ var LLAVES_8 = [
   {n:92,dia:25,fec:'05 Jul',hor:'7PM',l:'Gana P.79',v:'Gana P.80',lf:'',vf:'',city:'CDMX'},
   {n:93,dia:26,fec:'06 Jul',hor:'2PM',l:'Gana P.83',v:'Gana P.84',lf:'',vf:'',city:'Dallas'},
   {n:94,dia:26,fec:'06 Jul',hor:'7PM',l:'Gana P.81',v:'Gana P.82',lf:'',vf:'',city:'Seattle'},
-  {n:95,dia:26,fec:'06 Jul',hor:'11AM',l:'Gana P.86',v:'Gana P.88',lf:'',vf:'',city:'Atlanta'},
+  {n:95,dia:27,fec:'07 Jul',hor:'11AM',l:'Gana P.86',v:'Gana P.88',lf:'',vf:'',city:'Atlanta'},
   {n:96,dia:27,fec:'07 Jul',hor:'3PM',l:'Gana P.85',v:'Gana P.87',lf:'',vf:'',city:'Vancouver'}
 ];
 var LLAVES_CUARTOS = [
-  {n:97,dia:29,fec:'09 Jul',hor:'3PM',l:'Gana P.89',v:'Gana P.90',lf:'',vf:'',city:'Boston'},
-  {n:98,dia:30,fec:'10 Jul',hor:'2PM',l:'Gana P.93',v:'Gana P.94',lf:'',vf:'',city:'Los Angeles'},
-  {n:99,dia:31,fec:'11 Jul',hor:'4PM',l:'Gana P.91',v:'Gana P.92',lf:'',vf:'',city:'Miami'},
-  {n:100,dia:31,fec:'11 Jul',hor:'8PM',l:'Gana P.95',v:'Gana P.96',lf:'',vf:'',city:'Kansas City'}
+  {n:97,dia:28,fec:'09 Jul',hor:'3PM',l:'Gana P.89',v:'Gana P.90',lf:'',vf:'',city:'Boston'},
+  {n:98,dia:29,fec:'10 Jul',hor:'2PM',l:'Gana P.93',v:'Gana P.94',lf:'',vf:'',city:'Los Angeles'},
+  {n:99,dia:30,fec:'11 Jul',hor:'4PM',l:'Gana P.91',v:'Gana P.92',lf:'',vf:'',city:'Miami'},
+  {n:100,dia:30,fec:'11 Jul',hor:'8PM',l:'Gana P.95',v:'Gana P.96',lf:'',vf:'',city:'Kansas City'}
 ];
 var LLAVES_SEMI = [
-  {n:101,dia:34,fec:'14 Jul',hor:'2PM',l:'Gana P.97',v:'Gana P.98',lf:'',vf:'',city:'Dallas'},
-  {n:102,dia:35,fec:'15 Jul',hor:'2PM',l:'Gana P.99',v:'Gana P.100',lf:'',vf:'',city:'Atlanta'}
+  {n:101,dia:31,fec:'14 Jul',hor:'2PM',l:'Gana P.97',v:'Gana P.98',lf:'',vf:'',city:'Dallas'},
+  {n:102,dia:32,fec:'15 Jul',hor:'2PM',l:'Gana P.99',v:'Gana P.100',lf:'',vf:'',city:'Atlanta'}
 ];
 var LLAVES_FINAL = [
-  {n:103,dia:38,fec:'18 Jul',hor:'4PM',l:'Pierde P.101',v:'Pierde P.102',lf:'',vf:'',city:'Miami',tercero:true},
-  {n:104,dia:39,fec:'19 Jul',hor:'2PM',l:'Gana P.101',v:'Gana P.102',lf:'',vf:'',city:'Nueva York',esFinal:true}
+  {n:103,dia:33,fec:'18 Jul',hor:'4PM',l:'Pierde P.101',v:'Pierde P.102',lf:'',vf:'',city:'Miami',tercero:true},
+  {n:104,dia:34,fec:'19 Jul',hor:'2PM',l:'Gana P.101',v:'Gana P.102',lf:'',vf:'',city:'Nueva York',esFinal:true}
 ];
 var COMBINACIONES_FIFA = {
 1: "EJIFHGLK",
@@ -5867,6 +5876,64 @@ function reiniciarPolla(){
   });
 }
 window.reiniciarPolla = reiniciarPolla;
+
+// ============================================================
+// MIGRACION DE NUMERACION DE JORNADAS (Cuartos en adelante)
+// Corrige la fecha de Argentina vs Egipto (paso de jornada 26 a 27)
+// y renumera Cuartos/Semifinal/Tercero/Final para que sean consecutivas.
+// Los resultados se guardan en Firebase como resultados/j{numero},
+// asi que hay que MOVER los datos ya guardados a su nueva ruta.
+// ============================================================
+function migrarNumeracionJornadas(){
+  if(!(usuarioActual && usuarioActual.adminTotal===true)){ alert('Solo un administrador con control absoluto puede ejecutar esta migracion.'); return; }
+  if(!confirm('Vas a migrar los resultados ya guardados a la nueva numeracion de jornadas (por el ajuste de fechas). Esto se debe ejecutar SOLO UNA VEZ, justo despues de subir esta version del index. ¿Continuar?')) return;
+  var status = document.getElementById('statusMigracion');
+  function log(msg){ if(status) status.innerHTML += '<br>&gt; ' + msg; }
+  if(status) status.innerHTML = '&gt; Iniciando migracion...';
+  if(typeof showLoading==='function') showLoading('Migrando jornadas...');
+
+  // Paso 1: mover el resultado del partido 95 (Argentina vs Egipto) de la jornada 26 a la 27
+  function paso1(cb){
+    db.ref('resultados/j26/95').once('value', function(snap){
+      var val = snap.val();
+      if(!val){ log('Partido 95 (Argentina-Egipto): no habia resultado guardado en jornada 26, nada que mover.'); cb(); return; }
+      db.ref('resultados/j27/95').set(val, function(err){
+        if(err){ log('ERROR moviendo partido 95: ' + err); cb(); return; }
+        db.ref('resultados/j26/95').remove(function(){
+          log('Partido 95 (Argentina vs Egipto) movido de jornada 26 a jornada 27.');
+          cb();
+        });
+      });
+    }, function(){ log('No se pudo leer jornada 26 (revisa tu conexion).'); cb(); });
+  }
+
+  // Paso 2: renumerar jornadas completas de Cuartos/Semifinal/Tercero/Final
+  var renames = [[29,28],[30,29],[31,30],[34,31],[35,32],[38,33],[39,34]];
+  function paso2(i, cb){
+    if(i >= renames.length){ cb(); return; }
+    var origen = renames[i][0], destino = renames[i][1];
+    db.ref('resultados/j'+origen).once('value', function(snap){
+      var val = snap.val();
+      if(!val){ log('Jornada '+origen+': no habia datos guardados, nada que mover a jornada '+destino+'.'); paso2(i+1, cb); return; }
+      db.ref('resultados/j'+destino).update(val, function(err){
+        if(err){ log('ERROR moviendo jornada '+origen+' a '+destino+': ' + err); paso2(i+1, cb); return; }
+        db.ref('resultados/j'+origen).remove(function(){
+          log('Jornada '+origen+' movida a jornada '+destino+'.');
+          paso2(i+1, cb);
+        });
+      });
+    }, function(){ log('No se pudo leer jornada '+origen+' (revisa tu conexion).'); paso2(i+1, cb); });
+  }
+
+  paso1(function(){
+    paso2(0, function(){
+      if(typeof hideLoading==='function') hideLoading();
+      log('Migracion terminada. Recarga la pagina para ver los resultados en su nueva jornada.');
+      alert('Migracion terminada. Ahora recarga la pagina (F5) y revisa Control de Resultados Oficiales.');
+    });
+  });
+}
+window.migrarNumeracionJornadas = migrarNumeracionJornadas;
 window.cargarPremundialOficial = cargarPremundialOficial;
 window.renderPronosticoManual = renderPronosticoManual;
 window.cambiarJugadorManual = cambiarJugadorManual;
