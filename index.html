@@ -1314,6 +1314,10 @@ db.ref('jugadores').on('value', function(snap) {
   var tbody = document.getElementById('jugadoresBody');
   if (tbody) renderizarTablaJugadores();
   if (document.getElementById('sec-ranking').classList.contains('active')) renderizarRanking();
+  // Refrescar el selector de "Editar Pre-Mundial de un Jugador" (cardEditarPM), ya que
+  // jugadoresCache llega de forma asincrona y este select puede quedar vacio si se
+  // pobla antes de que Firebase responda.
+  if (typeof poblarSelectJugadoresPM === 'function') { try{ poblarSelectJugadoresPM(); }catch(e){} }
   // Status online
   document.getElementById('fbStatus').innerHTML = '<span class="fb-online">&#9679; Conectado a la nube &mdash; datos sincronizados en tiempo real</span>';
 });
