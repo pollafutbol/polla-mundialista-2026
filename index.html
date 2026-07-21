@@ -1124,23 +1124,6 @@ tr.fila-oficial-pend td{color:#9aa7b8!important;background:rgba(120,130,150,0.08
         <div style="text-align:right;margin-top:10px;"><button type="button" class="acc-close-btn" onclick="cerrarAdminAccordion(this)">&#9652; Cerrar</button></div>
         </div>
     </div>
-    <div class="form-card acc-card" style="border-color:#7a2a2a;background:rgba(122,42,42,0.06);">
-      <h3 style="color:#ff7a7a;" class="acc-header" onclick="toggleAdminAccordion(this)" ondblclick="cerrarAdminAccordion(this)"><span class="acc-title-text">&#9888; Migrar Numeracion de Jornadas (Eliminatorias) &mdash; USAR UNA SOLA VEZ</span><span class="acc-icon">&#9662;</span></h3>
-        <div class="acc-body" style="display:none;">
-      <p style="font-size:0.8rem;color:#d8a3a3;margin-bottom:12px;">Se corrigio la fecha de Argentina vs Egipto (paso del 6 al 7 de julio) y se renumeraron las jornadas de Cuartos, Semifinal, Tercer Puesto y Final para que sean consecutivas (sin saltos por dias de descanso). Este boton mueve los resultados que YA guardaste a su nueva jornada, para que no se pierdan. Ejecutalo <strong>una sola vez</strong>, justo despues de subir esta version del index. Si ya lo ejecutaste, no lo vuelvas a correr.</p>
-      <button class="btn-action" onclick="migrarNumeracionJornadas()" style="width:100%;padding:13px;background:#3a1414;color:#ff8a8a;border:1px solid #7a2a2a;font-weight:700;letter-spacing:1px;">MIGRAR RESULTADOS A LA NUEVA NUMERACION</button>
-      <div id="statusMigracion" class="status-box">&gt; Listo para ejecutar.</div>
-        <div style="text-align:right;margin-top:10px;"><button type="button" class="acc-close-btn" onclick="cerrarAdminAccordion(this)">&#9652; Cerrar</button></div>
-        </div>
-    </div>
-    <div class="form-card acc-card" style="border-color:#7a2a2a;background:rgba(122,42,42,0.06);">
-      <h3 style="color:#ff7a7a;" class="acc-header" onclick="toggleAdminAccordion(this)" ondblclick="cerrarAdminAccordion(this)"><span class="acc-title-text">&#9888; Zona de peligro &middot; Reiniciar polla</span><span class="acc-icon">&#9662;</span></h3>
-        <div class="acc-body" style="display:none;">
-      <p style="font-size:0.8rem;color:#d8a3a3;margin-bottom:12px;">Borra de la nube: predicciones de partidos de los jugadores, resultados oficiales, ajustes, marcas de envio y todos los puntos del ranking. <strong>CONSERVA las predicciones pre-mundial, el numero del chontico y las cuentas de los jugadores (con sus claves).</strong> Esto NO se puede deshacer.</p>
-      <button class="btn-action" onclick="reiniciarPolla()" style="width:100%;padding:13px;background:#3a1414;color:#ff8a8a;border:1px solid #7a2a2a;font-weight:700;letter-spacing:1px;">REINICIAR POLLA (DEJA EL RANKING EN CERO)</button>
-        <div style="text-align:right;margin-top:10px;"><button type="button" class="acc-close-btn" onclick="cerrarAdminAccordion(this)">&#9652; Cerrar</button></div>
-        </div>
-    </div>
     <div class="form-card acc-card" style="border-color:var(--gold2);">
       <h3 style="color:var(--gold2);" class="acc-header" onclick="toggleAdminAccordion(this)" ondblclick="cerrarAdminAccordion(this)"><span class="acc-title-text">Resultados Oficiales Pre-Mundial</span><span class="acc-icon">&#9662;</span></h3>
         <div class="acc-body" style="display:none;">
@@ -1462,7 +1445,7 @@ var DATA_JUGADORES = {
   'Argentina':    { n: ['Lionel Messi','Julian Alvarez','Lautaro Martinez','Di Maria','De Paul'], p: ['Dibu Martinez','German Rulli'] },
   'Brasil':       { n: ['Vinicius Jr','Rodrygo','Endrick','Neymar','Raphinha'],                  p: ['Alisson','Ederson'] },
   'Francia':      { n: ['Mbappe','Giroud','Dembele','Griezmann','Tchouameni'],                   p: ['Lloris','Maignan'] },
-  'Espana':       { n: ['Yamal','Morata','Pedri','Gavi','Olmo'],                                 p: ['Unai Simon','Raya'] },
+  'Espana':       { n: ['Yamal','Morata','Pedri','Gavi','Olmo','Rodri'],                        p: ['Unai Simon','Raya'] },
   'Alemania':     { n: ['Muller','Wirtz','Gnabry','Havertz','Kimmich'],                          p: ['Neuer','Ter Stegen'] },
   'Mexico':       { n: ['Santiago Gimenez','Chucky Lozano','Raul Jimenez','Antuna'],             p: ['Memo Ochoa','Malagon'] },
   'Portugal':     { n: ['Cristiano Ronaldo','Bruno Fernandes','Rafael Leao','Bernardo'],          p: ['Rui Patricio','Costa'] },
